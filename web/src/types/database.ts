@@ -36,10 +36,25 @@ export interface Organization {
   id: string;
   name: string;
   slug: string;
+  org_code: string;  // Human-readable code for mobile app entry (e.g., "TEMPLE-ABC123")
   logo_url: string | null;
+  primary_color: string;  // Hex color code for branding
   settings: Record<string, unknown> | null;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
+}
+
+// Organization type options
+export type OrganizationType = 'temple' | 'church' | 'mosque' | 'synagogue' | 'gurdwara' | 'other';
+
+// Organization signup input
+export interface OrganizationSignupInput {
+  org_name: string;
+  org_type: OrganizationType;
+  admin_name: string;
+  admin_email: string;
+  admin_phone: string;
 }
 
 export interface FamilyGroup {
