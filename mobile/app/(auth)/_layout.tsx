@@ -19,6 +19,13 @@ export default function AuthLayout() {
       }}
     >
       <Stack.Screen
+        name="org-code"
+        options={{
+          title: 'Join Organization',
+          headerBackTitle: 'Back',
+        }}
+      />
+      <Stack.Screen
         name="phone"
         options={{
           title: 'Sign In',

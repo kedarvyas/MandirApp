@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import { decode } from 'base64-arraybuffer';
 import { colors, typography, spacing, borderRadius } from '../../src/constants/theme';
 import { Button, Input, Card } from '../../src/components';
 import { supabase } from '../../src/lib/supabase';
+import { getStoredOrganization, type StoredOrganization } from '../../src/lib/orgContext';
 
 export default function ProfileSetupScreen() {
   const router = useRouter();
@@ -27,6 +28,21 @@ export default function ProfileSetupScreen() {
   const [photoBase64, setPhotoBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [organization, setOrganization] = useState<StoredOrganization | null>(null);
+
+  useEffect(() => {
+    loadOrganization();
+  }, []);
+
+  async function loadOrganization() {
+    const org = await getStoredOrganization();
+    if (!org) {
+      Alert.alert('Error', 'Organization not found. Please start over.');
+      router.replace('/(auth)/org-code');
+      return;
+    }
+    setOrganization(org);
+  }
 
   async function pickImage() {
     // Request permission
@@ -109,6 +125,11 @@ export default function ProfileSetupScreen() {
 
   async function handleComplete() {
     if (!validate()) return;
+    if (!organization) {
+      Alert.alert('Error', 'Organization not found. Please start over.');
+      router.replace('/(auth)/org-code');
+      return;
+    }
 
     setLoading(true);
 
@@ -154,11 +175,12 @@ export default function ProfileSetupScreen() {
         photoUrl = publicUrl;
       }
 
-      // Check if member already exists
+      // Check if member already exists in this organization
       const { data: existingMember } = await supabase
         .from('members')
         .select('id, family_group_id')
         .eq('phone', user.phone)
+        .eq('organization_id', organization.id)
         .single();
 
       let familyGroupId = existingMember?.family_group_id;
@@ -168,7 +190,7 @@ export default function ProfileSetupScreen() {
         const { data: newFamilyGroup, error: familyError } = await supabase
           .from('family_groups')
           .insert({
-            organization_id: '00000000-0000-0000-0000-000000000001',
+            organization_id: organization.id,
           })
           .select('id')
           .single();
@@ -193,7 +215,7 @@ export default function ProfileSetupScreen() {
         is_independent: true,
         relationship_to_prime: 'self' as const,
         family_group_id: familyGroupId,
-        organization_id: '00000000-0000-0000-0000-000000000001',
+        organization_id: organization.id,
         membership_date: new Date().toISOString().split('T')[0],
         updated_at: new Date().toISOString(),
       };

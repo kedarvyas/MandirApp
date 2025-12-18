@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,17 +6,34 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { colors, typography, spacing } from '../../src/constants/theme';
+import { colors, typography, spacing, borderRadius } from '../../src/constants/theme';
 import { Button, Input, Card } from '../../src/components';
 import { supabase } from '../../src/lib/supabase';
+import { getStoredOrganization, type StoredOrganization } from '../../src/lib/orgContext';
 
 export default function PhoneScreen() {
   const router = useRouter();
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [organization, setOrganization] = useState<StoredOrganization | null>(null);
+
+  useEffect(() => {
+    loadOrganization();
+  }, []);
+
+  async function loadOrganization() {
+    const org = await getStoredOrganization();
+    if (!org) {
+      // No org stored, go back to org code screen
+      router.replace('/(auth)/org-code');
+      return;
+    }
+    setOrganization(org);
+  }
 
   // Format phone number as user types
   function formatPhoneNumber(value: string): string {
@@ -96,6 +113,19 @@ export default function PhoneScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
+        {/* Organization Badge */}
+        {organization && (
+          <TouchableOpacity
+            style={styles.orgBadge}
+            onPress={() => router.push('/(auth)/org-code')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.orgBadgeLabel}>Signing in to</Text>
+            <Text style={styles.orgBadgeName}>{organization.name}</Text>
+            <Text style={styles.orgBadgeChange}>Tap to change</Text>
+          </TouchableOpacity>
+        )}
+
         <View style={styles.header}>
           <Text style={styles.title}>Enter your phone number</Text>
           <Text style={styles.subtitle}>
@@ -142,7 +172,29 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
+    paddingTop: spacing.lg,
+  },
+  orgBadge: {
+    backgroundColor: colors.background.secondary,
+    borderRadius: borderRadius.md,
+    padding: spacing.md,
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  orgBadgeLabel: {
+    fontSize: typography.size.xs,
+    color: colors.text.tertiary,
+  },
+  orgBadgeName: {
+    fontSize: typography.size.lg,
+    fontWeight: typography.weight.semibold,
+    color: colors.primary.maroon,
+    marginVertical: spacing.xs,
+  },
+  orgBadgeChange: {
+    fontSize: typography.size.xs,
+    color: colors.text.tertiary,
+    textDecorationLine: 'underline',
   },
   header: {
     marginBottom: spacing.xl,
