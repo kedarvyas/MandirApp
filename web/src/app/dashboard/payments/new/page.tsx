@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useOrganization } from '@/lib/org-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,6 +23,7 @@ const paymentMethods = [
 export default function NewPaymentPage() {
   const router = useRouter()
   const supabase = createClient()
+  const organization = useOrganization()
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<Member[]>([])
@@ -43,6 +45,7 @@ export default function NewPaymentPage() {
       const { data } = await supabase
         .from('members')
         .select('*')
+        .eq('organization_id', organization.id)
         .or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,phone.ilike.%${searchQuery}%`)
         .limit(5)
 
@@ -51,7 +54,7 @@ export default function NewPaymentPage() {
 
     const debounce = setTimeout(searchMembers, 300)
     return () => clearTimeout(debounce)
-  }, [searchQuery, supabase])
+  }, [searchQuery, supabase, organization.id])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -141,7 +144,7 @@ export default function NewPaymentPage() {
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="relative">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
@@ -152,7 +155,7 @@ export default function NewPaymentPage() {
                     />
                   </div>
                   {searchResults.length > 0 && (
-                    <div className="border rounded-lg divide-y">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border rounded-lg divide-y shadow-lg z-50 max-h-60 overflow-y-auto">
                       {searchResults.map((member) => (
                         <button
                           key={member.id}

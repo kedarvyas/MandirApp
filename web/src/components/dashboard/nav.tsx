@@ -13,18 +13,21 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Home, Users, QrCode, CreditCard, LogOut } from 'lucide-react'
+import { Home, Users, QrCode, CreditCard, Settings, LogOut } from 'lucide-react'
+import { useOrganization } from '@/lib/org-context'
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Home },
   { href: '/dashboard/members', label: 'Members', icon: Users },
   { href: '/dashboard/check-in', label: 'Check-In', icon: QrCode },
   { href: '/dashboard/payments', label: 'Payments', icon: CreditCard },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 
 export function DashboardNav({ user }: { user: User }) {
   const pathname = usePathname()
   const supabase = createClient()
+  const organization = useOrganization()
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -39,10 +42,18 @@ export function DashboardNav({ user }: { user: User }) {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
-                <span className="text-2xl text-primary">ॐ</span>
-              </div>
-              <span className="font-bold text-xl text-foreground">Mandir</span>
+              {organization.logo_url ? (
+                <img
+                  src={organization.logo_url}
+                  alt={organization.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
+                  <span className="text-2xl text-primary">ॐ</span>
+                </div>
+              )}
+              <span className="font-bold text-xl text-foreground">{organization.name}</span>
             </Link>
             <div className="hidden md:flex ml-10 space-x-1">
               {navItems.map((item) => {

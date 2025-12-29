@@ -5,20 +5,24 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
+  TouchableOpacity,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import QRCode from 'react-native-qrcode-svg';
 import { colors, typography, spacing, borderRadius, shadows } from '../../src/constants/theme';
-import { Card, Avatar } from '../../src/components';
+import { Card, Avatar, QRModal } from '../../src/components';
 import { supabase } from '../../src/lib/supabase';
+import { getStoredOrganization, StoredOrganization } from '../../src/lib/orgContext';
 import type { Member } from '../../src/types/database';
 
 export default function HomeScreen() {
   const router = useRouter();
   const [member, setMember] = useState<Member | null>(null);
+  const [organization, setOrganization] = useState<StoredOrganization | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [qrModalVisible, setQrModalVisible] = useState(false);
 
   // Refresh data when screen comes into focus
   useFocusEffect(
@@ -43,11 +47,22 @@ export default function HomeScreen() {
         return;
       }
 
+      // Get the stored organization for multi-tenancy
+      const storedOrg = await getStoredOrganization();
+      if (!storedOrg) {
+        console.log('No organization found, redirecting to org code entry');
+        router.replace('/(auth)/org-code');
+        return;
+      }
+      setOrganization(storedOrg);
+
+      // Query member scoped to the current organization
       const { data, error } = await supabase
         .from('members')
         .select('*')
         .eq('phone', user.phone)
-        .maybeSingle(); // Use maybeSingle instead of single to avoid error on 0 rows
+        .eq('organization_id', storedOrg.id)
+        .maybeSingle();
 
       if (error) {
         console.error('Fetch member error:', error);
@@ -148,14 +163,25 @@ export default function HomeScreen() {
         </View>
       </Card>
 
+      {/* Organization Header */}
+      {organization && (
+        <View style={styles.orgHeader}>
+          <Text style={styles.orgName}>{organization.name}</Text>
+        </View>
+      )}
+
       {/* QR Code Card */}
       <Card style={styles.qrCard} variant="elevated" padding="lg">
         <Text style={styles.qrTitle}>Your Check-in Code</Text>
         <Text style={styles.qrSubtitle}>
-          Show this QR code at the front desk when you arrive
+          Tap to expand for easier scanning
         </Text>
 
-        <View style={styles.qrContainer}>
+        <TouchableOpacity
+          style={styles.qrContainer}
+          onPress={() => member.qr_token && setQrModalVisible(true)}
+          activeOpacity={0.8}
+        >
           <View style={styles.qrWrapper}>
             {member.qr_token ? (
               <QRCode
@@ -172,12 +198,22 @@ export default function HomeScreen() {
               </View>
             )}
           </View>
-        </View>
+        </TouchableOpacity>
 
         <Text style={styles.qrHint}>
           Pull down to refresh if the code doesn't scan
         </Text>
       </Card>
+
+      {/* QR Expansion Modal */}
+      {member.qr_token && (
+        <QRModal
+          visible={qrModalVisible}
+          qrValue={member.qr_token}
+          onClose={() => setQrModalVisible(false)}
+          memberName={`${member.first_name} ${member.last_name}`}
+        />
+      )}
 
       {/* Quick Info */}
       <Card style={styles.infoCard}>
@@ -216,6 +252,19 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: typography.size.md,
     color: colors.text.secondary,
+  },
+
+  // Organization Header
+  orgHeader: {
+    marginBottom: spacing.md,
+    alignItems: 'center',
+  },
+  orgName: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+    color: colors.text.secondary,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
 
   // Profile Card

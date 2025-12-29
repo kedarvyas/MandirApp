@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useOrganization } from '@/lib/org-context'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -14,6 +15,7 @@ import Link from 'next/link'
 export default function NewMemberPage() {
   const router = useRouter()
   const supabase = createClient()
+  const organization = useOrganization()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     first_name: '',
@@ -27,19 +29,22 @@ export default function NewMemberPage() {
     setLoading(true)
 
     try {
-      // Create family group first
+      // Create family group first (scoped to organization)
       const { data: familyGroup, error: familyError } = await supabase
         .from('family_groups')
-        .insert({})
+        .insert({
+          organization_id: organization.id,
+        })
         .select()
         .single()
 
       if (familyError) throw familyError
 
-      // Create member
+      // Create member (scoped to organization)
       const { data: member, error: memberError } = await supabase
         .from('members')
         .insert({
+          organization_id: organization.id,
           first_name: formData.first_name,
           last_name: formData.last_name,
           phone: formData.phone || null,

@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
+import { getOrganization } from '@/lib/supabase/get-org'
 import { MembersTable } from '@/components/dashboard/members-table'
 import { Button } from '@/components/ui/button'
 import { UserPlus } from 'lucide-react'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 export default async function MembersPage({
   searchParams,
@@ -11,10 +13,18 @@ export default async function MembersPage({
 }) {
   const params = await searchParams
   const supabase = await createClient()
+  const orgContext = await getOrganization()
+
+  if (!orgContext) {
+    redirect('/login')
+  }
+
+  const { organization } = orgContext
 
   let query = supabase
     .from('members')
     .select('*')
+    .eq('organization_id', organization.id)
     .order('created_at', { ascending: false })
 
   if (params.search) {

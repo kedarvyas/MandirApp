@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,11 +6,20 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { colors, typography, spacing, borderRadius } from '../../src/constants/theme';
-import { Card, Avatar, Button } from '../../src/components';
+import { Card } from '../../src/components';
 import { supabase } from '../../src/lib/supabase';
+import {
+  getAllOrganizations,
+  getActiveOrgId,
+  setActiveOrganization,
+  clearAllOrganizations,
+  StoredOrganization,
+} from '../../src/lib/orgContext';
 
 interface SettingsItemProps {
   title: string;
@@ -49,6 +58,37 @@ function SettingsItem({
 export default function SettingsScreen() {
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [organizations, setOrganizations] = useState<StoredOrganization[]>([]);
+  const [activeOrgId, setActiveOrgId] = useState<string | null>(null);
+  const [switchingOrg, setSwitchingOrg] = useState<string | null>(null);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadOrganizations();
+    }, [])
+  );
+
+  async function loadOrganizations() {
+    const orgs = await getAllOrganizations();
+    const activeId = await getActiveOrgId();
+    setOrganizations(orgs);
+    setActiveOrgId(activeId);
+  }
+
+  async function handleSwitchOrg(orgId: string) {
+    if (orgId === activeOrgId) return;
+
+    setSwitchingOrg(orgId);
+    const success = await setActiveOrganization(orgId);
+    if (success) {
+      setActiveOrgId(orgId);
+      // Navigate to home to reload with new org context
+      router.replace('/(tabs)');
+    } else {
+      Alert.alert('Error', 'Failed to switch organization');
+    }
+    setSwitchingOrg(null);
+  }
 
   async function handleSignOut() {
     Alert.alert(
@@ -62,6 +102,7 @@ export default function SettingsScreen() {
           onPress: async () => {
             setLoggingOut(true);
             try {
+              await clearAllOrganizations();
               await supabase.auth.signOut();
               router.replace('/');
             } catch (err) {
@@ -74,6 +115,10 @@ export default function SettingsScreen() {
         },
       ]
     );
+  }
+
+  function handleAddOrganization() {
+    router.push('/(auth)/org-code?addNew=true');
   }
 
   return (
@@ -97,6 +142,40 @@ export default function SettingsScreen() {
             // TODO: Navigate to change phone
             console.log('Change phone');
           }}
+        />
+      </Card>
+
+      {/* My Organizations Section */}
+      <Text style={styles.sectionTitle}>My Organizations</Text>
+      <Card style={styles.sectionCard} padding="none">
+        {organizations.map((org, index) => (
+          <View key={org.id}>
+            {index > 0 && <View style={styles.divider} />}
+            <TouchableOpacity
+              style={styles.orgItem}
+              onPress={() => handleSwitchOrg(org.id)}
+              activeOpacity={0.7}
+              disabled={switchingOrg !== null}
+            >
+              <View style={styles.orgInfo}>
+                <Text style={styles.orgName}>{org.name}</Text>
+                <Text style={styles.orgCode}>{org.org_code}</Text>
+              </View>
+              {switchingOrg === org.id ? (
+                <ActivityIndicator size="small" color={colors.primary.maroon} />
+              ) : activeOrgId === org.id ? (
+                <View style={styles.activeIndicator}>
+                  <Text style={styles.checkmark}>✓</Text>
+                </View>
+              ) : null}
+            </TouchableOpacity>
+          </View>
+        ))}
+        {organizations.length > 0 && <View style={styles.divider} />}
+        <SettingsItem
+          title="Add Organization"
+          subtitle="Join another organization"
+          onPress={handleAddOrganization}
         />
       </Card>
 
@@ -226,6 +305,39 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.utility.divider,
     marginLeft: spacing.md,
+  },
+
+  // Organization Item
+  orgItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+  },
+  orgInfo: {
+    flex: 1,
+  },
+  orgName: {
+    fontSize: typography.size.md,
+    fontWeight: typography.weight.medium,
+    color: colors.text.primary,
+  },
+  orgCode: {
+    fontSize: typography.size.sm,
+    color: colors.text.tertiary,
+    marginTop: 2,
+  },
+  activeIndicator: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.semantic.success,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkmark: {
+    color: colors.utility.white,
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.bold,
   },
 
   // Version

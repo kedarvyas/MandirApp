@@ -3,6 +3,8 @@ import { supabase } from './supabase';
 import type { Organization } from '../types/database';
 
 const ORG_STORAGE_KEY = '@MandirApp:organization';
+const ORGS_STORAGE_KEY = '@MandirApp:organizations';
+const ACTIVE_ORG_KEY = '@MandirApp:activeOrgId';
 
 export interface StoredOrganization {
   id: string;
@@ -105,4 +107,142 @@ export async function clearOrganization(): Promise<void> {
 export async function hasStoredOrganization(): Promise<boolean> {
   const org = await getStoredOrganization();
   return org !== null;
+}
+
+// ============================================
+// Multi-Organization Support
+// ============================================
+
+/**
+ * Get all stored organizations
+ */
+export async function getAllOrganizations(): Promise<StoredOrganization[]> {
+  try {
+    const stored = await AsyncStorage.getItem(ORGS_STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored) as StoredOrganization[];
+    }
+
+    // Migration: check for legacy single org storage
+    const legacyOrg = await AsyncStorage.getItem(ORG_STORAGE_KEY);
+    if (legacyOrg) {
+      const org = JSON.parse(legacyOrg) as StoredOrganization;
+      // Migrate to new format
+      await AsyncStorage.setItem(ORGS_STORAGE_KEY, JSON.stringify([org]));
+      await AsyncStorage.setItem(ACTIVE_ORG_KEY, org.id);
+      return [org];
+    }
+
+    return [];
+  } catch (err) {
+    console.error('Error getting organizations:', err);
+    return [];
+  }
+}
+
+/**
+ * Get the active organization ID
+ */
+export async function getActiveOrgId(): Promise<string | null> {
+  try {
+    return await AsyncStorage.getItem(ACTIVE_ORG_KEY);
+  } catch (err) {
+    console.error('Error getting active org ID:', err);
+    return null;
+  }
+}
+
+/**
+ * Set the active organization by ID
+ */
+export async function setActiveOrganization(orgId: string): Promise<boolean> {
+  try {
+    const orgs = await getAllOrganizations();
+    const org = orgs.find(o => o.id === orgId);
+
+    if (!org) {
+      console.error('Organization not found:', orgId);
+      return false;
+    }
+
+    await AsyncStorage.setItem(ACTIVE_ORG_KEY, orgId);
+    // Also update legacy key for backward compatibility
+    await AsyncStorage.setItem(ORG_STORAGE_KEY, JSON.stringify(org));
+    return true;
+  } catch (err) {
+    console.error('Error setting active organization:', err);
+    return false;
+  }
+}
+
+/**
+ * Add a new organization to the list
+ * Returns true if added, false if already exists
+ */
+export async function addOrganization(org: StoredOrganization): Promise<boolean> {
+  try {
+    const orgs = await getAllOrganizations();
+
+    // Check if already exists
+    if (orgs.some(o => o.id === org.id)) {
+      // Already exists, just set as active
+      await setActiveOrganization(org.id);
+      return false;
+    }
+
+    // Add to list
+    orgs.push(org);
+    await AsyncStorage.setItem(ORGS_STORAGE_KEY, JSON.stringify(orgs));
+
+    // Set as active
+    await setActiveOrganization(org.id);
+
+    return true;
+  } catch (err) {
+    console.error('Error adding organization:', err);
+    return false;
+  }
+}
+
+/**
+ * Remove an organization from the list
+ */
+export async function removeOrganization(orgId: string): Promise<boolean> {
+  try {
+    const orgs = await getAllOrganizations();
+    const filtered = orgs.filter(o => o.id !== orgId);
+
+    if (filtered.length === orgs.length) {
+      return false; // Not found
+    }
+
+    await AsyncStorage.setItem(ORGS_STORAGE_KEY, JSON.stringify(filtered));
+
+    // If we removed the active org, switch to another or clear
+    const activeId = await getActiveOrgId();
+    if (activeId === orgId) {
+      if (filtered.length > 0) {
+        await setActiveOrganization(filtered[0].id);
+      } else {
+        await AsyncStorage.removeItem(ACTIVE_ORG_KEY);
+        await AsyncStorage.removeItem(ORG_STORAGE_KEY);
+      }
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Error removing organization:', err);
+    return false;
+  }
+}
+
+/**
+ * Clear all organization data (used on logout)
+ */
+export async function clearAllOrganizations(): Promise<void> {
+  try {
+    await AsyncStorage.multiRemove([ORG_STORAGE_KEY, ORGS_STORAGE_KEY, ACTIVE_ORG_KEY]);
+  } catch (err) {
+    console.error('Error clearing organizations:', err);
+  }
 }

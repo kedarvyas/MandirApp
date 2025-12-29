@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { getOrganization } from '@/lib/supabase/get-org'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +13,7 @@ import {
 } from '@/components/ui/table'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 const methodColors: Record<string, string> = {
   cash: 'bg-green-100 text-green-700',
@@ -22,6 +24,13 @@ const methodColors: Record<string, string> = {
 
 export default async function PaymentsPage() {
   const supabase = await createClient()
+  const orgContext = await getOrganization()
+
+  if (!orgContext) {
+    redirect('/login')
+  }
+
+  const { organization } = orgContext
 
   const { data: payments } = await supabase
     .from('payments')
@@ -29,6 +38,7 @@ export default async function PaymentsPage() {
       *,
       member:members(first_name, last_name)
     `)
+    .eq('organization_id', organization.id)
     .order('payment_date', { ascending: false })
     .limit(100)
 

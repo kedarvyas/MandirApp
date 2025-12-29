@@ -1,28 +1,40 @@
 import { createClient } from '@/lib/supabase/server'
+import { getOrganization } from '@/lib/supabase/get-org'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, UserCheck, CreditCard, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { redirect } from 'next/navigation'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
+  const orgContext = await getOrganization()
 
-  // Get stats
+  if (!orgContext) {
+    redirect('/login')
+  }
+
+  const { organization } = orgContext
+
+  // Get stats scoped to this organization
   const [
     { count: totalMembers },
     { count: todayCheckIns },
     { data: recentPayments },
   ] = await Promise.all([
-    supabase.from('members').select('*', { count: 'exact', head: true }),
+    supabase.from('members').select('*', { count: 'exact', head: true })
+      .eq('organization_id', organization.id),
     supabase.from('check_ins').select('*', { count: 'exact', head: true })
+      .eq('organization_id', organization.id)
       .gte('checked_in_at', new Date().toISOString().split('T')[0]),
     supabase.from('payments').select('amount')
+      .eq('organization_id', organization.id)
       .gte('payment_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]),
   ])
 
   const monthlyPayments = recentPayments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
 
-  // Get recent check-ins with member names
+  // Get recent check-ins with member names (scoped to organization)
   const { data: recentCheckIns } = await supabase
     .from('check_ins')
     .select(`
@@ -30,6 +42,7 @@ export default async function DashboardPage() {
       checked_in_at,
       member:members(first_name, last_name)
     `)
+    .eq('organization_id', organization.id)
     .order('checked_in_at', { ascending: false })
     .limit(5)
 
@@ -68,7 +81,7 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome to the Mandir front desk</p>
+        <p className="text-muted-foreground">Welcome to {organization.name}</p>
       </div>
 
       {/* Quick Actions */}

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useOrganization } from '@/lib/org-context'
 import { QRScanner } from '@/components/dashboard/qr-scanner'
 import { MemberCheckInCard } from '@/components/dashboard/member-checkin-card'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -20,6 +21,7 @@ export default function CheckInPage() {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
+  const organization = useOrganization()
 
   const handleQRScan = async (qrToken: string) => {
     setLoading(true)
@@ -28,6 +30,7 @@ export default function CheckInPage() {
         .from('members')
         .select('*')
         .eq('qr_token', qrToken)
+        .eq('organization_id', organization.id)
         .single()
 
       if (error || !member) {
@@ -52,6 +55,7 @@ export default function CheckInPage() {
       const { data: members, error } = await supabase
         .from('members')
         .select('*')
+        .eq('organization_id', organization.id)
         .or(`first_name.ilike.%${searchQuery}%,last_name.ilike.%${searchQuery}%,phone.ilike.%${searchQuery}%`)
         .limit(10)
 

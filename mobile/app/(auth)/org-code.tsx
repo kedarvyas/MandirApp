@@ -6,29 +6,35 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, typography, spacing } from '../../src/constants/theme';
 import { Button, Input, Card } from '../../src/components';
 import {
   validateOrgCode,
   saveOrganization,
+  addOrganization,
   getStoredOrganization,
-  type StoredOrganization,
 } from '../../src/lib/orgContext';
 
 export default function OrgCodeScreen() {
   const router = useRouter();
+  const { addNew } = useLocalSearchParams<{ addNew?: string }>();
+  const isAddingNew = addNew === 'true';
+
   const [orgCode, setOrgCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [checkingStored, setCheckingStored] = useState(true);
+  const [checkingStored, setCheckingStored] = useState(!isAddingNew);
   const [error, setError] = useState('');
   const [orgName, setOrgName] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if user already has a stored organization
-    checkStoredOrg();
-  }, []);
+    // Skip check if adding a new org (user is already authenticated)
+    if (!isAddingNew) {
+      checkStoredOrg();
+    }
+  }, [isAddingNew]);
 
   async function checkStoredOrg() {
     const storedOrg = await getStoredOrganization();
@@ -68,18 +74,30 @@ export default function OrgCodeScreen() {
     const result = await validateOrgCode(orgCode);
 
     if (result.success && result.organization) {
-      // Save the organization and proceed
-      await saveOrganization(result.organization);
       setOrgName(result.organization.name);
 
-      // Short delay to show the org name before navigating
-      setTimeout(() => {
-        router.push('/(auth)/phone');
-      }, 500);
+      if (isAddingNew) {
+        // Adding to existing user's organizations
+        await addOrganization(result.organization);
+        // Short delay to show success, then go to home
+        setTimeout(() => {
+          router.replace('/(tabs)');
+        }, 500);
+      } else {
+        // New user flow - save org and proceed to phone auth
+        await saveOrganization(result.organization);
+        setTimeout(() => {
+          router.push('/(auth)/phone');
+        }, 500);
+      }
     } else {
       setError(result.error || 'Invalid organization code');
       setLoading(false);
     }
+  }
+
+  function handleCancel() {
+    router.back();
   }
 
   if (checkingStored) {
@@ -100,9 +118,18 @@ export default function OrgCodeScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Enter your organization code</Text>
+          {isAddingNew && (
+            <TouchableOpacity onPress={handleCancel} style={styles.cancelButton}>
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          )}
+          <Text style={styles.title}>
+            {isAddingNew ? 'Add another organization' : 'Enter your organization code'}
+          </Text>
           <Text style={styles.subtitle}>
-            Your temple, church, or community will provide you with a unique code to join.
+            {isAddingNew
+              ? 'Enter the code for the new organization you want to join.'
+              : 'Your temple, church, or community will provide you with a unique code to join.'}
           </Text>
         </View>
 
@@ -171,6 +198,15 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: spacing.xl,
+  },
+  cancelButton: {
+    alignSelf: 'flex-start',
+    marginBottom: spacing.md,
+  },
+  cancelText: {
+    fontSize: typography.size.md,
+    color: colors.primary.maroon,
+    fontWeight: typography.weight.medium,
   },
   title: {
     fontSize: typography.size.xxl,

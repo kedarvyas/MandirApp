@@ -241,6 +241,7 @@ export default function ProfileSetupScreen() {
           .from('members')
           .select('id')
           .eq('phone', user.phone)
+          .eq('organization_id', organization.id)
           .single();
 
         if (newMember) {
