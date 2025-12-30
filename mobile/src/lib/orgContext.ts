@@ -2,9 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './supabase';
 import type { Organization } from '../types/database';
 
-const ORG_STORAGE_KEY = '@MandirApp:organization';
-const ORGS_STORAGE_KEY = '@MandirApp:organizations';
-const ACTIVE_ORG_KEY = '@MandirApp:activeOrgId';
+const ORG_STORAGE_KEY = '@Sanctum:organization';
+const ORGS_STORAGE_KEY = '@Sanctum:organizations';
+const ACTIVE_ORG_KEY = '@Sanctum:activeOrgId';
 
 export interface StoredOrganization {
   id: string;

@@ -1,5 +1,5 @@
 /**
- * Mandir App Design System
+ * Sanctum Design System
  *
  * This file contains all design tokens used throughout the app.
  * Import from here to ensure consistency.

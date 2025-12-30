@@ -240,7 +240,7 @@ export default function SettingsScreen() {
 
       {/* App Version */}
       <View style={styles.versionContainer}>
-        <Text style={styles.versionText}>Mandir App v1.0.0</Text>
+        <Text style={styles.versionText}>Sanctum v1.0.0</Text>
         <Text style={styles.versionSubtext}>Made with ❤️</Text>
       </View>
     </ScrollView>

@@ -1,7 +1,7 @@
-# MandirApp - Project Context for Claude
+# Sanctum - Project Context for Claude
 
 ## Project Overview
-MandirApp is a B2B SaaS member check-in system for religious organizations (temples, churches, mosques, gurdwaras, synagogues). Organizations sign up via web, get a unique org code, and their members use the mobile app to check in via QR codes.
+Sanctum is a B2B SaaS member check-in system for religious organizations (temples, churches, mosques, gurdwaras, synagogues). Organizations sign up via web, get a unique org code, and their members use the mobile app to check in via QR codes.
 
 ## Tech Stack
 | Component | Technology |
@@ -13,7 +13,7 @@ MandirApp is a B2B SaaS member check-in system for religious organizations (temp
 
 ## Project Structure
 ```
-/MandirApp
+/Sanctum
 ├── mobile/          # React Native Expo app (member-facing)
 │   ├── app/         # expo-router screens
 │   └── src/         # components, lib, types, constants

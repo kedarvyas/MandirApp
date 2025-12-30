@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "Mandir",
-    "slug": "mandir",
+    "name": "Sanctum",
+    "slug": "sanctum",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "scheme": "mandir",
+    "scheme": "sanctum",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.mandir.app",
+      "bundleIdentifier": "com.sanctum.app",
       "infoPlist": {
         "NSCameraUsageDescription": "We need camera access to take profile photos and scan QR codes.",
         "NSPhotoLibraryUsageDescription": "We need photo library access to select profile photos."
@@ -27,7 +27,7 @@
         "backgroundColor": "#4A2040"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.mandir.app",
+      "package": "com.sanctum.app",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE"
@@ -43,13 +43,13 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Mandir to access your camera for profile photos and QR scanning."
+          "cameraPermission": "Allow Sanctum to access your camera for profile photos and QR scanning."
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow Mandir to access your photos for profile pictures."
+          "photosPermission": "Allow Sanctum to access your photos for profile pictures."
         }
       ]
     ]

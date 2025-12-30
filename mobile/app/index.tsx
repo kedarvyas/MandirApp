@@ -55,7 +55,7 @@ export default function WelcomeScreen() {
         <View style={styles.logoContainer}>
           <Text style={styles.logoText}>ॐ</Text>
         </View>
-        <Text style={styles.title}>MandirApp</Text>
+        <Text style={styles.title}>Sanctum</Text>
         <Text style={styles.subtitle}>Member Check-in</Text>
       </View>
 

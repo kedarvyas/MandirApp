@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Users, QrCode, CreditCard, Building2, Shield, Smartphone, ArrowRight, Check } from 'lucide-react'
+import { DashboardPreview } from '@/components/landing/DashboardPreview'
 
 export default function LandingPage() {
   return (
@@ -66,17 +67,10 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Hero Image Placeholder */}
+          {/* Dashboard Preview */}
           <div className="mt-16 relative">
-            <div className="bg-card rounded-2xl shadow-2xl border border-border p-8 max-w-5xl mx-auto">
-              <div className="aspect-video bg-gradient-to-br from-primary/10 to-accent/20 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <QrCode className="h-12 w-12 text-primary" />
-                  </div>
-                  <p className="text-muted-foreground">Dashboard Preview</p>
-                </div>
-              </div>
+            <div className="bg-card rounded-2xl shadow-2xl border border-border p-2 sm:p-4 max-w-5xl mx-auto">
+              <DashboardPreview />
             </div>
           </div>
         </div>
