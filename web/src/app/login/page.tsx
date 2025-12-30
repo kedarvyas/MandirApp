@@ -46,7 +46,7 @@ export default function LoginPage() {
           <div className="mx-auto w-20 h-20 bg-secondary rounded-full flex items-center justify-center mb-4">
             <span className="text-5xl text-primary">ॐ</span>
           </div>
-          <CardTitle className="text-2xl font-bold text-foreground">Mandir Front Desk</CardTitle>
+          <CardTitle className="text-2xl font-bold text-foreground">Sanctum Dashboard</CardTitle>
           <CardDescription className="text-muted-foreground">Sign in to access the dashboard</CardDescription>
         </CardHeader>
         <CardContent className="pt-4">

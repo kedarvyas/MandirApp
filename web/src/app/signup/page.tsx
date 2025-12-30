@@ -227,7 +227,7 @@ export default function SignupPage() {
               <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
                 <span className="text-2xl text-primary-foreground">॰</span>
               </div>
-              <span className="text-xl font-bold text-foreground">MandirApp</span>
+              <span className="text-xl font-bold text-foreground">Sanctum</span>
             </Link>
             <Link href="/login" className="text-muted-foreground hover:text-foreground text-sm">
               Already have an account? Sign in
@@ -418,7 +418,7 @@ export default function SignupPage() {
                 <CheckCircle2 className="h-8 w-8 text-[#4A7C59]" />
               </div>
               <CardTitle className="text-2xl font-bold text-foreground">
-                Welcome to MandirApp!
+                Welcome to Sanctum!
               </CardTitle>
               <CardDescription className="text-base">
                 Your organization has been created successfully

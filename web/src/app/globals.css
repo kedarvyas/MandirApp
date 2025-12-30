@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Mandir App Design System - Web
+ * Sanctum Design System - Web
  * Colors matched to mobile app theme
  *
  * Primary: Maroon #4A2040
@@ -58,7 +58,7 @@
 :root {
   --radius: 0.75rem;
 
-  /* Mandir Theme Colors */
+  /* Sanctum Theme Colors */
   --background: #FDF8F5;
   --foreground: #2D1A24;
 
@@ -169,7 +169,7 @@
   }
 }
 
-/* Custom utility classes for Mandir theme */
+/* Custom utility classes for Sanctum theme */
 @layer utilities {
   .bg-mandir-maroon {
     background-color: #4A2040;

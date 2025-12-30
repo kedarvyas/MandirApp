@@ -27,10 +27,17 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Refresh session if expired
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Refresh session if expired - handle errors gracefully
+  let user = null
+  try {
+    const { data, error } = await supabase.auth.getUser()
+    if (!error) {
+      user = data.user
+    }
+    // If there's an auth error (like invalid refresh token), treat as logged out
+  } catch {
+    // Ignore auth errors - user will be treated as not logged in
+  }
 
   // Public routes that don't require authentication
   const publicRoutes = ['/', '/login', '/signup', '/pricing', '/auth']

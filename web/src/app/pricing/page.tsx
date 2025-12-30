@@ -14,7 +14,7 @@ export default function PricingPage() {
               <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
                 <span className="text-2xl text-primary-foreground">॰</span>
               </div>
-              <span className="text-xl font-bold text-foreground">MandirApp</span>
+              <span className="text-xl font-bold text-foreground">Sanctum</span>
             </Link>
             <div className="flex items-center gap-4">
               <Link href="/login">
@@ -279,7 +279,7 @@ export default function PricingPage() {
             Ready to get started?
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Join hundreds of religious organizations already using MandirApp.
+            Join hundreds of religious organizations already using Sanctum.
           </p>
           <Link href="/signup">
             <Button size="lg" className="bg-primary hover:bg-[#5D2850] text-primary-foreground px-8">
@@ -300,7 +300,7 @@ export default function PricingPage() {
               <div className="w-8 h-8 bg-background rounded-full flex items-center justify-center">
                 <span className="text-lg text-foreground">॰</span>
               </div>
-              <span className="font-bold">MandirApp</span>
+              <span className="font-bold">Sanctum</span>
             </div>
             <div className="flex gap-6 text-sm text-background/70">
               <Link href="/" className="hover:text-background">Home</Link>
@@ -310,7 +310,7 @@ export default function PricingPage() {
             </div>
           </div>
           <div className="border-t border-background/20 mt-8 pt-8 text-center text-sm text-background/50">
-            © {new Date().getFullYear()} MandirApp. All rights reserved.
+            © {new Date().getFullYear()} Sanctum. All rights reserved.
           </div>
         </div>
       </footer>

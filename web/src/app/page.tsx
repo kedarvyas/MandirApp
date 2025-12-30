@@ -14,7 +14,7 @@ export default function LandingPage() {
               <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
                 <span className="text-2xl text-primary-foreground">॰</span>
               </div>
-              <span className="text-xl font-bold text-foreground">MandirApp</span>
+              <span className="text-xl font-bold text-foreground">Sanctum</span>
             </div>
             <div className="flex items-center gap-4">
               <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
@@ -224,7 +224,7 @@ export default function LandingPage() {
               Trusted by communities worldwide
             </h2>
             <p className="text-xl text-primary-foreground/80 mb-8">
-              Whether you have 50 members or 5,000, MandirApp scales with your community.
+              Whether you have 50 members or 5,000, Sanctum scales with your community.
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
               <div>
@@ -392,7 +392,7 @@ export default function LandingPage() {
             Ready to modernize your community management?
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Join hundreds of religious organizations already using MandirApp to streamline their operations.
+            Join hundreds of religious organizations already using Sanctum to streamline their operations.
           </p>
           <Link href="/signup">
             <Button size="lg" className="bg-primary hover:bg-[#5D2850] text-primary-foreground px-8 py-6 text-lg">
@@ -412,7 +412,7 @@ export default function LandingPage() {
                 <div className="w-8 h-8 bg-background rounded-full flex items-center justify-center">
                   <span className="text-lg text-foreground">॰</span>
                 </div>
-                <span className="font-bold">MandirApp</span>
+                <span className="font-bold">Sanctum</span>
               </div>
               <p className="text-sm text-background/70">
                 Modern member management for religious communities.
@@ -443,7 +443,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-background/20 mt-12 pt-8 text-center text-sm text-background/50">
-            © {new Date().getFullYear()} MandirApp. All rights reserved.
+            © {new Date().getFullYear()} Sanctum. All rights reserved.
           </div>
         </div>
       </footer>
