@@ -26,7 +26,13 @@ export type RelationshipType =
 export type PaymentMethod = 'check' | 'cash' | 'card' | 'other';
 
 // Staff roles
-export type StaffRole = 'admin' | 'staff';
+export type StaffRole =
+  | 'owner'      // Full access + can transfer ownership, delete org
+  | 'admin'      // Full access to all features
+  | 'treasurer'  // Payments/donations focus
+  | 'secretary'  // Members/attendance focus
+  | 'volunteer'  // Check-in only
+  | 'viewer';    // Read-only access
 
 // ============================================
 // Database Table Types
@@ -39,7 +45,7 @@ export interface Organization {
   org_code: string;  // Human-readable code for mobile app entry (e.g., "TEMPLE-ABC123")
   logo_url: string | null;
   primary_color: string;  // Hex color code for branding
-  settings: Record<string, unknown> | null;
+  settings: OrganizationSettings | null;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -47,6 +53,37 @@ export interface Organization {
 
 // Organization type options
 export type OrganizationType = 'temple' | 'church' | 'mosque' | 'synagogue' | 'gurdwara' | 'other';
+
+// Kiosk payment method options
+export type KioskPaymentMethod = 'apple_pay' | 'google_pay' | 'card' | 'venmo';
+
+// Kiosk settings (stored in organization.settings.kiosk)
+export interface KioskSettings {
+  enabled: boolean;
+  preset_amounts: number[];
+  custom_amount_enabled: boolean;
+  payment_methods: KioskPaymentMethod[];
+  thank_you_message: string;
+  show_org_logo: boolean;
+  require_email: boolean;  // Whether to ask for email for receipt
+}
+
+// Default kiosk settings
+export const DEFAULT_KIOSK_SETTINGS: KioskSettings = {
+  enabled: false,
+  preset_amounts: [25, 51, 101, 251, 501, 1001],
+  custom_amount_enabled: true,
+  payment_methods: ['apple_pay', 'google_pay', 'card'],
+  thank_you_message: 'Thank you for your generous donation!',
+  show_org_logo: true,
+  require_email: false,
+};
+
+// Organization settings structure
+export interface OrganizationSettings {
+  type?: OrganizationType;
+  kiosk?: KioskSettings;
+}
 
 // Organization signup input
 export interface OrganizationSignupInput {
@@ -116,6 +153,35 @@ export interface Staff {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface RolePermissions {
+  role: StaffRole;
+  // Member permissions
+  can_view_members: boolean;
+  can_create_members: boolean;
+  can_edit_members: boolean;
+  can_delete_members: boolean;
+  // Payment permissions
+  can_view_payments: boolean;
+  can_create_payments: boolean;
+  can_edit_payments: boolean;
+  can_delete_payments: boolean;
+  can_export_payments: boolean;
+  // Check-in permissions
+  can_view_checkins: boolean;
+  can_create_checkins: boolean;
+  // Report permissions
+  can_view_reports: boolean;
+  can_export_reports: boolean;
+  // Staff management
+  can_view_staff: boolean;
+  can_manage_staff: boolean;
+  // Organization settings
+  can_edit_org_settings: boolean;
+  can_delete_org: boolean;
+  // Description
+  description: string;
 }
 
 // ============================================

@@ -70,6 +70,18 @@ export default function RootLayout() {
             headerShown: false,
           }}
         />
+        <Stack.Screen
+          name="edit-profile"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="add-family-member"
+          options={{
+            headerShown: false,
+          }}
+        />
       </Stack>
       <StatusBar style="dark" />
     </>

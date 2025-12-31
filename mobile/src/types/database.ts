@@ -26,7 +26,13 @@ export type RelationshipType =
 export type PaymentMethod = 'check' | 'cash' | 'card' | 'other';
 
 // Staff roles
-export type StaffRole = 'admin' | 'staff';
+export type StaffRole =
+  | 'owner'      // Full access + can transfer ownership, delete org
+  | 'admin'      // Full access to all features
+  | 'treasurer'  // Payments/donations focus
+  | 'secretary'  // Members/attendance focus
+  | 'volunteer'  // Check-in only
+  | 'viewer';    // Read-only access
 
 // ============================================
 // Database Table Types

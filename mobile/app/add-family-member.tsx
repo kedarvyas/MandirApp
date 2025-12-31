@@ -17,6 +17,7 @@ import { decode } from 'base64-arraybuffer';
 import { colors, typography, spacing, borderRadius } from '../src/constants/theme';
 import { Button, Input, Card } from '../src/components';
 import { supabase } from '../src/lib/supabase';
+import { getStoredOrganization } from '../src/lib/orgContext';
 import type { RelationshipType } from '../src/types/database';
 
 const relationshipOptions: { value: RelationshipType; label: string }[] = [
@@ -125,11 +126,19 @@ export default function AddFamilyMemberScreen() {
         return;
       }
 
+      // Get the current organization
+      const storedOrg = await getStoredOrganization();
+      if (!storedOrg) {
+        Alert.alert('Error', 'No organization selected.');
+        return;
+      }
+
       // Get current member's family group
       const { data: currentMember, error: memberError } = await supabase
         .from('members')
         .select('id, family_group_id, organization_id')
         .eq('phone', user.phone)
+        .eq('organization_id', storedOrg.id)
         .single();
 
       if (memberError || !currentMember?.family_group_id) {

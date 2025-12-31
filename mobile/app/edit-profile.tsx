@@ -17,6 +17,7 @@ import { decode } from 'base64-arraybuffer';
 import { colors, typography, spacing, borderRadius } from '../src/constants/theme';
 import { Button, Input, Card } from '../src/components';
 import { supabase } from '../src/lib/supabase';
+import { getStoredOrganization } from '../src/lib/orgContext';
 
 export default function EditProfileScreen() {
   const router = useRouter();
@@ -44,10 +45,18 @@ export default function EditProfileScreen() {
         return;
       }
 
+      // Get the current organization
+      const storedOrg = await getStoredOrganization();
+      if (!storedOrg) {
+        router.replace('/');
+        return;
+      }
+
       const { data: member, error } = await supabase
         .from('members')
         .select('*')
         .eq('phone', user.phone)
+        .eq('organization_id', storedOrg.id)
         .single();
 
       if (error || !member) {

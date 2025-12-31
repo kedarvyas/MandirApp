@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Users, QrCode, CreditCard, Building2, Shield, Smartphone, ArrowRight, Check } from 'lucide-react'
 import { DashboardPreview } from '@/components/landing/DashboardPreview'
+import { MobileAppPreview } from '@/components/landing/MobileAppPreview'
+import { RollingText } from '@/components/landing/RollingText'
 
 export default function LandingPage() {
   return (
@@ -42,8 +44,17 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tight">
-              Modern Member Check-In for{' '}
-              <span className="text-primary">Religious Organizations</span>
+              Modern Member Check-In for Your{' '}
+              <span className="text-primary">
+                <RollingText
+                  words={[
+                    'Non-Profit Organization',
+                    'Religious Association',
+                    'Cultural Community',
+                  ]}
+                  interval={2500}
+                />
+              </span>
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
               Streamline attendance tracking, family management, and donation records for your temple,
@@ -164,8 +175,58 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* How It Works Section */}
+      {/* Platform Preview Section */}
       <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
+              Two apps, one seamless experience
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+              Staff manage everything from the web dashboard. Members check in with the mobile app.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Dashboard Side */}
+            <div>
+              <div className="mb-6">
+                <span className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium mb-3">
+                  Staff Dashboard
+                </span>
+                <h3 className="text-2xl font-bold text-foreground mb-2">
+                  Manage your community
+                </h3>
+                <p className="text-muted-foreground">
+                  Track attendance, manage members, record donations, and view analytics—all from one intuitive dashboard.
+                </p>
+              </div>
+              <div className="bg-card rounded-xl shadow-lg border border-border p-2">
+                <DashboardPreview />
+              </div>
+            </div>
+
+            {/* Mobile Side */}
+            <div className="flex flex-col items-center lg:items-start">
+              <div className="mb-6 text-center lg:text-left">
+                <span className="inline-block px-3 py-1 bg-[#4A7C59]/10 text-[#4A7C59] rounded-full text-sm font-medium mb-3">
+                  Member App
+                </span>
+                <h3 className="text-2xl font-bold text-foreground mb-2">
+                  Check in with a tap
+                </h3>
+                <p className="text-muted-foreground">
+                  Members simply show their QR code at the door. Fast, touchless, and works offline.
+                </p>
+              </div>
+              <MobileAppPreview />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-20 bg-card/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground">

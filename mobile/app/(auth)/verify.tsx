@@ -13,6 +13,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, typography, spacing, borderRadius } from '../../src/constants/theme';
 import { Button } from '../../src/components';
 import { supabase } from '../../src/lib/supabase';
+import { getStoredOrganization } from '../../src/lib/orgContext';
 
 const CODE_LENGTH = 6;
 
@@ -97,15 +98,19 @@ export default function VerifyScreen() {
       }
 
       if (data.session) {
-        // Check if user has completed profile
+        // Get the current organization
+        const storedOrg = await getStoredOrganization();
+
+        // Check if user has completed profile for this organization
         const { data: member } = await supabase
           .from('members')
           .select('status, photo_url')
           .eq('phone', phone)
+          .eq('organization_id', storedOrg?.id || '')
           .single();
 
-        if (member?.status === 'pending_registration' || !member?.photo_url) {
-          // Profile incomplete, go to setup
+        if (!member || member?.status === 'pending_registration' || !member?.photo_url) {
+          // Profile incomplete or doesn't exist for this org, go to setup
           router.replace('/(auth)/profile-setup');
         } else {
           // Profile complete, go to main app

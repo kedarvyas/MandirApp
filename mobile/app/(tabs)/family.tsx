@@ -12,6 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { colors, typography, spacing, borderRadius } from '../../src/constants/theme';
 import { Card, Avatar, Button } from '../../src/components';
 import { supabase } from '../../src/lib/supabase';
+import { getStoredOrganization } from '../../src/lib/orgContext';
 import type { Member, RelationshipType } from '../../src/types/database';
 
 const relationshipLabels: Record<RelationshipType, string> = {
@@ -43,11 +44,16 @@ export default function FamilyScreen() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.phone) return;
 
-      // Get current member
+      // Get the current organization
+      const storedOrg = await getStoredOrganization();
+      if (!storedOrg) return;
+
+      // Get current member (filtered by org to handle multi-org users)
       const { data: member, error: memberError } = await supabase
         .from('members')
         .select('*')
         .eq('phone', user.phone)
+        .eq('organization_id', storedOrg.id)
         .single();
 
       if (memberError || !member) {
