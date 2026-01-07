@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, typography, spacing, borderRadius } from '../../src/constants/theme';
-import { Button, Input, Card } from '../../src/components';
+import { Button, Input, Card, Logo } from '../../src/components';
 import { supabase } from '../../src/lib/supabase';
 import { getStoredOrganization, type StoredOrganization } from '../../src/lib/orgContext';
 
@@ -113,6 +113,11 @@ export default function PhoneScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
+        {/* Logo */}
+        <View style={styles.logoContainer}>
+          <Logo size={60} />
+        </View>
+
         {/* Organization Badge */}
         {organization && (
           <TouchableOpacity
@@ -173,6 +178,10 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.lg,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: spacing.md,
   },
   orgBadge: {
     backgroundColor: colors.background.secondary,

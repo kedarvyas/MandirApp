@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, typography, spacing } from '../../src/constants/theme';
-import { Button, Input, Card } from '../../src/components';
+import { Button, Input, Card, Logo } from '../../src/components';
 import {
   validateOrgCode,
   saveOrganization,
@@ -123,6 +123,12 @@ export default function OrgCodeScreen() {
               <Text style={styles.cancelText}>Cancel</Text>
             </TouchableOpacity>
           )}
+          {!isAddingNew && (
+            <View style={styles.logoContainer}>
+              <Logo size={80} />
+              <Text style={styles.brandName}>Sanctum</Text>
+            </View>
+          )}
           <Text style={styles.title}>
             {isAddingNew ? 'Add another organization' : 'Enter your organization code'}
           </Text>
@@ -198,6 +204,17 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: spacing.xl,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  brandName: {
+    fontSize: typography.size.xxl,
+    fontWeight: typography.weight.bold,
+    color: colors.text.primary,
+    marginTop: spacing.sm,
+    letterSpacing: 1,
   },
   cancelButton: {
     alignSelf: 'flex-start',

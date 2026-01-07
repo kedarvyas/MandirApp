@@ -15,6 +15,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Sanctum - Member Check-In for Religious Organizations",
   description: "Modern member check-in system for temples, churches, mosques, and religious communities. QR code attendance, family management, and donation tracking.",
+  icons: {
+    icon: '/logo.svg',
+    apple: '/logo.svg',
+  },
 };
 
 export default function RootLayout({

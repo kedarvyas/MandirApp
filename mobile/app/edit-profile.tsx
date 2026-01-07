@@ -12,12 +12,12 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as ImagePicker from 'expo-image-picker';
 import { decode } from 'base64-arraybuffer';
 import { colors, typography, spacing, borderRadius } from '../src/constants/theme';
 import { Button, Input, Card } from '../src/components';
 import { supabase } from '../src/lib/supabase';
 import { getStoredOrganization } from '../src/lib/orgContext';
+import { usePhotoUpload } from '../src/hooks/usePhotoUpload';
 
 export default function EditProfileScreen() {
   const router = useRouter();
@@ -26,12 +26,16 @@ export default function EditProfileScreen() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [currentPhotoUrl, setCurrentPhotoUrl] = useState<string | null>(null);
-  const [newPhotoUri, setNewPhotoUri] = useState<string | null>(null);
-  const [newPhotoBase64, setNewPhotoBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [memberId, setMemberId] = useState<string | null>(null);
+
+  const {
+    photoUri: newPhotoUri,
+    photoBase64: newPhotoBase64,
+    showPhotoOptions,
+  } = usePhotoUpload();
 
   useEffect(() => {
     loadCurrentProfile();
@@ -78,62 +82,6 @@ export default function EditProfileScreen() {
     } finally {
       setInitialLoading(false);
     }
-  }
-
-  async function pickImage() {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert(
-        'Permission Required',
-        'Please allow access to your photos to upload a profile picture.'
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images',
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-      base64: true, // Get base64 directly
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      setNewPhotoUri(result.assets[0].uri);
-      // Store base64 for upload
-      setNewPhotoBase64(result.assets[0].base64 || null);
-    }
-  }
-
-  async function takePhoto() {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert(
-        'Permission Required',
-        'Please allow access to your camera to take a profile picture.'
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-      base64: true, // Get base64 directly
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      setNewPhotoUri(result.assets[0].uri);
-      setNewPhotoBase64(result.assets[0].base64 || null);
-    }
-  }
-
-  function showPhotoOptions() {
-    Alert.alert('Profile Photo', 'Choose how to update your photo', [
-      { text: 'Take Photo', onPress: takePhoto },
-      { text: 'Choose from Library', onPress: pickImage },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
   }
 
   function validate(): boolean {
@@ -270,7 +218,7 @@ export default function EditProfileScreen() {
           {/* Photo Upload */}
           <TouchableOpacity
             style={styles.photoContainer}
-            onPress={showPhotoOptions}
+            onPress={() => showPhotoOptions()}
             activeOpacity={0.7}
           >
             {displayPhotoUri ? (

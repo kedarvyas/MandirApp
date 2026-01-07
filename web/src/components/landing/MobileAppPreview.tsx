@@ -102,7 +102,7 @@ export function MobileAppPreview() {
               </div>
 
               <p className="text-center text-[9px] text-[#D4A89A] mt-2.5">
-                Pull down to refresh if the code doesn't scan
+                Pull down to refresh if the code doesn&apos;t scan
               </p>
             </div>
 

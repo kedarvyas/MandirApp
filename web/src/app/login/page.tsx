@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -42,9 +43,15 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-lg border-0">
         <CardHeader className="text-center pb-2">
-          {/* Om Symbol Logo */}
-          <div className="mx-auto w-20 h-20 bg-secondary rounded-full flex items-center justify-center mb-4">
-            <span className="text-5xl text-primary">ॐ</span>
+          {/* Logo */}
+          <div className="mx-auto mb-4">
+            <Image
+              src="/logo.svg"
+              alt="Sanctum"
+              width={80}
+              height={80}
+              className="w-20 h-20"
+            />
           </div>
           <CardTitle className="text-2xl font-bold text-foreground">Sanctum Dashboard</CardTitle>
           <CardDescription className="text-muted-foreground">Sign in to access the dashboard</CardDescription>

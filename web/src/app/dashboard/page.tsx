@@ -16,6 +16,11 @@ export default async function DashboardPage() {
 
   const { organization } = orgContext
 
+  // Calculate date boundaries for queries (server-side at request time)
+  const now = new Date()
+  const today = now.toISOString().split('T')[0]
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+
   // Get stats scoped to this organization
   const [
     { count: totalMembers },
@@ -26,10 +31,10 @@ export default async function DashboardPage() {
       .eq('organization_id', organization.id),
     supabase.from('check_ins').select('*', { count: 'exact', head: true })
       .eq('organization_id', organization.id)
-      .gte('checked_in_at', new Date().toISOString().split('T')[0]),
+      .gte('checked_in_at', today),
     supabase.from('payments').select('amount')
       .eq('organization_id', organization.id)
-      .gte('payment_date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]),
+      .gte('payment_date', thirtyDaysAgo),
   ])
 
   const monthlyPayments = recentPayments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0

@@ -39,11 +39,3 @@ export function useStaff() {
   }
   return context.staff
 }
-
-export function useOrgContext() {
-  const context = useContext(OrgContext)
-  if (!context) {
-    throw new Error('useOrgContext must be used within an OrgProvider')
-  }
-  return context
-}

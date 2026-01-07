@@ -103,12 +103,11 @@ export default function SettingsScreen() {
             setLoggingOut(true);
             try {
               await clearAllOrganizations();
+              // signOut triggers SIGNED_OUT event which redirects via _layout.tsx
               await supabase.auth.signOut();
-              router.replace('/');
             } catch (err) {
               console.error('Sign out error:', err);
               Alert.alert('Error', 'Failed to sign out. Please try again.');
-            } finally {
               setLoggingOut(false);
             }
           },

@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Stack } from 'expo-router';
+import { useEffect, useState, useRef } from 'react';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { colors } from '../src/constants/theme';
@@ -9,6 +9,9 @@ import type { Session } from '@supabase/supabase-js';
 export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const segments = useSegments();
+  const hasNavigated = useRef(false);
 
   useEffect(() => {
     // Check initial session
@@ -19,8 +22,13 @@ export default function RootLayout() {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
         setSession(session);
+
+        // Handle sign out - redirect to welcome screen
+        if (event === 'SIGNED_OUT') {
+          router.replace('/');
+        }
       }
     );
 

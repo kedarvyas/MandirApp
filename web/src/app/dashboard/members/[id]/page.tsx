@@ -7,20 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ArrowLeft, Mail, Phone, Calendar, Users, CreditCard } from 'lucide-react'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
-
-const statusColors: Record<string, string> = {
-  active: 'bg-green-100 text-green-700',
-  pending_invite: 'bg-yellow-100 text-yellow-700',
-  pending_registration: 'bg-blue-100 text-blue-700',
-  inactive: 'bg-gray-100 text-gray-700',
-}
-
-const statusLabels: Record<string, string> = {
-  active: 'Active',
-  pending_invite: 'Pending Invite',
-  pending_registration: 'Pending Registration',
-  inactive: 'Inactive',
-}
+import { STATUS_COLORS, STATUS_LABELS } from '@/lib/constants'
 
 export default async function MemberDetailPage({
   params,
@@ -108,8 +95,8 @@ export default async function MemberDetailPage({
                 <h1 className="text-2xl font-bold text-foreground">
                   {member.first_name} {member.last_name}
                 </h1>
-                <Badge className={statusColors[member.status]}>
-                  {statusLabels[member.status]}
+                <Badge className={STATUS_COLORS[member.status as keyof typeof STATUS_COLORS]}>
+                  {STATUS_LABELS[member.status as keyof typeof STATUS_LABELS]}
                 </Badge>
                 {member.is_prime_member && (
                   <Badge variant="outline" className="border-primary text-primary">

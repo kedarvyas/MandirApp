@@ -17,20 +17,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Search, Eye, QrCode } from 'lucide-react'
 import Link from 'next/link'
-
-const statusColors: Record<string, string> = {
-  active: 'bg-green-100 text-green-700',
-  pending_invite: 'bg-yellow-100 text-yellow-700',
-  pending_registration: 'bg-blue-100 text-blue-700',
-  inactive: 'bg-gray-100 text-gray-700',
-}
-
-const statusLabels: Record<string, string> = {
-  active: 'Active',
-  pending_invite: 'Pending Invite',
-  pending_registration: 'Pending Registration',
-  inactive: 'Inactive',
-}
+import { STATUS_COLORS, STATUS_LABELS } from '@/lib/constants'
 
 export function MembersTable({ members }: { members: Member[] }) {
   const router = useRouter()
@@ -106,8 +93,8 @@ export function MembersTable({ members }: { members: Member[] }) {
                     {member.phone || <span className="text-gray-400">-</span>}
                   </TableCell>
                   <TableCell>
-                    <Badge className={statusColors[member.status]}>
-                      {statusLabels[member.status]}
+                    <Badge className={STATUS_COLORS[member.status]}>
+                      {STATUS_LABELS[member.status]}
                     </Badge>
                   </TableCell>
                   <TableCell>

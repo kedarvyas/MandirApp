@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,12 +12,12 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as ImagePicker from 'expo-image-picker';
 import { decode } from 'base64-arraybuffer';
 import { colors, typography, spacing, borderRadius } from '../src/constants/theme';
 import { Button, Input, Card } from '../src/components';
 import { supabase } from '../src/lib/supabase';
 import { getStoredOrganization } from '../src/lib/orgContext';
+import { usePhotoUpload } from '../src/hooks/usePhotoUpload';
 import type { RelationshipType } from '../src/types/database';
 
 const relationshipOptions: { value: RelationshipType; label: string }[] = [
@@ -36,67 +36,17 @@ export default function AddFamilyMemberScreen() {
   const [lastName, setLastName] = useState('');
   const [relationship, setRelationship] = useState<RelationshipType>('spouse');
   const [isIndependent, setIsIndependent] = useState(true);
-  const [photoUri, setPhotoUri] = useState<string | null>(null);
-  const [photoBase64, setPhotoBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  async function pickImage() {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert(
-        'Permission Required',
-        'Please allow access to your photos to upload a profile picture.'
-      );
-      return;
-    }
+  const { photoUri, photoBase64, showPhotoOptions } = usePhotoUpload();
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images',
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-      base64: true,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      setPhotoUri(result.assets[0].uri);
-      setPhotoBase64(result.assets[0].base64 || null);
+  // Clear photo error when photo is selected
+  useEffect(() => {
+    if (photoUri) {
       setErrors((prev) => ({ ...prev, photo: '' }));
     }
-  }
-
-  async function takePhoto() {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert(
-        'Permission Required',
-        'Please allow access to your camera to take a profile picture.'
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-      base64: true,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      setPhotoUri(result.assets[0].uri);
-      setPhotoBase64(result.assets[0].base64 || null);
-      setErrors((prev) => ({ ...prev, photo: '' }));
-    }
-  }
-
-  function showPhotoOptions() {
-    Alert.alert('Profile Photo', 'Choose how to add the photo', [
-      { text: 'Take Photo', onPress: takePhoto },
-      { text: 'Choose from Library', onPress: pickImage },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  }
+  }, [photoUri]);
 
   function validate(): boolean {
     const newErrors: Record<string, string> = {};
@@ -234,7 +184,7 @@ export default function AddFamilyMemberScreen() {
           {/* Photo Upload */}
           <TouchableOpacity
             style={styles.photoContainer}
-            onPress={showPhotoOptions}
+            onPress={() => showPhotoOptions()}
             activeOpacity={0.7}
           >
             {photoUri ? (

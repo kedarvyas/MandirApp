@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Users, QrCode, CreditCard, Building2, Shield, Smartphone, ArrowRight, Check } from 'lucide-react'
@@ -14,9 +15,13 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-2xl text-primary-foreground">॰</span>
-              </div>
+              <Image
+                src="/logo.svg"
+                alt="Sanctum"
+                width={40}
+                height={40}
+                className="w-10 h-10"
+              />
               <span className="text-xl font-bold text-foreground">Sanctum</span>
             </div>
             <div className="flex items-center gap-4">
@@ -464,9 +469,13 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-background rounded-full flex items-center justify-center">
-                  <span className="text-lg text-foreground">॰</span>
-                </div>
+                <Image
+                  src="/logo.svg"
+                  alt="Sanctum"
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 invert"
+                />
                 <span className="font-bold">Sanctum</span>
               </div>
               <p className="text-sm text-background/70">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 import {
   Heart,
   CreditCard,
@@ -27,6 +28,8 @@ export default function DonationKioskPage() {
   const [kioskSettings, setKioskSettings] = useState<KioskSettings>(DEFAULT_KIOSK_SETTINGS)
   const [amount, setAmount] = useState<number | null>(null)
   const [customAmount, setCustomAmount] = useState('')
+  // Payment method stored for future integration with actual payment processing
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [paymentMethod, setPaymentMethod] = useState<KioskPaymentMethod | null>(null)
 
   const selectedAmount = amount || (customAmount ? parseFloat(customAmount) : 0)
@@ -160,10 +163,13 @@ export default function DonationKioskPage() {
       <header className="p-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           {kioskSettings.show_org_logo && organization?.logo_url ? (
-            <img
+            <Image
               src={organization.logo_url}
               alt={organization.name}
-              className="w-12 h-12 rounded-full object-cover"
+              width={48}
+              height={48}
+              className="rounded-full object-cover"
+              unoptimized
             />
           ) : (
             <div

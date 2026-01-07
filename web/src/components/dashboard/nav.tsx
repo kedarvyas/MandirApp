@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
@@ -43,15 +44,22 @@ export function DashboardNav({ user }: { user: User }) {
           <div className="flex items-center">
             <Link href="/dashboard" className="flex items-center gap-3">
               {organization.logo_url ? (
-                <img
+                <Image
                   src={organization.logo_url}
                   alt={organization.name}
-                  className="w-10 h-10 rounded-full object-cover"
+                  width={40}
+                  height={40}
+                  className="rounded-full object-cover"
+                  unoptimized
                 />
               ) : (
-                <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
-                  <span className="text-2xl text-primary">ॐ</span>
-                </div>
+                <Image
+                  src="/logo.svg"
+                  alt="Sanctum"
+                  width={40}
+                  height={40}
+                  className="w-10 h-10"
+                />
               )}
               <span className="font-bold text-xl text-foreground">{organization.name}</span>
             </Link>

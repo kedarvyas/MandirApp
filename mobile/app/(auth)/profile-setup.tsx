@@ -11,12 +11,12 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import * as ImagePicker from 'expo-image-picker';
 import { decode } from 'base64-arraybuffer';
 import { colors, typography, spacing, borderRadius } from '../../src/constants/theme';
 import { Button, Input, Card } from '../../src/components';
 import { supabase } from '../../src/lib/supabase';
 import { getStoredOrganization, type StoredOrganization } from '../../src/lib/orgContext';
+import { usePhotoUpload } from '../../src/hooks/usePhotoUpload';
 
 export default function ProfileSetupScreen() {
   const router = useRouter();
@@ -24,11 +24,18 @@ export default function ProfileSetupScreen() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [photoUri, setPhotoUri] = useState<string | null>(null);
-  const [photoBase64, setPhotoBase64] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [organization, setOrganization] = useState<StoredOrganization | null>(null);
+
+  const { photoUri, photoBase64, showPhotoOptions } = usePhotoUpload();
+
+  // Clear photo error when photo is selected
+  useEffect(() => {
+    if (photoUri) {
+      setErrors((prev) => ({ ...prev, photo: '' }));
+    }
+  }, [photoUri]);
 
   useEffect(() => {
     loadOrganization();
@@ -42,65 +49,6 @@ export default function ProfileSetupScreen() {
       return;
     }
     setOrganization(org);
-  }
-
-  async function pickImage() {
-    // Request permission
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert(
-        'Permission Required',
-        'Please allow access to your photos to upload a profile picture.'
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: 'images',
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-      base64: true,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      setPhotoUri(result.assets[0].uri);
-      setPhotoBase64(result.assets[0].base64 || null);
-      setErrors((prev) => ({ ...prev, photo: '' }));
-    }
-  }
-
-  async function takePhoto() {
-    // Request permission
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert(
-        'Permission Required',
-        'Please allow access to your camera to take a profile picture.'
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-      base64: true,
-    });
-
-    if (!result.canceled && result.assets[0]) {
-      setPhotoUri(result.assets[0].uri);
-      setPhotoBase64(result.assets[0].base64 || null);
-      setErrors((prev) => ({ ...prev, photo: '' }));
-    }
-  }
-
-  function showPhotoOptions() {
-    Alert.alert('Profile Photo', 'Choose how to add your photo', [
-      { text: 'Take Photo', onPress: takePhoto },
-      { text: 'Choose from Library', onPress: pickImage },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
   }
 
   function validate(): boolean {
@@ -281,7 +229,7 @@ export default function ProfileSetupScreen() {
         {/* Photo Upload */}
         <TouchableOpacity
           style={styles.photoContainer}
-          onPress={showPhotoOptions}
+          onPress={() => showPhotoOptions()}
           activeOpacity={0.7}
         >
           {photoUri ? (

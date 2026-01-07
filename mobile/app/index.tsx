@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, typography, spacing } from '../src/constants/theme';
-import { Button } from '../src/components';
+import { Button, Logo } from '../src/components';
 import { supabase } from '../src/lib/supabase';
 import { getStoredOrganization, type StoredOrganization } from '../src/lib/orgContext';
 
@@ -51,9 +51,8 @@ export default function WelcomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        {/* Om Symbol Placeholder */}
         <View style={styles.logoContainer}>
-          <Text style={styles.logoText}>ॐ</Text>
+          <Logo size={100} />
         </View>
         <Text style={styles.title}>Sanctum</Text>
         <Text style={styles.subtitle}>Member Check-in</Text>
@@ -120,17 +119,9 @@ const styles = StyleSheet.create({
     marginTop: spacing.xxl,
   },
   logoContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: colors.background.secondary,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.lg,
-  },
-  logoText: {
-    fontSize: 64,
-    color: colors.primary.maroon,
   },
   title: {
     fontSize: typography.size.display,
