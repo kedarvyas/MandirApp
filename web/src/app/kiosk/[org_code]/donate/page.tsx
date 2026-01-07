@@ -172,12 +172,13 @@ export default function DonationKioskPage() {
               unoptimized
             />
           ) : (
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: primaryColor }}
-            >
-              <span className="text-2xl text-white">॰</span>
-            </div>
+            <Image
+              src="/logo.svg"
+              alt="Sanctum"
+              width={48}
+              height={48}
+              className="w-12 h-12"
+            />
           )}
           <span className="text-2xl font-bold text-[#2D1A24]">
             {organization?.name || 'Sanctum'}

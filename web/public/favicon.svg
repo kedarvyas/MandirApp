@@ -1,9 +1,12 @@
 <?xml version="1.0" standalone="no"?>
 <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
- width="400" height="395" viewBox="0 0 800 789"
+ width="400" height="400" viewBox="0 0 800 800"
  preserveAspectRatio="xMidYMid meet">
-<g transform="translate(0.000000,789.000000) scale(0.100000,-0.100000)"
-fill="#2d2d2d" stroke="none">
+<!-- Background circle for visibility on dark tabs -->
+<circle cx="400" cy="400" r="390" fill="#FDF8F5"/>
+<circle cx="400" cy="400" r="390" fill="none" stroke="#4A2040" stroke-width="8"/>
+<g transform="translate(0.000000,795.000000) scale(0.100000,-0.100000)"
+fill="#4A2040" stroke="none">
 <path d="M3819 6960 c-145 -55 -237 -195 -226 -345 5 -72 26 -155 39 -155 5 0
 8 -7 8 -15 0 -24 89 -107 140 -132 143 -70 301 -42 419 74 52 52 77 103 90
 181 8 57 1 149 -14 187 -27 65 -103 151 -165 184 -78 42 -211 52 -291 21z"/>

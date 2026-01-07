@@ -2,46 +2,17 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Users, QrCode, CreditCard, Building2, Shield, Smartphone, ArrowRight, Check } from 'lucide-react'
+import { Users, QrCode, CreditCard, Building2, Shield, Smartphone, ArrowRight } from 'lucide-react'
 import { DashboardPreview } from '@/components/landing/DashboardPreview'
 import { MobileAppPreview } from '@/components/landing/MobileAppPreview'
 import { RollingText } from '@/components/landing/RollingText'
+import { LandingHeader } from '@/components/landing/LandingHeader'
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
-              <Image
-                src="/logo.svg"
-                alt="Sanctum"
-                width={40}
-                height={40}
-                className="w-10 h-10"
-              />
-              <span className="text-xl font-bold text-foreground">Sanctum</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
-                Pricing
-              </Link>
-              <Link href="/login">
-                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                  Staff Login
-                </Button>
-              </Link>
-              <Link href="/signup">
-                <Button className="bg-primary hover:bg-[#5D2850] text-primary-foreground">
-                  Get Started
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* Navigation Header */}
+      <LandingHeader />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 sm:py-32">
@@ -311,137 +282,78 @@ export default function LandingPage() {
       {/* Pricing Preview */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
-              Simple, transparent pricing
+              Pricing that fits your community
             </h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Start free, upgrade as you grow
+              Every organization is unique. We work with you to create a plan that matches your needs.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {/* Free Tier */}
-            <Card className="border-2 border-border">
-              <CardContent className="pt-8 pb-6 px-6">
-                <h3 className="text-lg font-semibold text-muted-foreground mb-2">Starter</h3>
-                <div className="flex items-baseline gap-1 mb-4">
-                  <span className="text-4xl font-bold text-foreground">$0</span>
-                  <span className="text-muted-foreground">/month</span>
-                </div>
-                <p className="text-muted-foreground mb-6">Perfect for small communities</p>
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-[#4A7C59]" />
-                    Up to 50 members
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-[#4A7C59]" />
-                    QR code check-in
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-[#4A7C59]" />
-                    Basic reports
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-[#4A7C59]" />
-                    1 staff account
-                  </li>
-                </ul>
-                <Link href="/signup">
-                  <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                    Get Started
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            {/* Pro Tier */}
-            <Card className="border-2 border-primary shadow-xl relative">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium">
-                Most Popular
+          <Card className="max-w-3xl mx-auto border-2 border-primary/20 shadow-xl">
+            <CardContent className="pt-10 pb-8 px-8 sm:px-12">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-foreground mb-3">
+                  Flexible pricing based on your needs
+                </h3>
+                <p className="text-muted-foreground">
+                  Our pricing adapts to what matters most for your community
+                </p>
               </div>
-              <CardContent className="pt-8 pb-6 px-6">
-                <h3 className="text-lg font-semibold text-primary mb-2">Growth</h3>
-                <div className="flex items-baseline gap-1 mb-4">
-                  <span className="text-4xl font-bold text-foreground">$49</span>
-                  <span className="text-muted-foreground">/month</span>
-                </div>
-                <p className="text-muted-foreground mb-6">For growing organizations</p>
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-[#4A7C59]" />
-                    Up to 500 members
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-[#4A7C59]" />
-                    Everything in Starter
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-[#4A7C59]" />
-                    Donation tracking
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-[#4A7C59]" />
-                    5 staff accounts
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-[#4A7C59]" />
-                    Email support
-                  </li>
-                </ul>
-                <Link href="/signup">
-                  <Button className="w-full bg-primary hover:bg-[#5D2850] text-primary-foreground">
-                    Start Free Trial
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
 
-            {/* Enterprise Tier */}
-            <Card className="border-2 border-border">
-              <CardContent className="pt-8 pb-6 px-6">
-                <h3 className="text-lg font-semibold text-muted-foreground mb-2">Enterprise</h3>
-                <div className="flex items-baseline gap-1 mb-4">
-                  <span className="text-4xl font-bold text-foreground">Custom</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Users className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground">Community Size</h4>
+                    <p className="text-sm text-muted-foreground">From 50 to 50,000+ members</p>
+                  </div>
                 </div>
-                <p className="text-muted-foreground mb-6">For large organizations</p>
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-[#4A7C59]" />
-                    Unlimited members
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-[#4A7C59]" />
-                    Everything in Growth
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-[#4A7C59]" />
-                    Multi-location
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-[#4A7C59]" />
-                    Unlimited staff
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-[#4A7C59]" />
-                    Priority support
-                  </li>
-                </ul>
-                <Link href="/signup">
-                  <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Building2 className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground">Locations</h4>
+                    <p className="text-sm text-muted-foreground">Single site or multi-campus</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground">Features</h4>
+                    <p className="text-sm text-muted-foreground">Pick what you need</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Shield className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-foreground">Support Level</h4>
+                    <p className="text-sm text-muted-foreground">Self-serve to dedicated rep</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <Link href="/contact">
+                  <Button size="lg" className="bg-primary hover:bg-[#5D2850] text-primary-foreground px-10 py-6 text-lg">
                     Contact Sales
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="text-center mt-8">
-            <Link href="/pricing" className="text-primary hover:underline">
-              View full pricing details →
-            </Link>
-          </div>
+                <p className="text-sm text-muted-foreground mt-6">
+                  Free demo included • No commitment required
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 

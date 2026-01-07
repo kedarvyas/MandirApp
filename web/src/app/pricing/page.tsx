@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Check, X, ArrowLeft } from 'lucide-react'
@@ -11,9 +12,13 @@ export default function PricingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-2xl text-primary-foreground">॰</span>
-              </div>
+              <Image
+                src="/logo.svg"
+                alt="Sanctum"
+                width={40}
+                height={40}
+                className="w-10 h-10"
+              />
               <span className="text-xl font-bold text-foreground">Sanctum</span>
             </Link>
             <div className="flex items-center gap-4">
@@ -297,9 +302,13 @@ export default function PricingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-background rounded-full flex items-center justify-center">
-                <span className="text-lg text-foreground">॰</span>
-              </div>
+              <Image
+                src="/logo.svg"
+                alt="Sanctum"
+                width={32}
+                height={32}
+                className="w-8 h-8 invert"
+              />
               <span className="font-bold">Sanctum</span>
             </div>
             <div className="flex gap-6 text-sm text-background/70">

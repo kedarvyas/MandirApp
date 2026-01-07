@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -224,9 +225,13 @@ export default function SignupPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-2xl text-primary-foreground">॰</span>
-              </div>
+              <Image
+                src="/logo.svg"
+                alt="Sanctum"
+                width={40}
+                height={40}
+                className="w-10 h-10"
+              />
               <span className="text-xl font-bold text-foreground">Sanctum</span>
             </Link>
             <Link href="/login" className="text-muted-foreground hover:text-foreground text-sm">
