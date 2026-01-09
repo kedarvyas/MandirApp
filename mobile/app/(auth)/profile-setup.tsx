@@ -25,8 +25,15 @@ export default function ProfileSetupScreen() {
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [organization, setOrganization] = useState<StoredOrganization | null>(null);
+
+  // Track if this is an existing member or new registration
+  const [isExistingMember, setIsExistingMember] = useState(false);
+  const [existingPhotoUrl, setExistingPhotoUrl] = useState<string | null>(null);
+  const [existingMemberId, setExistingMemberId] = useState<string | null>(null);
+  const [existingFamilyGroupId, setExistingFamilyGroupId] = useState<string | null>(null);
 
   const { photoUri, photoBase64, showPhotoOptions } = usePhotoUpload();
 
@@ -38,10 +45,10 @@ export default function ProfileSetupScreen() {
   }, [photoUri]);
 
   useEffect(() => {
-    loadOrganization();
+    loadOrganizationAndMember();
   }, []);
 
-  async function loadOrganization() {
+  async function loadOrganizationAndMember() {
     const org = await getStoredOrganization();
     if (!org) {
       Alert.alert('Error', 'Organization not found. Please start over.');
@@ -49,6 +56,35 @@ export default function ProfileSetupScreen() {
       return;
     }
     setOrganization(org);
+
+    // Check if member already exists and pre-fill their data
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.phone) {
+        const { data: existingMember } = await supabase
+          .from('members')
+          .select('id, first_name, last_name, email, photo_url, family_group_id')
+          .eq('phone', user.phone)
+          .eq('organization_id', org.id)
+          .single();
+
+        if (existingMember) {
+          setIsExistingMember(true);
+          setExistingMemberId(existingMember.id);
+          setExistingFamilyGroupId(existingMember.family_group_id);
+
+          // Pre-fill existing data
+          if (existingMember.first_name) setFirstName(existingMember.first_name);
+          if (existingMember.last_name) setLastName(existingMember.last_name);
+          if (existingMember.email) setEmail(existingMember.email);
+          if (existingMember.photo_url) setExistingPhotoUrl(existingMember.photo_url);
+        }
+      }
+    } catch (err) {
+      console.log('No existing member found, proceeding with new registration');
+    }
+
+    setInitialLoading(false);
   }
 
   function validate(): boolean {
@@ -60,7 +96,8 @@ export default function ProfileSetupScreen() {
     if (!lastName.trim()) {
       newErrors.lastName = 'Last name is required';
     }
-    if (!photoUri) {
+    // Photo is required only if there's no existing photo and no new photo selected
+    if (!photoUri && !existingPhotoUrl) {
       newErrors.photo = 'Profile photo is required';
     }
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -90,15 +127,15 @@ export default function ProfileSetupScreen() {
         return;
       }
 
-      let photoUrl = null;
+      // Determine the photo URL to use
+      let photoUrl = existingPhotoUrl; // Start with existing photo if any
 
-      // Upload photo to Supabase Storage
+      // Upload new photo if one was selected
       if (photoUri && photoBase64) {
         const fileName = `${user.id}-${Date.now()}.jpg`;
 
         console.log('Uploading photo, base64 size:', photoBase64.length);
 
-        // Upload using base64 directly from ImagePicker
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('member-photos')
           .upload(fileName, decode(photoBase64), {
@@ -123,15 +160,8 @@ export default function ProfileSetupScreen() {
         photoUrl = publicUrl;
       }
 
-      // Check if member already exists in this organization
-      const { data: existingMember } = await supabase
-        .from('members')
-        .select('id, family_group_id')
-        .eq('phone', user.phone)
-        .eq('organization_id', organization.id)
-        .single();
-
-      let familyGroupId = existingMember?.family_group_id;
+      // Use tracked family group ID or create new one
+      let familyGroupId = existingFamilyGroupId;
 
       // If no family group, create one
       if (!familyGroupId) {
@@ -151,28 +181,36 @@ export default function ProfileSetupScreen() {
         familyGroupId = newFamilyGroup.id;
       }
 
-      // Upsert member profile (insert or update)
-      const memberData = {
+      // Build member data - only include photo if we have one
+      const memberData: Record<string, unknown> = {
         phone: user.phone,
         first_name: firstName.trim(),
         last_name: lastName.trim(),
         email: email.trim() || null,
-        photo_url: photoUrl,
         status: 'active' as const,
         is_prime_member: true,
         is_independent: true,
         relationship_to_prime: 'self' as const,
         family_group_id: familyGroupId,
         organization_id: organization.id,
-        membership_date: new Date().toISOString().split('T')[0],
         updated_at: new Date().toISOString(),
       };
 
-      const { error: updateError } = existingMember
+      // Only update photo if we have a new one or if this is a new member
+      if (photoUrl) {
+        memberData.photo_url = photoUrl;
+      }
+
+      // Only set membership_date for new members
+      if (!isExistingMember) {
+        memberData.membership_date = new Date().toISOString().split('T')[0];
+      }
+
+      const { error: updateError } = existingMemberId
         ? await supabase
             .from('members')
             .update(memberData)
-            .eq('id', existingMember.id)
+            .eq('id', existingMemberId)
         : await supabase
             .from('members')
             .insert(memberData);
@@ -183,8 +221,8 @@ export default function ProfileSetupScreen() {
         return;
       }
 
-      // Update family group with prime member id if new
-      if (!existingMember) {
+      // Update family group with prime member id if new member
+      if (!isExistingMember) {
         const { data: newMember } = await supabase
           .from('members')
           .select('id')
@@ -210,6 +248,18 @@ export default function ProfileSetupScreen() {
     }
   }
 
+  // Show loading state while fetching existing member data
+  if (initialLoading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
+
+  // Determine which photo to display
+  const displayPhotoUri = photoUri || existingPhotoUrl;
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -220,9 +270,13 @@ export default function ProfileSetupScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Complete your profile</Text>
+          <Text style={styles.title}>
+            {isExistingMember ? 'Welcome back!' : 'Complete your profile'}
+          </Text>
           <Text style={styles.subtitle}>
-            Add your photo and details to finish setting up your membership.
+            {isExistingMember
+              ? 'Please verify your details are correct.'
+              : 'Add your photo and details to finish setting up your membership.'}
           </Text>
         </View>
 
@@ -232,8 +286,8 @@ export default function ProfileSetupScreen() {
           onPress={() => showPhotoOptions()}
           activeOpacity={0.7}
         >
-          {photoUri ? (
-            <Image source={{ uri: photoUri }} style={styles.photo} />
+          {displayPhotoUri ? (
+            <Image source={{ uri: displayPhotoUri }} style={styles.photo} />
           ) : (
             <View style={styles.photoPlaceholder}>
               <Text style={styles.photoPlaceholderIcon}>+</Text>
@@ -245,7 +299,7 @@ export default function ProfileSetupScreen() {
           <Text style={styles.photoError}>{errors.photo}</Text>
         )}
         <Text style={styles.photoHint}>
-          Tap to add your photo (required)
+          {existingPhotoUrl ? 'Tap to change your photo' : 'Tap to add your photo (required)'}
         </Text>
 
         <Card style={styles.formCard}>
@@ -289,7 +343,7 @@ export default function ProfileSetupScreen() {
 
         <View style={styles.footer}>
           <Button
-            title="Complete Setup"
+            title={isExistingMember ? 'Continue' : 'Complete Setup'}
             onPress={handleComplete}
             loading={loading}
             size="lg"
@@ -305,6 +359,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary,
+  },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: typography.size.md,
+    color: colors.text.secondary,
   },
   scrollContent: {
     flexGrow: 1,

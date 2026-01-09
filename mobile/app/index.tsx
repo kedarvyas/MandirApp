@@ -4,40 +4,37 @@ import { useRouter } from 'expo-router';
 import { colors, typography, spacing } from '../src/constants/theme';
 import { Button, Logo } from '../src/components';
 import { supabase } from '../src/lib/supabase';
-import { getStoredOrganization, type StoredOrganization } from '../src/lib/orgContext';
+import { getStoredOrganization } from '../src/lib/orgContext';
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const [storedOrg, setStoredOrg] = useState<StoredOrganization | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkSessionAndOrg();
+    checkSession();
   }, []);
 
-  async function checkSessionAndOrg() {
+  async function checkSession() {
     // Check if user is already logged in
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
-      // User is logged in, redirect to main app
-      router.replace('/(tabs)');
+      // User is logged in, check if they need to select org or go to app
+      const org = await getStoredOrganization();
+      if (org) {
+        router.replace('/(tabs)');
+      } else {
+        // Has session but no org - need to select organization
+        router.replace('/(auth)/org-code');
+      }
       return;
     }
 
-    // Check for stored organization
-    const org = await getStoredOrganization();
-    setStoredOrg(org);
     setLoading(false);
   }
 
-  function handleGetStarted() {
-    if (storedOrg) {
-      // Already have an org, go to phone auth
-      router.push('/(auth)/phone');
-    } else {
-      // Need to enter org code first
-      router.push('/(auth)/org-code');
-    }
+  function handlePhoneSignIn() {
+    // Go to phone auth - org will be requested after authentication
+    router.push('/(auth)/phone');
   }
 
   if (loading) {
@@ -63,33 +60,17 @@ export default function WelcomeScreen() {
           Welcome to your community
         </Text>
         <Text style={styles.descriptionText}>
-          Sign in with your registered phone number to access your membership and check in.
+          Sign in to access your membership and check in to events.
         </Text>
-        {storedOrg && (
-          <View style={styles.orgBadge}>
-            <Text style={styles.orgBadgeLabel}>Your Organization</Text>
-            <Text style={styles.orgBadgeName}>{storedOrg.name}</Text>
-          </View>
-        )}
       </View>
 
       <View style={styles.footer}>
         <Button
-          title={storedOrg ? 'Sign In' : 'Get Started'}
-          onPress={handleGetStarted}
+          title="Sign In with Phone"
+          onPress={handlePhoneSignIn}
           size="lg"
           fullWidth
         />
-        {storedOrg && (
-          <Button
-            title="Switch Organization"
-            onPress={() => router.push('/(auth)/org-code')}
-            variant="secondary"
-            size="md"
-            fullWidth
-            style={{ marginTop: spacing.md }}
-          />
-        )}
         <Text style={styles.footerNote}>
           New members: Please visit the front desk to register
         </Text>
@@ -151,24 +132,6 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     textAlign: 'center',
     lineHeight: typography.size.md * 1.6,
-  },
-  orgBadge: {
-    marginTop: spacing.lg,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors.background.secondary,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  orgBadgeLabel: {
-    fontSize: typography.size.xs,
-    color: colors.text.tertiary,
-    marginBottom: spacing.xs,
-  },
-  orgBadgeName: {
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
-    color: colors.primary.maroon,
   },
   footer: {
     alignItems: 'center',

@@ -51,7 +51,8 @@
         {
           "photosPermission": "Allow Sanctum to access your photos for profile pictures."
         }
-      ]
+      ],
+      "expo-web-browser"
     ]
   }
 }

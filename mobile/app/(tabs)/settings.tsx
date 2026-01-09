@@ -17,7 +17,6 @@ import {
   getAllOrganizations,
   getActiveOrgId,
   setActiveOrganization,
-  clearAllOrganizations,
   StoredOrganization,
 } from '../../src/lib/orgContext';
 
@@ -93,7 +92,7 @@ export default function SettingsScreen() {
   async function handleSignOut() {
     Alert.alert(
       'Sign Out',
-      'Are you sure you want to sign out?',
+      'Are you sure you want to sign out? Your organization will be remembered for easy sign-in.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -102,7 +101,7 @@ export default function SettingsScreen() {
           onPress: async () => {
             setLoggingOut(true);
             try {
-              await clearAllOrganizations();
+              // Keep organization stored for quick re-login
               // signOut triggers SIGNED_OUT event which redirects via _layout.tsx
               await supabase.auth.signOut();
             } catch (err) {

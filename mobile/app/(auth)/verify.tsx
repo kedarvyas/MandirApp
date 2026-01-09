@@ -98,15 +98,21 @@ export default function VerifyScreen() {
       }
 
       if (data.session) {
-        // Get the current organization
+        // Auth successful - now check if user has an org
         const storedOrg = await getStoredOrganization();
+
+        if (!storedOrg) {
+          // No org stored - need to enter org code first
+          router.replace('/(auth)/org-code');
+          return;
+        }
 
         // Check if user has completed profile for this organization
         const { data: member } = await supabase
           .from('members')
           .select('status, photo_url')
           .eq('phone', phone)
-          .eq('organization_id', storedOrg?.id || '')
+          .eq('organization_id', storedOrg.id)
           .single();
 
         if (!member || member?.status === 'pending_registration' || !member?.photo_url) {

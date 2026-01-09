@@ -1,37 +1,44 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Check, X, ArrowLeft } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Check, ArrowLeft, ArrowRight, Users, Building2, Zap, HeadphonesIcon, BarChart3, Shield } from 'lucide-react'
+import { QuoteFormModal } from '@/components/landing/QuoteFormModal'
 
 export default function PricingPage() {
+  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false)
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
+      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/" className="flex items-center gap-2">
+          <div className="flex items-center justify-between h-20">
+            <Link href="/" className="flex items-center gap-3">
               <Image
                 src="/logo.svg"
                 alt="Sanctum"
-                width={40}
-                height={40}
-                className="w-10 h-10"
+                width={48}
+                height={48}
+                className="w-12 h-12"
               />
-              <span className="text-xl font-bold text-foreground">Sanctum</span>
+              <span className="text-2xl font-bold text-foreground">Sanctum</span>
             </Link>
-            <div className="flex items-center gap-4">
-              <Link href="/login">
-                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                  Staff Login
-                </Button>
-              </Link>
+            <div className="flex items-center gap-3">
               <Link href="/signup">
-                <Button className="bg-primary hover:bg-[#5D2850] text-primary-foreground">
+                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
                   Get Started
                 </Button>
               </Link>
+              <Button
+                onClick={() => setIsQuoteModalOpen(true)}
+                className="bg-primary hover:bg-[#5D2850] text-primary-foreground"
+              >
+                Get Quote
+              </Button>
             </div>
           </div>
         </div>
@@ -45,187 +52,205 @@ export default function PricingPage() {
             Back to Home
           </Link>
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground">
-            Simple, Transparent Pricing
+            Pricing That Fits Your Community
           </h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            Start free and scale as your community grows. No hidden fees, no surprises.
+            Every organization is unique. We work with you to create a custom plan that matches your specific needs and budget.
           </p>
         </div>
       </section>
 
-      {/* Pricing Cards */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Starter */}
-            <Card className="border-2 border-border relative">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-semibold text-muted-foreground">Starter</CardTitle>
-                <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-5xl font-bold text-foreground">$0</span>
-                  <span className="text-muted-foreground">/month</span>
-                </div>
-                <p className="text-muted-foreground mt-2">Perfect for small communities just getting started</p>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <Link href="/signup">
-                  <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground mb-6">
-                    Get Started Free
-                  </Button>
-                </Link>
-                <div className="space-y-4">
-                  <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">What&apos;s included</h4>
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">Up to 50 members</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">QR code check-in</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">Member mobile app access</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">Basic attendance reports</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">1 staff account</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">Family grouping</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <X className="h-5 w-5 text-muted-foreground/50 shrink-0 mt-0.5" />
-                      <span className="text-sm text-muted-foreground">Donation tracking</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <X className="h-5 w-5 text-muted-foreground/50 shrink-0 mt-0.5" />
-                      <span className="text-sm text-muted-foreground">Custom branding</span>
-                    </li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Growth */}
-            <Card className="border-2 border-primary shadow-xl relative">
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium">
-                Most Popular
+      {/* Main Pricing Card */}
+      <section className="py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Card className="border-2 border-primary/20 shadow-2xl">
+            <CardContent className="pt-10 pb-8 px-8 sm:px-12">
+              <div className="text-center mb-10">
+                <h2 className="text-3xl font-bold text-foreground mb-3">
+                  Custom Pricing for Your Organization
+                </h2>
+                <p className="text-muted-foreground text-lg">
+                  Get a personalized quote based on your community&apos;s size and needs
+                </p>
               </div>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-semibold text-primary">Growth</CardTitle>
-                <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-5xl font-bold text-foreground">$49</span>
-                  <span className="text-muted-foreground">/month</span>
-                </div>
-                <p className="text-muted-foreground mt-2">For growing organizations that need more power</p>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <Link href="/signup">
-                  <Button className="w-full bg-primary hover:bg-[#5D2850] text-primary-foreground mb-6">
-                    Start 14-Day Free Trial
-                  </Button>
-                </Link>
-                <div className="space-y-4">
-                  <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">Everything in Starter, plus</h4>
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">Up to 500 members</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">5 staff accounts</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">Donation & payment tracking</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">Advanced reports & analytics</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">Export data (CSV, PDF)</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">Email support</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <X className="h-5 w-5 text-muted-foreground/50 shrink-0 mt-0.5" />
-                      <span className="text-sm text-muted-foreground">Multi-location</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <X className="h-5 w-5 text-muted-foreground/50 shrink-0 mt-0.5" />
-                      <span className="text-sm text-muted-foreground">API access</span>
-                    </li>
-                  </ul>
-                </div>
-              </CardContent>
-            </Card>
 
-            {/* Enterprise */}
-            <Card className="border-2 border-border relative">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-lg font-semibold text-muted-foreground">Enterprise</CardTitle>
-                <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-5xl font-bold text-foreground">Custom</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Users className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground text-lg">Community Size</h3>
+                    <p className="text-muted-foreground">From 50 to 50,000+ members. Pay only for what you need.</p>
+                  </div>
                 </div>
-                <p className="text-muted-foreground mt-2">For large organizations with complex needs</p>
-              </CardHeader>
-              <CardContent className="pt-4">
-                <Link href="/signup">
-                  <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground mb-6">
-                    Contact Sales
-                  </Button>
-                </Link>
-                <div className="space-y-4">
-                  <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">Everything in Growth, plus</h4>
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">Unlimited members</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">Unlimited staff accounts</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">Multi-location support</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">Custom branding & colors</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">API access</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">Priority phone support</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">Dedicated account manager</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
-                      <span className="text-sm">Custom integrations</span>
-                    </li>
-                  </ul>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Building2 className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground text-lg">Locations</h3>
+                    <p className="text-muted-foreground">Single site or multi-campus. We scale with you.</p>
+                  </div>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Zap className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground text-lg">Features</h3>
+                    <p className="text-muted-foreground">Choose the features that matter most to your community.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <HeadphonesIcon className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground text-lg">Support Level</h3>
+                    <p className="text-muted-foreground">From self-serve to dedicated account management.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <Button
+                  size="lg"
+                  onClick={() => setIsQuoteModalOpen(true)}
+                  className="bg-primary hover:bg-[#5D2850] text-primary-foreground px-12 py-6 text-lg"
+                >
+                  Get Your Custom Quote
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+                <p className="text-sm text-muted-foreground mt-4">
+                  Free consultation • No commitment required • Response within 24 hours
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Features Included */}
+      <section className="py-16 bg-card/50">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
+              What&apos;s Included in Every Plan
+            </h2>
+            <p className="text-muted-foreground">
+              All plans include these core features to help your community thrive
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex items-start gap-3 p-4 bg-background rounded-lg">
+              <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-foreground">QR Code Check-In</h4>
+                <p className="text-sm text-muted-foreground">Fast, touchless attendance</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-4 bg-background rounded-lg">
+              <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-foreground">Mobile App Access</h4>
+                <p className="text-sm text-muted-foreground">iOS & Android for members</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-4 bg-background rounded-lg">
+              <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-foreground">Family Management</h4>
+                <p className="text-sm text-muted-foreground">Group members into families</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-4 bg-background rounded-lg">
+              <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-foreground">Staff Dashboard</h4>
+                <p className="text-sm text-muted-foreground">Web-based management</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-4 bg-background rounded-lg">
+              <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-foreground">Attendance Reports</h4>
+                <p className="text-sm text-muted-foreground">Track patterns & trends</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-4 bg-background rounded-lg">
+              <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-medium text-foreground">Secure Data Storage</h4>
+                <p className="text-sm text-muted-foreground">Your data stays private</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 text-center">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Premium Features Available</h3>
+            <div className="flex flex-wrap justify-center gap-3">
+              <span className="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                Donation Tracking
+              </span>
+              <span className="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                Multi-Location
+              </span>
+              <span className="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                Advanced Analytics
+              </span>
+              <span className="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                Custom Branding
+              </span>
+              <span className="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                API Access
+              </span>
+              <span className="px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
+                Priority Support
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Custom Pricing */}
+      <section className="py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-foreground mb-4">
+              Why Custom Pricing?
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <BarChart3 className="h-7 w-7 text-primary" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-2">Fair Pricing</h3>
+              <p className="text-muted-foreground text-sm">
+                Pay based on your actual usage, not arbitrary tiers that don&apos;t fit your needs.
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Zap className="h-7 w-7 text-primary" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-2">Right Features</h3>
+              <p className="text-muted-foreground text-sm">
+                Get exactly the features you need without paying for ones you won&apos;t use.
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Shield className="h-7 w-7 text-primary" />
+              </div>
+              <h3 className="font-semibold text-foreground mb-2">Non-Profit Friendly</h3>
+              <p className="text-muted-foreground text-sm">
+                Special consideration for religious organizations and non-profits.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -238,39 +263,39 @@ export default function PricingPage() {
           </h2>
           <div className="space-y-8">
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">Can I switch plans later?</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">How does the pricing consultation work?</h3>
               <p className="text-muted-foreground">
-                Yes! You can upgrade or downgrade your plan at any time. When upgrading, you will get immediate access to new features. When downgrading, changes take effect at the end of your billing cycle.
+                Simply fill out our quote form with details about your organization. We&apos;ll review your needs and send you a custom proposal within 24 hours. No obligation, no pressure.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Is there a free trial?</h3>
+              <p className="text-muted-foreground">
+                Yes! Every organization gets a free trial period to test the platform with their community before committing to a paid plan.
               </p>
             </div>
             <div>
               <h3 className="text-lg font-semibold text-foreground mb-2">What payment methods do you accept?</h3>
               <p className="text-muted-foreground">
-                We accept all major credit cards (Visa, Mastercard, American Express) and can arrange ACH bank transfers for annual Enterprise plans.
+                We accept all major credit cards (Visa, Mastercard, American Express) and can arrange ACH bank transfers or invoicing for annual plans.
               </p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">Is there a setup fee?</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">Can I change my plan later?</h3>
               <p className="text-muted-foreground">
-                No, there are no setup fees for any plan. You only pay the monthly subscription. Enterprise customers may request custom onboarding assistance.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">What happens if I exceed my member limit?</h3>
-              <p className="text-muted-foreground">
-                We will notify you when you are approaching your limit. You can upgrade to the next tier anytime. We won&apos;t automatically charge you or lock out existing members.
+                Absolutely! As your community grows or your needs change, we&apos;ll work with you to adjust your plan accordingly.
               </p>
             </div>
             <div>
               <h3 className="text-lg font-semibold text-foreground mb-2">Do you offer discounts for non-profits?</h3>
               <p className="text-muted-foreground">
-                Yes! All religious organizations automatically qualify for our non-profit pricing. The prices shown on this page already reflect our non-profit rates.
+                Yes! All religious organizations and registered non-profits receive special pricing. This is factored into every custom quote we provide.
               </p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-2">Can I cancel anytime?</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">What if we need to cancel?</h3>
               <p className="text-muted-foreground">
-                Absolutely. You can cancel your subscription at any time from your dashboard. You will continue to have access until the end of your current billing period.
+                You can cancel anytime. We&apos;ll help you export your data, and you&apos;ll have access until the end of your current billing period.
               </p>
             </div>
           </div>
@@ -284,16 +309,22 @@ export default function PricingPage() {
             Ready to get started?
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Join hundreds of religious organizations already using Sanctum.
+            Let&apos;s discuss how Sanctum can help your community thrive.
           </p>
-          <Link href="/signup">
-            <Button size="lg" className="bg-primary hover:bg-[#5D2850] text-primary-foreground px-8">
-              Start Your Free Trial
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button
+              size="lg"
+              onClick={() => setIsQuoteModalOpen(true)}
+              className="bg-primary hover:bg-[#5D2850] text-primary-foreground px-8"
+            >
+              Get Your Custom Quote
             </Button>
-          </Link>
-          <p className="mt-4 text-sm text-muted-foreground">
-            No credit card required for Starter plan
-          </p>
+            <Link href="/signup">
+              <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/5 px-8">
+                Start Free Trial
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -323,6 +354,12 @@ export default function PricingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Quote Modal */}
+      <QuoteFormModal
+        isOpen={isQuoteModalOpen}
+        onClose={() => setIsQuoteModalOpen(false)}
+      />
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -11,11 +11,11 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { colors, typography, spacing } from '../../src/constants/theme';
 import { Button, Input, Card, Logo } from '../../src/components';
+import { supabase } from '../../src/lib/supabase';
 import {
   validateOrgCode,
   saveOrganization,
   addOrganization,
-  getStoredOrganization,
 } from '../../src/lib/orgContext';
 
 export default function OrgCodeScreen() {
@@ -25,26 +25,8 @@ export default function OrgCodeScreen() {
 
   const [orgCode, setOrgCode] = useState('');
   const [loading, setLoading] = useState(false);
-  const [checkingStored, setCheckingStored] = useState(!isAddingNew);
   const [error, setError] = useState('');
   const [orgName, setOrgName] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Skip check if adding a new org (user is already authenticated)
-    if (!isAddingNew) {
-      checkStoredOrg();
-    }
-  }, [isAddingNew]);
-
-  async function checkStoredOrg() {
-    const storedOrg = await getStoredOrganization();
-    if (storedOrg) {
-      // User already has an org, go straight to phone auth
-      router.replace('/(auth)/phone');
-    } else {
-      setCheckingStored(false);
-    }
-  }
 
   // Format org code as user types (uppercase, add dash if needed)
   function formatOrgCode(value: string): string {
@@ -84,11 +66,32 @@ export default function OrgCodeScreen() {
           router.replace('/(tabs)');
         }, 500);
       } else {
-        // New user flow - save org and proceed to phone auth
+        // User just authenticated - save org and check if they need profile setup
         await saveOrganization(result.organization);
-        setTimeout(() => {
-          router.push('/(auth)/phone');
-        }, 500);
+
+        // Get current user to check their profile
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (user) {
+          // Check if user has completed profile for this organization
+          const { data: member } = await supabase
+            .from('members')
+            .select('status, photo_url')
+            .eq('organization_id', result.organization.id)
+            .or(`phone.eq.${user.phone},email.eq.${user.email}`)
+            .single();
+
+          setTimeout(() => {
+            if (!member || member?.status === 'pending_registration' || !member?.photo_url) {
+              router.replace('/(auth)/profile-setup');
+            } else {
+              router.replace('/(tabs)');
+            }
+          }, 500);
+        } else {
+          // No user session (shouldn't happen in new flow)
+          router.replace('/');
+        }
       }
     } else {
       setError(result.error || 'Invalid organization code');
@@ -98,14 +101,6 @@ export default function OrgCodeScreen() {
 
   function handleCancel() {
     router.back();
-  }
-
-  if (checkingStored) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
-    );
   }
 
   return (
@@ -186,16 +181,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary,
-  },
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: colors.background.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: typography.size.md,
-    color: colors.text.secondary,
   },
   scrollContent: {
     flexGrow: 1,
