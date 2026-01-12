@@ -112,6 +112,19 @@ export interface Staff {
   updated_at: string;
 }
 
+export interface Announcement {
+  id: string;
+  organization_id: string;
+  author_id: string;
+  title: string;
+  content: string;  // HTML content from rich text editor
+  image_url: string | null;  // Optional featured image
+  is_published: boolean;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // ============================================
 // Extended Types (with relations)
 // ============================================
@@ -128,6 +141,10 @@ export interface FamilyGroupWithMembers extends FamilyGroup {
 
 export interface CheckInWithMember extends CheckIn {
   member: Member;
+}
+
+export interface AnnouncementWithAuthor extends Announcement {
+  author: Pick<Staff, 'id' | 'name'> | null;
 }
 
 // ============================================

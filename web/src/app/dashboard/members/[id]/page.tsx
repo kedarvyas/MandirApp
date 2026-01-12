@@ -8,6 +8,7 @@ import { ArrowLeft, Mail, Phone, Calendar, Users, CreditCard } from 'lucide-reac
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
 import { STATUS_COLORS, STATUS_LABELS } from '@/lib/constants'
+import { MemberNameEditor } from '@/components/member-name-editor'
 
 export default async function MemberDetailPage({
   params,
@@ -91,10 +92,12 @@ export default async function MemberDetailPage({
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl font-bold text-foreground">
-                  {member.first_name} {member.last_name}
-                </h1>
+              <div className="flex items-center gap-3 mb-2 flex-wrap">
+                <MemberNameEditor
+                  memberId={member.id}
+                  firstName={member.first_name}
+                  lastName={member.last_name}
+                />
                 <Badge className={STATUS_COLORS[member.status as keyof typeof STATUS_COLORS]}>
                   {STATUS_LABELS[member.status as keyof typeof STATUS_LABELS]}
                 </Badge>

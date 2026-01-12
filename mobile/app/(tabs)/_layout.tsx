@@ -1,86 +1,97 @@
+import { useState } from 'react';
 import { Tabs } from 'expo-router';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { colors, typography } from '../../src/constants/theme';
+import { AppHeader, DrawerMenu } from '../../src/components';
 
-// Simple icon components (can be replaced with icon library later)
-function TabIcon({ name, focused }: { name: string; focused: boolean }) {
-  const icons: Record<string, string> = {
-    home: '🏠',
-    family: '👨‍👩‍👧‍👦',
-    settings: '⚙️',
-  };
-
+// Clean icon component using Feather icons
+function TabIcon({ name, focused }: { name: 'home' | 'bell'; focused: boolean }) {
   return (
     <View style={styles.iconContainer}>
-      <Text style={[styles.icon, focused && styles.iconFocused]}>
-        {icons[name] || '○'}
-      </Text>
+      <Feather
+        name={name}
+        size={24}
+        color={focused ? colors.primary.maroon : colors.text.tertiary}
+      />
     </View>
   );
 }
 
 export default function TabsLayout() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
-    <Tabs
-      screenOptions={{
-        headerStyle: {
-          backgroundColor: colors.primary.maroon,
-        },
-        headerTintColor: colors.text.inverse,
-        headerTitleStyle: {
-          fontWeight: '600',
-        },
-        tabBarStyle: {
-          backgroundColor: colors.background.primary,
-          borderTopColor: colors.utility.divider,
-          height: 85,
-          paddingBottom: 25,
-          paddingTop: 10,
-        },
-        tabBarActiveTintColor: colors.primary.maroon,
-        tabBarInactiveTintColor: colors.text.tertiary,
-        tabBarLabelStyle: {
-          fontSize: typography.size.xs,
-          fontWeight: '500',
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          headerTitle: 'Sanctum',
-          tabBarIcon: ({ focused }) => <TabIcon name="home" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="family"
-        options={{
-          title: 'Family',
-          tabBarIcon: ({ focused }) => <TabIcon name="family" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ focused }) => <TabIcon name="settings" focused={focused} />,
-        }}
-      />
-    </Tabs>
+    <View style={styles.container}>
+      {/* Custom Header */}
+      <AppHeader onMenuPress={() => setIsMenuOpen(true)} />
+
+      {/* Tabs */}
+      <View style={styles.tabsContainer}>
+        <Tabs
+          screenOptions={{
+            headerShown: false, // Hide default header, using custom AppHeader
+            tabBarStyle: {
+              backgroundColor: colors.background.primary,
+              borderTopColor: colors.utility.divider,
+              height: 85,
+              paddingBottom: 25,
+              paddingTop: 10,
+            },
+            tabBarActiveTintColor: colors.primary.maroon,
+            tabBarInactiveTintColor: colors.text.tertiary,
+            tabBarLabelStyle: {
+              fontSize: typography.size.xs,
+              fontWeight: '500',
+            },
+          }}
+        >
+          <Tabs.Screen
+            name="index"
+            options={{
+              title: 'Home',
+              tabBarIcon: ({ focused }) => <TabIcon name="home" focused={focused} />,
+            }}
+          />
+          <Tabs.Screen
+            name="news"
+            options={{
+              title: 'News',
+              tabBarIcon: ({ focused }) => <TabIcon name="bell" focused={focused} />,
+            }}
+          />
+          {/* Family and Settings are now in the drawer menu, hide from tab bar */}
+          <Tabs.Screen
+            name="family"
+            options={{
+              href: null, // Hide from tab bar
+            }}
+          />
+          <Tabs.Screen
+            name="settings"
+            options={{
+              href: null, // Hide from tab bar
+            }}
+          />
+        </Tabs>
+      </View>
+
+      {/* Drawer Menu */}
+      <DrawerMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background.primary,
+  },
+  tabsContainer: {
+    flex: 1,
+  },
   iconContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  icon: {
-    fontSize: 24,
-    opacity: 0.5,
-  },
-  iconFocused: {
-    opacity: 1,
   },
 });

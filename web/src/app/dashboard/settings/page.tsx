@@ -3,7 +3,7 @@
 import { useOrganization, useStaff } from '@/lib/org-context'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Copy, Check, Building2, QrCode, Tablet, ExternalLink, Plus, X, DollarSign } from 'lucide-react'
+import { Copy, Check, Building2, QrCode, Tablet, ExternalLink, Plus, X, DollarSign, Pencil } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { KioskSettings, DEFAULT_KIOSK_SETTINGS, KioskPaymentMethod } from '@/types/database'
@@ -27,13 +27,56 @@ export default function SettingsPage() {
   const [newAmount, setNewAmount] = useState('')
   const [kioskUrl, setKioskUrl] = useState(`/kiosk/${organization.org_code}/donate`)
 
-  // Set full URL on client mount to avoid hydration mismatch
+  // Org name editing state
+  const [isEditingName, setIsEditingName] = useState(false)
+  const [orgName, setOrgName] = useState(organization.name)
+  const [savingName, setSavingName] = useState(false)
+
+  // Client-side formatted date to avoid hydration mismatch
+  const [formattedCreatedDate, setFormattedCreatedDate] = useState<string>('')
+
+  // Set client-only values on mount to avoid hydration mismatch
   useEffect(() => {
     setKioskUrl(`${window.location.origin}/kiosk/${organization.org_code}/donate`)
-  }, [organization.org_code])
+    setFormattedCreatedDate(
+      new Date(organization.created_at).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })
+    )
+  }, [organization.org_code, organization.created_at])
 
   // Check if user can edit settings (owner, admin, or treasurer)
   const canEditKiosk = ['owner', 'admin', 'treasurer'].includes(staff.role)
+  const canEditOrg = ['owner', 'admin'].includes(staff.role)
+
+  const handleSaveOrgName = async () => {
+    if (!canEditOrg || !orgName.trim()) return
+
+    setSavingName(true)
+    try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('organizations')
+        .update({
+          name: orgName.trim(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', organization.id)
+
+      if (error) throw error
+
+      setIsEditingName(false)
+      // Refresh page to get updated data
+      window.location.reload()
+    } catch (err) {
+      console.error('Failed to save org name:', err)
+      alert('Failed to save organization name. Please try again.')
+    } finally {
+      setSavingName(false)
+    }
+  }
 
   const handleCopyCode = async () => {
     try {
@@ -383,7 +426,51 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between py-3 border-b border-border">
               <span className="text-muted-foreground">Name</span>
-              <span className="font-medium text-foreground">{organization.name}</span>
+              <div className="flex items-center gap-2">
+                {isEditingName ? (
+                  <>
+                    <input
+                      type="text"
+                      value={orgName}
+                      onChange={(e) => setOrgName(e.target.value)}
+                      className="px-3 py-1.5 border border-border rounded-lg text-sm font-medium text-foreground w-48"
+                      autoFocus
+                    />
+                    <Button
+                      onClick={handleSaveOrgName}
+                      size="sm"
+                      disabled={savingName || !orgName.trim()}
+                      className="bg-primary hover:bg-primary/90"
+                    >
+                      {savingName ? 'Saving...' : 'Save'}
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setIsEditingName(false)
+                        setOrgName(organization.name)
+                      }}
+                      size="sm"
+                      variant="outline"
+                    >
+                      Cancel
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <span className="font-medium text-foreground">{organization.name}</span>
+                    {canEditOrg && (
+                      <Button
+                        onClick={() => setIsEditingName(true)}
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0"
+                      >
+                        <Pencil className="w-4 h-4 text-muted-foreground" />
+                      </Button>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
             <div className="flex items-center justify-between py-3 border-b border-border">
               <span className="text-muted-foreground">Status</span>
@@ -404,11 +491,7 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between py-3 border-b border-border">
               <span className="text-muted-foreground">Created</span>
               <span className="font-medium text-foreground">
-                {new Date(organization.created_at).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
+                {formattedCreatedDate || '—'}
               </span>
             </div>
             <div className="flex items-center justify-between py-3">

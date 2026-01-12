@@ -296,6 +296,86 @@ CREATE POLICY "Staff can view own record"
     USING (user_id = auth.uid());
 
 -- =============================================
+-- ANNOUNCEMENTS TABLE
+-- =============================================
+CREATE TABLE announcements (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    author_id UUID NOT NULL REFERENCES staff(id) ON DELETE SET NULL,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL, -- HTML content from rich text editor
+    is_published BOOLEAN DEFAULT FALSE,
+    published_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_announcements_org_id ON announcements(organization_id);
+CREATE INDEX idx_announcements_published ON announcements(organization_id, is_published, published_at DESC);
+
+ALTER TABLE announcements ENABLE ROW LEVEL SECURITY;
+
+-- Members can view published announcements in their organization
+CREATE POLICY "Members can view published announcements"
+    ON announcements FOR SELECT
+    USING (
+        is_published = TRUE
+        AND organization_id IN (
+            SELECT organization_id FROM members
+            WHERE phone = auth.jwt()->>'phone'
+        )
+    );
+
+-- Staff can view all announcements in their organization
+CREATE POLICY "Staff can view all announcements"
+    ON announcements FOR SELECT
+    USING (
+        organization_id IN (
+            SELECT organization_id FROM staff
+            WHERE user_id = auth.uid() AND is_active = TRUE
+        )
+    );
+
+-- Staff with appropriate roles can create announcements
+CREATE POLICY "Staff can create announcements"
+    ON announcements FOR INSERT
+    WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM staff
+            WHERE user_id = auth.uid()
+            AND organization_id = announcements.organization_id
+            AND is_active = TRUE
+            AND role IN ('owner', 'admin', 'manager')
+        )
+    );
+
+-- Staff with appropriate roles can update announcements
+CREATE POLICY "Staff can update announcements"
+    ON announcements FOR UPDATE
+    USING (
+        EXISTS (
+            SELECT 1 FROM staff
+            WHERE user_id = auth.uid()
+            AND organization_id = announcements.organization_id
+            AND is_active = TRUE
+            AND role IN ('owner', 'admin', 'manager')
+        )
+    );
+
+-- Staff with appropriate roles can delete announcements
+CREATE POLICY "Staff can delete announcements"
+    ON announcements FOR DELETE
+    USING (
+        EXISTS (
+            SELECT 1 FROM staff
+            WHERE user_id = auth.uid()
+            AND organization_id = announcements.organization_id
+            AND is_active = TRUE
+            AND role IN ('owner', 'admin', 'manager')
+        )
+    );
+
+-- =============================================
 -- STORAGE BUCKET FOR PHOTOS
 -- =============================================
 -- Run this separately in Storage section or via SQL:

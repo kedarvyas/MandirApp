@@ -13,7 +13,7 @@ import QRCode from 'react-native-qrcode-svg';
 import { colors, typography, spacing, borderRadius, shadows } from '../../src/constants/theme';
 import { Card, Avatar, QRModal } from '../../src/components';
 import { supabase } from '../../src/lib/supabase';
-import { getStoredOrganization, StoredOrganization } from '../../src/lib/orgContext';
+import { getStoredOrganization, refreshOrganization, StoredOrganization } from '../../src/lib/orgContext';
 import type { Member } from '../../src/types/database';
 
 export default function HomeScreen() {
@@ -54,7 +54,10 @@ export default function HomeScreen() {
         router.replace('/(auth)/org-code');
         return;
       }
-      setOrganization(storedOrg);
+
+      // Refresh org data from server to get latest name/logo/etc
+      const refreshedOrg = await refreshOrganization(storedOrg.id);
+      setOrganization(refreshedOrg || storedOrg);
 
       // Query member scoped to the current organization
       const { data, error } = await supabase

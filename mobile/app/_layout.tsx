@@ -25,7 +25,8 @@ export default function RootLayout() {
       (event, session) => {
         setSession(session);
 
-        // Handle sign out - redirect to welcome screen
+        // Sign out is now handled directly in settings.tsx with AsyncStorage flag
+        // This is a backup in case it's triggered from elsewhere
         if (event === 'SIGNED_OUT') {
           router.replace('/');
         }

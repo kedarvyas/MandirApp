@@ -8,7 +8,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, router as globalRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { colors, typography, spacing, borderRadius } from '../../src/constants/theme';
 import { Card } from '../../src/components';
@@ -17,6 +17,7 @@ import {
   getAllOrganizations,
   getActiveOrgId,
   setActiveOrganization,
+  setJustSignedOut,
   StoredOrganization,
 } from '../../src/lib/orgContext';
 
@@ -99,13 +100,35 @@ export default function SettingsScreen() {
           text: 'Sign Out',
           style: 'destructive',
           onPress: async () => {
+            console.log('[SignOut] Starting sign out process...');
             setLoggingOut(true);
             try {
-              // Keep organization stored for quick re-login
-              // signOut triggers SIGNED_OUT event which redirects via _layout.tsx
-              await supabase.auth.signOut();
+              // Set flag BEFORE signing out to prevent race condition
+              console.log('[SignOut] Setting justSignedOut flag...');
+              await setJustSignedOut();
+
+              // Sign out with local scope to ensure session is cleared from device
+              console.log('[SignOut] Calling supabase.auth.signOut...');
+              const { error } = await supabase.auth.signOut({ scope: 'local' });
+
+              if (error) {
+                console.error('[SignOut] SignOut returned error:', error);
+                throw error;
+              }
+              console.log('[SignOut] SignOut successful');
+
+              // Small delay to ensure session is cleared before navigation
+              await new Promise(resolve => setTimeout(resolve, 200));
+
+              // Navigate to welcome screen using dismissTo to reset stack
+              console.log('[SignOut] Navigating to welcome screen...');
+              if (globalRouter.canDismiss()) {
+                globalRouter.dismissAll();
+              }
+              globalRouter.replace('/');
+              console.log('[SignOut] Navigation called');
             } catch (err) {
-              console.error('Sign out error:', err);
+              console.error('[SignOut] Error:', err);
               Alert.alert('Error', 'Failed to sign out. Please try again.');
               setLoggingOut(false);
             }

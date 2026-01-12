@@ -5,6 +5,7 @@ import type { Organization } from '../types/database';
 const ORG_STORAGE_KEY = '@Sanctum:organization';
 const ORGS_STORAGE_KEY = '@Sanctum:organizations';
 const ACTIVE_ORG_KEY = '@Sanctum:activeOrgId';
+const SIGNED_OUT_KEY = '@Sanctum:justSignedOut';
 
 export interface StoredOrganization {
   id: string;
@@ -107,6 +108,46 @@ export async function clearOrganization(): Promise<void> {
 export async function hasStoredOrganization(): Promise<boolean> {
   const org = await getStoredOrganization();
   return org !== null;
+}
+
+/**
+ * Refresh organization data from the server
+ * Updates the locally stored org with latest data from Supabase
+ */
+export async function refreshOrganization(orgId: string): Promise<StoredOrganization | null> {
+  try {
+    const { data, error } = await supabase
+      .from('organizations')
+      .select('id, name, org_code, logo_url, primary_color')
+      .eq('id', orgId)
+      .single();
+
+    if (error || !data) {
+      console.error('Error refreshing organization:', error);
+      return null;
+    }
+
+    const updatedOrg: StoredOrganization = {
+      id: data.id,
+      name: data.name,
+      org_code: data.org_code,
+      logo_url: data.logo_url,
+      primary_color: data.primary_color || '#4A2040',
+    };
+
+    // Update in storage
+    await AsyncStorage.setItem(ORG_STORAGE_KEY, JSON.stringify(updatedOrg));
+
+    // Also update in the multi-org list if it exists
+    const orgs = await getAllOrganizations();
+    const updatedOrgs = orgs.map(o => o.id === orgId ? updatedOrg : o);
+    await AsyncStorage.setItem(ORGS_STORAGE_KEY, JSON.stringify(updatedOrgs));
+
+    return updatedOrg;
+  } catch (err) {
+    console.error('Error refreshing organization:', err);
+    return null;
+  }
 }
 
 // ============================================
@@ -244,5 +285,38 @@ export async function clearAllOrganizations(): Promise<void> {
     await AsyncStorage.multiRemove([ORG_STORAGE_KEY, ORGS_STORAGE_KEY, ACTIVE_ORG_KEY]);
   } catch (err) {
     console.error('Error clearing organizations:', err);
+  }
+}
+
+// ============================================
+// Sign-out state tracking
+// ============================================
+
+/**
+ * Set a flag indicating user just signed out (to prevent auto-redirect)
+ */
+export async function setJustSignedOut(): Promise<void> {
+  try {
+    await AsyncStorage.setItem(SIGNED_OUT_KEY, 'true');
+  } catch (err) {
+    console.error('Error setting signed out flag:', err);
+  }
+}
+
+/**
+ * Check and clear the signed-out flag
+ * Returns true if user just signed out
+ */
+export async function checkAndClearSignedOut(): Promise<boolean> {
+  try {
+    const value = await AsyncStorage.getItem(SIGNED_OUT_KEY);
+    if (value === 'true') {
+      await AsyncStorage.removeItem(SIGNED_OUT_KEY);
+      return true;
+    }
+    return false;
+  } catch (err) {
+    console.error('Error checking signed out flag:', err);
+    return false;
   }
 }

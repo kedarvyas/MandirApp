@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Home, Users, QrCode, CreditCard, Settings, LogOut } from 'lucide-react'
+import { Home, Users, QrCode, CreditCard, Settings, LogOut, Megaphone } from 'lucide-react'
 import { useOrganization } from '@/lib/org-context'
 
 const navItems = [
@@ -22,6 +22,7 @@ const navItems = [
   { href: '/dashboard/members', label: 'Members', icon: Users },
   { href: '/dashboard/check-in', label: 'Check-In', icon: QrCode },
   { href: '/dashboard/payments', label: 'Payments', icon: CreditCard },
+  { href: '/dashboard/news', label: 'News', icon: Megaphone },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 

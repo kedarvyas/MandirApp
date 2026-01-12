@@ -5,3 +5,5 @@ export { Card } from './Card';
 export { Avatar } from './Avatar';
 export { QRModal } from './QRModal';
 export { Logo } from './Logo';
+export { AppHeader } from './AppHeader';
+export { DrawerMenu } from './DrawerMenu';
