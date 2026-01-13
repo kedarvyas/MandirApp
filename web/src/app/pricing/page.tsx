@@ -16,30 +16,23 @@ export default function PricingPage() {
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <Link href="/" className="flex items-center gap-3">
+          <div className="flex items-center justify-between h-16 md:h-20">
+            <Link href="/" className="flex items-center gap-2 md:gap-3">
               <Image
                 src="/logo.svg"
                 alt="Sanctum"
                 width={48}
                 height={48}
-                className="w-12 h-12"
+                className="w-10 h-10 md:w-12 md:h-12"
               />
-              <span className="text-2xl font-bold text-foreground">Sanctum</span>
+              <span className="text-xl md:text-2xl font-bold text-foreground">Sanctum</span>
             </Link>
-            <div className="flex items-center gap-3">
-              <Link href="/signup">
-                <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                  Get Started
-                </Button>
-              </Link>
-              <Button
-                onClick={() => setIsQuoteModalOpen(true)}
-                className="bg-primary hover:bg-[#5D2850] text-primary-foreground"
-              >
-                Get Quote
-              </Button>
-            </div>
+            <Button
+              onClick={() => setIsQuoteModalOpen(true)}
+              className="bg-primary hover:bg-[#5D2850] text-primary-foreground"
+            >
+              Get Quote
+            </Button>
           </div>
         </div>
       </nav>
@@ -311,20 +304,13 @@ export default function PricingPage() {
           <p className="text-lg text-muted-foreground mb-8">
             Let&apos;s discuss how Sanctum can help your community thrive.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button
-              size="lg"
-              onClick={() => setIsQuoteModalOpen(true)}
-              className="bg-primary hover:bg-[#5D2850] text-primary-foreground px-8"
-            >
-              Get Your Custom Quote
-            </Button>
-            <Link href="/signup">
-              <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/5 px-8">
-                Start Free Trial
-              </Button>
-            </Link>
-          </div>
+          <Button
+            size="lg"
+            onClick={() => setIsQuoteModalOpen(true)}
+            className="bg-primary hover:bg-[#5D2850] text-primary-foreground px-8"
+          >
+            Get Your Custom Quote
+          </Button>
         </div>
       </section>
 

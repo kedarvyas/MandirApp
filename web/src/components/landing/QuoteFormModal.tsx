@@ -92,12 +92,12 @@ ${formData.message || 'No additional message'}
         {/* Close button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-muted transition-colors"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 p-2 rounded-full hover:bg-muted transition-colors z-10"
         >
           <X className="h-5 w-5 text-muted-foreground" />
         </button>
 
-        <div className="p-8 sm:p-10">
+        <div className="p-6 sm:p-10">
           {submitted ? (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-[#4A7C59]/10 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -137,7 +137,7 @@ ${formData.message || 'No additional message'}
               </div>
 
               {/* Service Selection */}
-              <div className="mb-8">
+              <div className="mb-6 sm:mb-8">
                 <label className="block text-sm font-medium text-foreground mb-3">
                   What are you interested in?
                 </label>
@@ -147,7 +147,7 @@ ${formData.message || 'No additional message'}
                       key={service}
                       type="button"
                       onClick={() => toggleService(service)}
-                      className={`px-4 py-2 rounded-full border text-sm font-medium transition-all ${
+                      className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border text-xs sm:text-sm font-medium transition-all ${
                         selectedServices.includes(service)
                           ? 'bg-primary text-primary-foreground border-primary'
                           : 'bg-background text-foreground border-border hover:border-primary/50'
@@ -159,7 +159,7 @@ ${formData.message || 'No additional message'}
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">

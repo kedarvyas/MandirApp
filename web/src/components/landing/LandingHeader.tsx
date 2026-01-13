@@ -79,24 +79,24 @@ export function LandingHeader() {
         {/* Mobile Menu Dropdown */}
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-border/50 bg-background/95 backdrop-blur-md">
-            <div className="px-4 py-4 space-y-3">
+            <div className="px-4 py-4 space-y-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="block py-2 px-3 text-foreground hover:bg-accent rounded-lg transition-colors font-medium"
+                  className="block py-4 px-4 text-foreground hover:bg-accent rounded-lg transition-colors font-medium text-lg"
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="pt-2">
+              <div className="pt-4">
                 <Button
                   onClick={() => {
                     setIsMobileMenuOpen(false)
                     setIsQuoteModalOpen(true)
                   }}
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 py-6 text-lg"
                 >
                   Get Started
                 </Button>
