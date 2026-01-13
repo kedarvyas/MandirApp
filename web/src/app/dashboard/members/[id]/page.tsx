@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
 import { STATUS_COLORS, STATUS_LABELS } from '@/lib/constants'
 import { MemberNameEditor } from '@/components/member-name-editor'
+import { DeleteMemberButton } from '@/components/delete-member-button'
 
 export default async function MemberDetailPage({
   params,
@@ -72,13 +73,17 @@ export default async function MemberDetailPage({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between">
         <Link href="/dashboard/members">
           <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Members
           </Button>
         </Link>
+        <DeleteMemberButton
+          memberId={member.id}
+          memberName={`${member.first_name} ${member.last_name}`}
+        />
       </div>
 
       {/* Member Profile Card */}

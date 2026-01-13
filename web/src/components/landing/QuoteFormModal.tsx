@@ -43,8 +43,25 @@ export function QuoteFormModal({ isOpen, onClose }: QuoteFormModalProps) {
     e.preventDefault()
     setIsSubmitting(true)
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    const emailBody = `
+New Quote Request from Sanctum Website
+
+Name: ${formData.name}
+Email: ${formData.email}
+Organization: ${formData.organization}
+
+Interested In:
+${selectedServices.length > 0 ? selectedServices.map(s => `- ${s}`).join('\n') : '- Not specified'}
+
+Message:
+${formData.message || 'No additional message'}
+    `.trim()
+
+    const mailtoLink = `mailto:kedarvyas17@gmail.com?subject=${encodeURIComponent(`Quote Request: ${formData.organization}`)}&body=${encodeURIComponent(emailBody)}`
+    window.open(mailtoLink, '_blank')
+
+    // Short delay then show success
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
     setSubmitted(true)
     setIsSubmitting(false)

@@ -48,21 +48,14 @@ export function LandingHeader() {
               </Link>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-3">
-              <Link href="/signup">
-                <Button
-                  variant="outline"
-                  className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
-                >
-                  Get Started
-                </Button>
-              </Link>
+            {/* Action Button */}
+            <div className="flex items-center">
               <Button
                 onClick={() => setIsQuoteModalOpen(true)}
-                className="bg-primary hover:bg-[#5D2850] text-primary-foreground"
+                variant="outline"
+                className="border-2 border-primary text-primary bg-transparent hover:bg-primary hover:text-primary-foreground hover:scale-105 hover:shadow-lg px-6 transition-all duration-200"
               >
-                Get Quote
+                Get Started
               </Button>
             </div>
           </div>

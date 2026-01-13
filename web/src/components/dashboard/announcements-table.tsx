@@ -2,14 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
@@ -19,10 +11,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, EyeOff, Pencil, Trash2 } from 'lucide-react'
+import { MoreHorizontal, Eye, EyeOff, Pencil, Trash2, Calendar, User } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import type { AnnouncementWithAuthor } from '@/types/database'
+import Image from 'next/image'
+import { AuthorNameEditor } from '@/components/author-name-editor'
 
 interface AnnouncementsTableProps {
   announcements: AnnouncementWithAuthor[]
@@ -37,11 +31,9 @@ export function AnnouncementsTable({ announcements, canManage }: AnnouncementsTa
   function formatDate(dateString: string | null): string {
     if (!dateString) return '-'
     return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
+      month: 'long',
       day: 'numeric',
       year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
     })
   }
 
@@ -53,7 +45,7 @@ export function AnnouncementsTable({ announcements, canManage }: AnnouncementsTa
       .trim()
   }
 
-  function truncateText(text: string, maxLength: number = 100): string {
+  function truncateText(text: string, maxLength: number = 200): string {
     const stripped = stripHtml(text)
     if (stripped.length <= maxLength) return stripped
     return stripped.substring(0, maxLength).trim() + '...'
@@ -107,7 +99,7 @@ export function AnnouncementsTable({ announcements, canManage }: AnnouncementsTa
 
   if (announcements.length === 0) {
     return (
-      <Card className="p-12 text-center">
+      <Card className="p-12 text-center border-0 shadow-sm">
         <div className="text-4xl mb-4">📰</div>
         <h3 className="text-lg font-semibold text-foreground mb-2">No Announcements Yet</h3>
         <p className="text-muted-foreground">
@@ -118,46 +110,81 @@ export function AnnouncementsTable({ announcements, canManage }: AnnouncementsTa
   }
 
   return (
-    <Card>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[300px]">Title</TableHead>
-            <TableHead>Preview</TableHead>
-            <TableHead>Author</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Date</TableHead>
-            {canManage && <TableHead className="w-[70px]"></TableHead>}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {announcements.map((announcement) => (
-            <TableRow key={announcement.id}>
-              <TableCell className="font-medium">{announcement.title}</TableCell>
-              <TableCell className="text-muted-foreground text-sm">
-                {truncateText(announcement.content)}
-              </TableCell>
-              <TableCell className="text-sm">
-                {announcement.author?.name || 'Unknown'}
-              </TableCell>
-              <TableCell>
-                <Badge
-                  variant={announcement.is_published ? 'default' : 'secondary'}
-                  className={announcement.is_published ? 'bg-green-100 text-green-800' : ''}
-                >
-                  {announcement.is_published ? 'Published' : 'Draft'}
-                </Badge>
-              </TableCell>
-              <TableCell className="text-sm text-muted-foreground">
-                {formatDate(announcement.is_published ? announcement.published_at : announcement.created_at)}
-              </TableCell>
-              {canManage && (
-                <TableCell>
+    <div className="grid gap-6">
+      {announcements.map((announcement) => (
+        <Card
+          key={announcement.id}
+          className="border-0 shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+        >
+          <div className="flex">
+            {/* Image Section */}
+            {announcement.image_url && (
+              <div className="relative w-64 min-h-[200px] bg-secondary flex-shrink-0">
+                <Image
+                  src={announcement.image_url}
+                  alt={announcement.title}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            )}
+
+            {/* Content Section */}
+            <div className="flex-1 p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  {/* Status Badge */}
+                  <div className="mb-3">
+                    <Badge
+                      variant={announcement.is_published ? 'default' : 'secondary'}
+                      className={announcement.is_published
+                        ? 'bg-green-100 text-green-800 hover:bg-green-100'
+                        : 'bg-gray-100 text-gray-600'
+                      }
+                    >
+                      {announcement.is_published ? 'Published' : 'Draft'}
+                    </Badge>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="text-xl font-semibold text-foreground mb-2 leading-tight">
+                    {announcement.title}
+                  </h3>
+
+                  {/* Content Preview */}
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+                    {truncateText(announcement.content, 250)}
+                  </p>
+
+                  {/* Meta Info */}
+                  <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      {announcement.author ? (
+                        <AuthorNameEditor
+                          authorId={announcement.author.id}
+                          authorName={announcement.author.name}
+                        />
+                      ) : (
+                        <span>Unknown</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>
+                        {formatDate(announcement.is_published ? announcement.published_at : announcement.created_at)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                {canManage && (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="h-8 w-8 p-0"
+                        className="h-8 w-8 p-0 flex-shrink-0"
                         disabled={loading === announcement.id}
                       >
                         <MoreHorizontal className="h-4 w-4" />
@@ -192,12 +219,12 @@ export function AnnouncementsTable({ announcements, canManage }: AnnouncementsTa
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </TableCell>
-              )}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </Card>
+                )}
+              </div>
+            </div>
+          </div>
+        </Card>
+      ))}
+    </div>
   )
 }

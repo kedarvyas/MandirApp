@@ -2,11 +2,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Users, QrCode, CreditCard, Building2, Shield, Smartphone, ArrowRight } from 'lucide-react'
+import { Users, QrCode, CreditCard, Building2, Shield, Smartphone } from 'lucide-react'
 import { DashboardPreview } from '@/components/landing/DashboardPreview'
 import { RollingText } from '@/components/landing/RollingText'
 import { LandingHeader } from '@/components/landing/LandingHeader'
 import { ProductShowcase } from '@/components/landing/ProductShowcase'
+import { GetQuoteButton } from '@/components/landing/GetQuoteButton'
 
 export default function LandingPage() {
   return (
@@ -37,20 +38,15 @@ export default function LandingPage() {
               church, mosque, or spiritual community—all in one beautiful app.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/signup">
-                <Button size="lg" className="bg-primary hover:bg-[#5D2850] text-primary-foreground px-8 py-6 text-lg">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="#features">
-                <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/5 px-8 py-6 text-lg">
+              <GetQuoteButton className="px-8 py-6 text-lg" />
+              <Link href="#demo">
+                <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/5 hover:scale-105 px-8 py-6 text-lg transition-all duration-200">
                   See How It Works
                 </Button>
               </Link>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
-              No credit card required • Free for up to 50 members
+              Custom pricing for your organization • Free demo included
             </p>
           </div>
 
@@ -63,15 +59,18 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Interactive Product Showcase */}
+      <ProductShowcase id="demo" />
+
       {/* Features Section */}
-      <section id="features" className="py-20 bg-card/50">
+      <section id="features" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
-              Everything you need to manage your community
+              Powerful features for your community
             </h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Purpose-built for religious organizations of all sizes
+              Everything you need to manage attendance, families, and donations—all in one place
             </p>
           </div>
 
@@ -151,9 +150,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Interactive Product Showcase */}
-      <ProductShowcase />
-
       {/* How It Works Section */}
       <section className="py-20 bg-card/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -195,38 +191,6 @@ export default function LandingPage() {
               <p className="text-muted-foreground">
                 Scan QR codes at the front desk. View attendance, manage families, and record donations.
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonial/Trust Section */}
-      <section className="py-20 bg-primary text-primary-foreground">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl font-bold mb-6">
-              Trusted by communities worldwide
-            </h2>
-            <p className="text-xl text-primary-foreground/80 mb-8">
-              Whether you have 50 members or 5,000, Sanctum scales with your community.
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-12">
-              <div>
-                <div className="text-4xl font-bold">500+</div>
-                <div className="text-primary-foreground/70 mt-1">Organizations</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold">50K+</div>
-                <div className="text-primary-foreground/70 mt-1">Active Members</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold">1M+</div>
-                <div className="text-primary-foreground/70 mt-1">Check-Ins</div>
-              </div>
-              <div>
-                <div className="text-4xl font-bold">99.9%</div>
-                <div className="text-primary-foreground/70 mt-1">Uptime</div>
-              </div>
             </div>
           </div>
         </div>
@@ -295,12 +259,12 @@ export default function LandingPage() {
               </div>
 
               <div className="text-center">
-                <Link href="/contact">
-                  <Button size="lg" className="bg-primary hover:bg-[#5D2850] text-primary-foreground px-10 py-6 text-lg">
-                    Contact Sales
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
+                <GetQuoteButton
+                  size="lg"
+                  className="bg-primary hover:bg-[#5D2850] hover:scale-105 hover:shadow-lg text-primary-foreground px-10 py-6 text-lg transition-all duration-200"
+                  label="Contact Sales"
+                  showArrow
+                />
                 <p className="text-sm text-muted-foreground mt-6">
                   Free demo included • No commitment required
                 </p>
@@ -311,20 +275,15 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-card">
+      <section className="py-20 bg-primary">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl sm:text-4xl font-bold text-primary-foreground mb-4">
             Ready to modernize your community management?
           </h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Join hundreds of religious organizations already using Sanctum to streamline their operations.
+          <p className="text-lg text-primary-foreground/80 mb-8">
+            Get a custom demo and see how Sanctum can work for your organization.
           </p>
-          <Link href="/signup">
-            <Button size="lg" className="bg-primary hover:bg-[#5D2850] text-primary-foreground px-8 py-6 text-lg">
-              Start Your Free Trial
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+          <GetQuoteButton variant="secondary" className="px-8 py-6 text-lg bg-background text-foreground hover:bg-background/90 hover:scale-105 hover:shadow-lg transition-all duration-200" />
         </div>
       </section>
 

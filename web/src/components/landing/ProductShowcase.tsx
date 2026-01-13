@@ -23,20 +23,20 @@ const features: Feature[] = [
     icon: QrCode,
   },
   {
-    id: 'family',
-    title: 'Family Management',
-    description: 'Group family members together. Track attendance for the whole family and manage relationships easily.',
-    mobileImage: '/demo/mobile-family.png',
-    dashboardImage: '/demo/dashboard-members.png',
-    icon: Users,
-  },
-  {
     id: 'news',
     title: 'News & Announcements',
     description: 'Keep your community informed. Post updates, event announcements, and important notices that reach all members.',
     mobileImage: '/demo/mobile-news.png',
     dashboardImage: '/demo/dashboard-news.png',
     icon: Bell,
+  },
+  {
+    id: 'family',
+    title: 'Family Management',
+    description: 'Group family members together. Track attendance for the whole family and manage relationships easily.',
+    mobileImage: '/demo/mobile-family.png',
+    dashboardImage: '/demo/dashboard-members.png',
+    icon: Users,
   },
 ]
 
@@ -81,7 +81,11 @@ function ScreenImage({ src, alt, type, title, icon }: {
   )
 }
 
-export function ProductShowcase() {
+interface ProductShowcaseProps {
+  id?: string
+}
+
+export function ProductShowcase({ id }: ProductShowcaseProps) {
   const [activeIndex, setActiveIndex] = useState(0)
 
   const goToSlide = (index: number) => {
@@ -100,7 +104,7 @@ export function ProductShowcase() {
   const FeatureIcon = activeFeature.icon
 
   return (
-    <section className="py-20 bg-gradient-to-b from-background to-card/50 overflow-hidden">
+    <section id={id} className="py-20 bg-gradient-to-b from-background to-card/50 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
@@ -157,7 +161,7 @@ export function ProductShowcase() {
           </button>
 
           {/* Showcase Content - Centered */}
-          <div className="flex flex-col lg:flex-row items-center justify-center gap-10 lg:gap-20 px-4 md:px-20">
+          <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-10 lg:gap-20 px-4 md:px-20">
             {/* Mobile Preview */}
             <div className="flex flex-col items-center">
               <div className="relative">
