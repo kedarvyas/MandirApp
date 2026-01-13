@@ -37,10 +37,10 @@ export default function LandingPage() {
               Streamline attendance tracking, family management, and donation records for your temple,
               church, mosque, or spiritual community—all in one beautiful app.
             </p>
-            <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-              <GetQuoteButton className="px-8 py-6 text-lg" />
-              <Link href="#demo">
-                <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/5 hover:scale-105 px-8 py-6 text-lg transition-all duration-200">
+            <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center w-full max-w-md sm:max-w-none mx-auto">
+              <GetQuoteButton className="w-full sm:w-auto px-8 py-6 text-lg" />
+              <Link href="#demo" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full border-primary text-primary hover:bg-primary/5 hover:scale-105 px-8 py-6 text-lg transition-all duration-200">
                   See How It Works
                 </Button>
               </Link>
@@ -319,7 +319,7 @@ export default function LandingPage() {
               <ul className="space-y-2 text-sm text-background/70">
                 <li><a href="#" className="hover:text-background">Documentation</a></li>
                 <li><a href="#" className="hover:text-background">Contact Us</a></li>
-                <li><a href="#" className="hover:text-background">FAQ</a></li>
+                <li><Link href="/faq" className="hover:text-background">FAQ</Link></li>
               </ul>
             </div>
             <div>

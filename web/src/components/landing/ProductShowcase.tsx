@@ -87,6 +87,7 @@ interface ProductShowcaseProps {
 
 export function ProductShowcase({ id }: ProductShowcaseProps) {
   const [activeIndex, setActiveIndex] = useState(0)
+  const [showDashboardMobile, setShowDashboardMobile] = useState(false)
 
   const goToSlide = (index: number) => {
     setActiveIndex(index)
@@ -166,7 +167,7 @@ export function ProductShowcase({ id }: ProductShowcaseProps) {
             <div className="flex flex-col items-center">
               <div className="relative">
                 {/* Phone Frame */}
-                <div className="relative bg-[#1a1a1a] rounded-[2.5rem] p-[6px] shadow-2xl" style={{ width: '280px' }}>
+                <div className="relative bg-[#1a1a1a] rounded-[2.5rem] p-1.5 shadow-2xl" style={{ width: '280px' }}>
                   {/* Dynamic Island */}
                   <div className="absolute top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full z-20" />
 
@@ -190,8 +191,8 @@ export function ProductShowcase({ id }: ProductShowcaseProps) {
               </div>
             </div>
 
-            {/* Dashboard Preview */}
-            <div className="flex flex-col items-center w-full max-w-xl lg:max-w-2xl">
+            {/* Dashboard Preview - Hidden on mobile by default */}
+            <div className="hidden lg:flex flex-col items-center w-full max-w-xl lg:max-w-2xl">
               <div className="relative w-full">
                 {/* Browser Frame */}
                 <div className="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
@@ -227,6 +228,57 @@ export function ProductShowcase({ id }: ProductShowcaseProps) {
                 <p className="text-sm text-muted-foreground font-medium">Staff Dashboard</p>
               </div>
             </div>
+          </div>
+
+          {/* Mobile: View Dashboard Button + Expandable Dashboard */}
+          <div className="lg:hidden mt-8 px-4">
+            <button
+              onClick={() => setShowDashboardMobile(!showDashboardMobile)}
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-card border border-border rounded-xl text-foreground font-medium hover:bg-accent transition-colors"
+            >
+              <Monitor className="w-5 h-5" />
+              {showDashboardMobile ? 'Hide Dashboard Preview' : 'View Staff Dashboard'}
+              <ChevronRight className={`w-4 h-4 transition-transform ${showDashboardMobile ? 'rotate-90' : ''}`} />
+            </button>
+
+            {showDashboardMobile && (
+              <div className="mt-6 flex flex-col items-center">
+                <div className="relative w-full max-w-md">
+                  {/* Browser Frame - Scaled for mobile */}
+                  <div className="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+                    {/* Browser Chrome */}
+                    <div className="bg-gray-100 border-b border-gray-200 px-3 py-2 flex items-center gap-2">
+                      <div className="flex gap-1">
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56]" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#27CA40]" />
+                      </div>
+                      <div className="flex-1 mx-2">
+                        <div className="bg-white rounded px-2 py-1 text-[10px] text-gray-500 border border-gray-200">
+                          app.sanctum.com/dashboard
+                        </div>
+                      </div>
+                    </div>
+                    {/* Screen Content */}
+                    <div className="relative" style={{ height: '280px' }}>
+                      <ScreenImage
+                        src={activeFeature.dashboardImage}
+                        alt={`${activeFeature.title} - Dashboard`}
+                        type="dashboard"
+                        title={activeFeature.title}
+                        icon={FeatureIcon}
+                      />
+                    </div>
+                  </div>
+                  {/* Shadow */}
+                  <div className="absolute inset-x-6 -bottom-3 h-6 bg-black/15 blur-xl rounded-full -z-10" />
+                </div>
+                <div className="flex items-center gap-2 mt-4">
+                  <Monitor className="w-4 h-4 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground font-medium">Staff Dashboard</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
