@@ -7,35 +7,15 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Check, ArrowLeft, ArrowRight, Users, Building2, Zap, HeadphonesIcon, BarChart3, Shield } from 'lucide-react'
 import { QuoteFormModal } from '@/components/landing/QuoteFormModal'
+import { LandingHeader } from '@/components/landing/LandingHeader'
 
 export default function PricingPage() {
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false)
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
-            <Link href="/" className="flex items-center gap-2 md:gap-3">
-              <Image
-                src="/logo.svg"
-                alt="Sanctum"
-                width={48}
-                height={48}
-                className="w-10 h-10 md:w-12 md:h-12"
-              />
-              <span className="text-xl md:text-2xl font-bold text-foreground">Sanctum</span>
-            </Link>
-            <Button
-              onClick={() => setIsQuoteModalOpen(true)}
-              className="bg-primary hover:bg-[#5D2850] text-primary-foreground"
-            >
-              Get Quote
-            </Button>
-          </div>
-        </div>
-      </nav>
+      {/* Navigation Header */}
+      <LandingHeader />
 
       {/* Header */}
       <section className="py-16 bg-gradient-to-b from-primary/5 to-transparent">

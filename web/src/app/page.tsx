@@ -262,7 +262,7 @@ export default function LandingPage() {
                 <GetQuoteButton
                   size="lg"
                   className="bg-primary hover:bg-[#5D2850] hover:scale-105 hover:shadow-lg text-primary-foreground px-10 py-6 text-lg transition-all duration-200"
-                  label="Contact Sales"
+                  label="Contact Us"
                   showArrow
                 />
                 <p className="text-sm text-muted-foreground mt-6">
