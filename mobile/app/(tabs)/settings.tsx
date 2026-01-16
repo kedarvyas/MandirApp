@@ -10,7 +10,8 @@ import {
 } from 'react-native';
 import { useRouter, router as globalRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors, typography, spacing, borderRadius } from '../../src/constants/theme';
+import { Feather } from '@expo/vector-icons';
+import { colors, typography, spacing } from '../../src/constants/theme';
 import { Card } from '../../src/components';
 import { supabase } from '../../src/lib/supabase';
 import {
@@ -100,35 +101,28 @@ export default function SettingsScreen() {
           text: 'Sign Out',
           style: 'destructive',
           onPress: async () => {
-            console.log('[SignOut] Starting sign out process...');
             setLoggingOut(true);
             try {
               // Set flag BEFORE signing out to prevent race condition
-              console.log('[SignOut] Setting justSignedOut flag...');
               await setJustSignedOut();
 
               // Sign out with local scope to ensure session is cleared from device
-              console.log('[SignOut] Calling supabase.auth.signOut...');
               const { error } = await supabase.auth.signOut({ scope: 'local' });
 
               if (error) {
-                console.error('[SignOut] SignOut returned error:', error);
                 throw error;
               }
-              console.log('[SignOut] SignOut successful');
 
               // Small delay to ensure session is cleared before navigation
               await new Promise(resolve => setTimeout(resolve, 200));
 
               // Navigate to welcome screen using dismissTo to reset stack
-              console.log('[SignOut] Navigating to welcome screen...');
               if (globalRouter.canDismiss()) {
                 globalRouter.dismissAll();
               }
               globalRouter.replace('/');
-              console.log('[SignOut] Navigation called');
             } catch (err) {
-              console.error('[SignOut] Error:', err);
+              console.error('Sign out error:', err);
               Alert.alert('Error', 'Failed to sign out. Please try again.');
               setLoggingOut(false);
             }
@@ -160,8 +154,8 @@ export default function SettingsScreen() {
           title="Change Phone Number"
           subtitle="Update your phone number"
           onPress={() => {
-            // TODO: Navigate to change phone
-            console.log('Change phone');
+            // TODO: Implement change phone flow
+            Alert.alert('Coming Soon', 'Phone number change will be available in a future update.');
           }}
         />
       </Card>
@@ -186,7 +180,7 @@ export default function SettingsScreen() {
                 <ActivityIndicator size="small" color={colors.primary.maroon} />
               ) : activeOrgId === org.id ? (
                 <View style={styles.activeIndicator}>
-                  <Text style={styles.checkmark}>✓</Text>
+                  <Feather name="check" size={14} color={colors.utility.white} />
                 </View>
               ) : null}
             </TouchableOpacity>
@@ -207,8 +201,8 @@ export default function SettingsScreen() {
           title="Notifications"
           subtitle="Manage push notifications"
           onPress={() => {
-            // TODO: Navigate to notifications settings
-            console.log('Notifications');
+            // TODO: Implement notifications settings
+            Alert.alert('Coming Soon', 'Notification settings will be available in a future update.');
           }}
         />
       </Card>
@@ -219,32 +213,32 @@ export default function SettingsScreen() {
         <SettingsItem
           title="Help & FAQ"
           onPress={() => {
-            // TODO: Navigate to help
-            console.log('Help');
+            // TODO: Implement help screen or link to web
+            Alert.alert('Coming Soon', 'Help & FAQ will be available in a future update.');
           }}
         />
         <View style={styles.divider} />
         <SettingsItem
           title="Contact Us"
           onPress={() => {
-            // TODO: Open contact options
-            console.log('Contact');
+            // TODO: Implement contact - email or in-app form
+            Alert.alert('Coming Soon', 'Contact options will be available in a future update.');
           }}
         />
         <View style={styles.divider} />
         <SettingsItem
           title="Privacy Policy"
           onPress={() => {
-            // TODO: Open privacy policy
-            console.log('Privacy');
+            // TODO: Link to privacy policy URL
+            Alert.alert('Coming Soon', 'Privacy policy will be available in a future update.');
           }}
         />
         <View style={styles.divider} />
         <SettingsItem
           title="Terms of Service"
           onPress={() => {
-            // TODO: Open terms
-            console.log('Terms');
+            // TODO: Link to terms URL
+            Alert.alert('Coming Soon', 'Terms of service will be available in a future update.');
           }}
         />
       </Card>

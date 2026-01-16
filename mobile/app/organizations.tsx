@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
-import { BlurView } from 'expo-blur';
 import { Feather } from '@expo/vector-icons';
 import { colors, typography, spacing, borderRadius, shadows } from '../src/constants/theme';
 import {
@@ -199,7 +198,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: colors.primary.maroon,
-    paddingTop: 54,
+    paddingTop: 60,
     paddingBottom: spacing.md,
     paddingHorizontal: spacing.lg,
     flexDirection: 'row',

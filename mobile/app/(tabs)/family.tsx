@@ -4,13 +4,13 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
+import { Feather } from '@expo/vector-icons';
 import { colors, typography, spacing, borderRadius } from '../../src/constants/theme';
-import { Card, Avatar, Button } from '../../src/components';
+import { Card, Avatar, Button, SkeletonFamilyScreen } from '../../src/components';
 import { supabase } from '../../src/lib/supabase';
 import { getStoredOrganization } from '../../src/lib/orgContext';
 import type { Member, RelationshipType } from '../../src/types/database';
@@ -94,9 +94,9 @@ export default function FamilyScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
+      <ScrollView style={styles.container}>
+        <SkeletonFamilyScreen />
+      </ScrollView>
     );
   }
 
@@ -147,7 +147,7 @@ export default function FamilyScreen() {
               </View>
             </View>
             <View style={styles.qrIndicator}>
-              <Text style={styles.qrIcon}>✓</Text>
+              <Feather name="check" size={16} color={colors.semantic.success} />
             </View>
           </View>
         </Card>
@@ -188,7 +188,7 @@ export default function FamilyScreen() {
                 </View>
                 {member.is_independent && member.qr_token && (
                   <View style={styles.qrIndicator}>
-                    <Text style={styles.qrIcon}>✓</Text>
+                    <Feather name="check" size={16} color={colors.semantic.success} />
                   </View>
                 )}
               </View>
@@ -197,7 +197,9 @@ export default function FamilyScreen() {
         </>
       ) : (
         <Card style={styles.emptyCard}>
-          <Text style={styles.emptyIcon}>👨‍👩‍👧‍👦</Text>
+          <View style={styles.emptyIconContainer}>
+            <Feather name="users" size={48} color={colors.text.tertiary} />
+          </View>
           <Text style={styles.emptyTitle}>No Family Members Yet</Text>
           <Text style={styles.emptyText}>
             Add your spouse, children, parents, or other family members to link them to your membership.
@@ -336,8 +338,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing.xl,
   },
-  emptyIcon: {
-    fontSize: 48,
+  emptyIconContainer: {
     marginBottom: spacing.md,
   },
   emptyTitle: {

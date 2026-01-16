@@ -9,8 +9,9 @@ import {
   Image,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { colors, typography, spacing, borderRadius, shadows } from '../../src/constants/theme';
-import { Card } from '../../src/components';
+import { Feather } from '@expo/vector-icons';
+import { colors, typography, spacing } from '../../src/constants/theme';
+import { Card, SkeletonNewsScreen } from '../../src/components';
 import { supabase } from '../../src/lib/supabase';
 import { getStoredOrganization } from '../../src/lib/orgContext';
 import type { AnnouncementWithAuthor } from '../../src/types/database';
@@ -115,9 +116,9 @@ export default function NewsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading news...</Text>
-      </View>
+      <ScrollView style={styles.container}>
+        <SkeletonNewsScreen />
+      </ScrollView>
     );
   }
 
@@ -135,7 +136,9 @@ export default function NewsScreen() {
     >
       {announcements.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>📰</Text>
+          <View style={styles.emptyIconContainer}>
+            <Feather name="bell-off" size={64} color={colors.text.tertiary} />
+          </View>
           <Text style={styles.emptyTitle}>No News Yet</Text>
           <Text style={styles.emptyText}>
             Check back later for announcements and updates from your organization.
@@ -220,8 +223,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing.xxxl,
   },
-  emptyIcon: {
-    fontSize: 64,
+  emptyIconContainer: {
     marginBottom: spacing.lg,
   },
   emptyTitle: {

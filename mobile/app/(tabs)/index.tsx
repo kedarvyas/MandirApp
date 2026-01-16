@@ -10,8 +10,9 @@ import {
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import QRCode from 'react-native-qrcode-svg';
+import * as Haptics from 'expo-haptics';
 import { colors, typography, spacing, borderRadius, shadows } from '../../src/constants/theme';
-import { Card, Avatar, QRModal } from '../../src/components';
+import { Card, Avatar, QRModal, SkeletonHomeScreen } from '../../src/components';
 import { supabase } from '../../src/lib/supabase';
 import { getStoredOrganization, refreshOrganization, StoredOrganization } from '../../src/lib/orgContext';
 import type { Member } from '../../src/types/database';
@@ -42,7 +43,6 @@ export default function HomeScreen() {
       }
 
       if (!user.phone) {
-        console.log('No phone number found for user');
         setLoading(false);
         return;
       }
@@ -50,7 +50,6 @@ export default function HomeScreen() {
       // Get the stored organization for multi-tenancy
       const storedOrg = await getStoredOrganization();
       if (!storedOrg) {
-        console.log('No organization found, redirecting to org code entry');
         router.replace('/(auth)/org-code');
         return;
       }
@@ -75,17 +74,12 @@ export default function HomeScreen() {
 
       // If no member record exists, redirect to profile setup
       if (!data) {
-        console.log('No member record found, redirecting to profile setup');
         router.replace('/(auth)/profile-setup');
         return;
       }
 
-      // Debug: Log the photo_url
-      console.log('Member data loaded - photo_url:', data.photo_url);
-
       // If member exists but profile is incomplete, redirect to profile setup
       if (data.status === 'pending_registration') {
-        console.log('Profile incomplete, redirecting to profile setup');
         router.replace('/(auth)/profile-setup');
         return;
       }
@@ -117,9 +111,9 @@ export default function HomeScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
+      <ScrollView style={styles.container}>
+        <SkeletonHomeScreen />
+      </ScrollView>
     );
   }
 
@@ -182,7 +176,12 @@ export default function HomeScreen() {
 
         <TouchableOpacity
           style={styles.qrContainer}
-          onPress={() => member.qr_token && setQrModalVisible(true)}
+          onPress={() => {
+            if (member.qr_token) {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              setQrModalVisible(true);
+            }
+          }}
           activeOpacity={0.8}
         >
           <View style={styles.qrWrapper}>

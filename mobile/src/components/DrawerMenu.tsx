@@ -12,6 +12,7 @@ import {
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { colors, typography, spacing } from '../constants/theme';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -57,6 +58,8 @@ export function DrawerMenu({ isOpen, onClose }: DrawerMenuProps) {
 
   useEffect(() => {
     if (isOpen) {
+      // Haptic feedback when drawer opens
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       // Animate in
       Animated.parallel([
         Animated.timing(fadeAnim, {
@@ -89,6 +92,7 @@ export function DrawerMenu({ isOpen, onClose }: DrawerMenuProps) {
   }, [isOpen]);
 
   const handleMenuItemPress = (item: MenuItem) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onClose();
     setTimeout(() => {
       if (item.onPress) {
