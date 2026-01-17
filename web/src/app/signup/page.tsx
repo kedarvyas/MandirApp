@@ -406,9 +406,9 @@ export default function SignupPage() {
 
                 <p className="text-xs text-muted-foreground text-center pt-2">
                   By creating an account, you agree to our{' '}
-                  <a href="#" className="text-primary hover:underline">Terms of Service</a>
+                  <Link href="/terms" className="text-primary hover:underline">Terms of Service</Link>
                   {' '}and{' '}
-                  <a href="#" className="text-primary hover:underline">Privacy Policy</a>
+                  <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
                 </p>
               </div>
             </CardContent>

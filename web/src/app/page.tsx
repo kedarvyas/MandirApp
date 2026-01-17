@@ -317,16 +317,16 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold mb-4">Support</h4>
               <ul className="space-y-2 text-sm text-background/70">
-                <li><a href="#" className="hover:text-background">Documentation</a></li>
-                <li><a href="#" className="hover:text-background">Contact Us</a></li>
+                <li><Link href="/help" className="hover:text-background">Help Center</Link></li>
+                <li><a href="mailto:kedarvyas17@gmail.com" className="hover:text-background">Contact Us</a></li>
                 <li><Link href="/faq" className="hover:text-background">FAQ</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm text-background/70">
-                <li><a href="#" className="hover:text-background">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-background">Terms of Service</a></li>
+                <li><Link href="/privacy" className="hover:text-background">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-background">Terms of Service</Link></li>
               </ul>
             </div>
           </div>

@@ -311,8 +311,8 @@ export default function PricingPage() {
             <div className="flex gap-6 text-sm text-background/70">
               <Link href="/" className="hover:text-background">Home</Link>
               <Link href="/signup" className="hover:text-background">Get Started</Link>
-              <a href="#" className="hover:text-background">Privacy</a>
-              <a href="#" className="hover:text-background">Terms</a>
+              <Link href="/privacy" className="hover:text-background">Privacy</Link>
+              <Link href="/terms" className="hover:text-background">Terms</Link>
             </div>
           </div>
           <div className="border-t border-background/20 mt-8 pt-8 text-center text-sm text-background/50">
