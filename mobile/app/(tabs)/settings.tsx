@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Linking,
 } from 'react-native';
 import { useRouter, router as globalRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
@@ -223,7 +224,13 @@ export default function SettingsScreen() {
         <SettingsItem
           title="Contact Us"
           subtitle={CONTACT_EMAIL}
-          onPress={() => WebBrowser.openBrowserAsync(`mailto:${CONTACT_EMAIL}`)}
+          onPress={async () => {
+            try {
+              await Linking.openURL(`mailto:${CONTACT_EMAIL}`);
+            } catch {
+              Alert.alert('Contact Us', `Email us at:\n${CONTACT_EMAIL}`);
+            }
+          }}
         />
         <View style={styles.divider} />
         <SettingsItem
