@@ -5,9 +5,6 @@ import { supabase } from './supabase';
 // Required for expo-auth-session
 WebBrowser.maybeCompleteAuthSession();
 
-// Your Supabase project URL
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL!;
-
 /**
  * Initiates Google Sign-In flow using Supabase OAuth
  */
@@ -21,8 +18,6 @@ export async function signInWithGoogle(): Promise<{
       scheme: 'sanctum',
       path: 'auth/callback',
     });
-
-    console.log('Redirect URL:', redirectUrl);
 
     // Get the OAuth URL from Supabase
     const { data, error } = await supabase.auth.signInWithOAuth({
@@ -50,8 +45,6 @@ export async function signInWithGoogle(): Promise<{
         showInRecents: true,
       }
     );
-
-    console.log('Auth result:', result);
 
     if (result.type === 'success' && result.url) {
       // Extract the tokens from the URL

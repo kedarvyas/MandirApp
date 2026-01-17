@@ -11,9 +11,11 @@ import {
 import { useRouter, router as globalRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
 import { colors, typography, spacing } from '../../src/constants/theme';
 import { Card } from '../../src/components';
 import { supabase } from '../../src/lib/supabase';
+
 import {
   getAllOrganizations,
   getActiveOrgId,
@@ -21,6 +23,12 @@ import {
   setJustSignedOut,
   StoredOrganization,
 } from '../../src/lib/orgContext';
+
+// Legal and support URLs
+const PRIVACY_POLICY_URL = 'https://sanctumapp.vercel.app/privacy';
+const TERMS_OF_SERVICE_URL = 'https://sanctumapp.vercel.app/terms';
+const HELP_URL = 'https://sanctumapp.vercel.app/help';
+const CONTACT_EMAIL = 'kedarvyas17@gmail.com';
 
 interface SettingsItemProps {
   title: string;
@@ -58,7 +66,7 @@ function SettingsItem({
 
 export default function SettingsScreen() {
   const router = useRouter();
-  const [loggingOut, setLoggingOut] = useState(false);
+  const [_loggingOut, setLoggingOut] = useState(false);
   const [organizations, setOrganizations] = useState<StoredOrganization[]>([]);
   const [activeOrgId, setActiveOrgId] = useState<string | null>(null);
   const [switchingOrg, setSwitchingOrg] = useState<string | null>(null);
@@ -200,10 +208,7 @@ export default function SettingsScreen() {
         <SettingsItem
           title="Notifications"
           subtitle="Manage push notifications"
-          onPress={() => {
-            // TODO: Implement notifications settings
-            Alert.alert('Coming Soon', 'Notification settings will be available in a future update.');
-          }}
+          onPress={() => router.push('/notification-settings')}
         />
       </Card>
 
@@ -212,34 +217,23 @@ export default function SettingsScreen() {
       <Card style={styles.sectionCard} padding="none">
         <SettingsItem
           title="Help & FAQ"
-          onPress={() => {
-            // TODO: Implement help screen or link to web
-            Alert.alert('Coming Soon', 'Help & FAQ will be available in a future update.');
-          }}
+          onPress={() => WebBrowser.openBrowserAsync(HELP_URL)}
         />
         <View style={styles.divider} />
         <SettingsItem
           title="Contact Us"
-          onPress={() => {
-            // TODO: Implement contact - email or in-app form
-            Alert.alert('Coming Soon', 'Contact options will be available in a future update.');
-          }}
+          subtitle={CONTACT_EMAIL}
+          onPress={() => WebBrowser.openBrowserAsync(`mailto:${CONTACT_EMAIL}`)}
         />
         <View style={styles.divider} />
         <SettingsItem
           title="Privacy Policy"
-          onPress={() => {
-            // TODO: Link to privacy policy URL
-            Alert.alert('Coming Soon', 'Privacy policy will be available in a future update.');
-          }}
+          onPress={() => WebBrowser.openBrowserAsync(PRIVACY_POLICY_URL)}
         />
         <View style={styles.divider} />
         <SettingsItem
           title="Terms of Service"
-          onPress={() => {
-            // TODO: Link to terms URL
-            Alert.alert('Coming Soon', 'Terms of service will be available in a future update.');
-          }}
+          onPress={() => WebBrowser.openBrowserAsync(TERMS_OF_SERVICE_URL)}
         />
       </Card>
 

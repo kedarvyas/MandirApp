@@ -15,39 +15,30 @@ export default function WelcomeScreen() {
   }, []);
 
   async function checkSignOutAndSession() {
-    console.log('[Welcome] Checking sign out status...');
     // Check if user just signed out - if so, skip session check
     const justSignedOut = await checkAndClearSignedOut();
-    console.log('[Welcome] justSignedOut flag:', justSignedOut);
     if (justSignedOut) {
-      console.log('[Welcome] User just signed out, showing welcome screen');
       setLoading(false);
       return;
     }
-    console.log('[Welcome] Checking session...');
     checkSession();
   }
 
   async function checkSession() {
     // Check if user is already logged in
     const { data: { session } } = await supabase.auth.getSession();
-    console.log('[Welcome] Session exists:', !!session);
     if (session) {
       // User is logged in, check if they need to select org or go to app
       const org = await getStoredOrganization();
-      console.log('[Welcome] Stored org:', org?.name || 'none');
       if (org) {
-        console.log('[Welcome] Redirecting to tabs...');
         router.replace('/(tabs)');
       } else {
         // Has session but no org - need to select organization
-        console.log('[Welcome] Redirecting to org-code...');
         router.replace('/(auth)/org-code');
       }
       return;
     }
 
-    console.log('[Welcome] No session, showing welcome screen');
     setLoading(false);
   }
 

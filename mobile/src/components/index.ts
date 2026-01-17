@@ -8,6 +8,9 @@ export { Logo } from './Logo';
 export { AppHeader } from './AppHeader';
 export { DrawerMenu } from './DrawerMenu';
 
+// Notifications
+export { NotificationPrompt } from './NotificationPrompt';
+
 // Skeleton Loaders
 export {
   Skeleton,

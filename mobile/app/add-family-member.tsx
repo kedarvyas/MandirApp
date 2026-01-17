@@ -102,19 +102,16 @@ export default function AddFamilyMemberScreen() {
       if (photoUri && photoBase64) {
         const fileName = `family-${currentMember.id}-${Date.now()}.jpg`;
 
-        console.log('Uploading family member photo, base64 size:', photoBase64.length);
-
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('member-photos')
           .upload(fileName, decode(photoBase64), {
             contentType: 'image/jpeg',
           });
 
         if (uploadError) {
-          console.error('Upload error:', uploadError);
+          console.error('Photo upload error:', uploadError);
           // Continue without photo
         } else {
-          console.log('Upload successful:', uploadData);
           const { data: { publicUrl } } = supabase.storage
             .from('member-photos')
             .getPublicUrl(fileName);

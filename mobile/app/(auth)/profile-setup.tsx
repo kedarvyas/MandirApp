@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { decode } from 'base64-arraybuffer';
-import { colors, typography, spacing, borderRadius } from '../../src/constants/theme';
+import { colors, typography, spacing } from '../../src/constants/theme';
 import { Button, Input, Card } from '../../src/components';
 import { supabase } from '../../src/lib/supabase';
 import { getStoredOrganization, type StoredOrganization } from '../../src/lib/orgContext';
@@ -80,8 +80,8 @@ export default function ProfileSetupScreen() {
           if (existingMember.photo_url) setExistingPhotoUrl(existingMember.photo_url);
         }
       }
-    } catch (err) {
-      console.log('No existing member found, proceeding with new registration');
+    } catch {
+      // No existing member found, proceeding with new registration
     }
 
     setInitialLoading(false);
@@ -134,29 +134,24 @@ export default function ProfileSetupScreen() {
       if (photoUri && photoBase64) {
         const fileName = `${user.id}-${Date.now()}.jpg`;
 
-        console.log('Uploading photo, base64 size:', photoBase64.length);
-
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('member-photos')
           .upload(fileName, decode(photoBase64), {
             contentType: 'image/jpeg',
           });
 
         if (uploadError) {
-          console.error('Upload error:', uploadError);
+          console.error('Photo upload error:', uploadError);
           Alert.alert('Error', 'Failed to upload photo. Please try again.');
           setLoading(false);
           return;
         }
-
-        console.log('Upload successful:', uploadData);
 
         // Get public URL
         const { data: { publicUrl } } = supabase.storage
           .from('member-photos')
           .getPublicUrl(fileName);
 
-        console.log('Public URL:', publicUrl);
         photoUrl = publicUrl;
       }
 

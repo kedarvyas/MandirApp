@@ -51,8 +51,8 @@ export function QRModal({ visible, qrValue, onClose, memberName }: QRModalProps)
       const currentBrightness = await Brightness.getBrightnessAsync();
       originalBrightness.current = currentBrightness;
       await Brightness.setBrightnessAsync(1);
-    } catch (error) {
-      console.log('Brightness control not available:', error);
+    } catch {
+      // Brightness control not available on this device
     }
   }
 
@@ -65,8 +65,8 @@ export function QRModal({ visible, qrValue, onClose, memberName }: QRModalProps)
       try {
         await Brightness.setBrightnessAsync(originalBrightness.current);
         setBrightnessRestored(true);
-      } catch (error) {
-        console.log('Could not restore brightness:', error);
+      } catch {
+        // Could not restore brightness
       }
     }
 

@@ -31,3 +31,6 @@ coverage/
 
 # Misc
 *.pem
+
+# MCP configuration (contains secrets)
+.mcp.json

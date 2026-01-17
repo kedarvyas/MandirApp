@@ -52,8 +52,7 @@ export function Avatar({ source, name = '', size = 'md', style }: AvatarProps) {
           },
           style as ImageStyle,
         ]}
-        onError={(e) => {
-          console.log('Avatar image load error:', e.nativeEvent.error, 'URL:', source);
+        onError={() => {
           setImageError(true);
         }}
       />

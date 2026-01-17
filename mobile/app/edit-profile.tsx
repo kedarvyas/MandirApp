@@ -74,9 +74,6 @@ export default function EditProfileScreen() {
       setLastName(member.last_name || '');
       setEmail(member.email || '');
       setCurrentPhotoUrl(member.photo_url);
-
-      // Debug: Log the current photo URL
-      console.log('Current photo_url from database:', member.photo_url);
     } catch (err) {
       console.error('Load profile error:', err);
     } finally {
@@ -119,9 +116,8 @@ export default function EditProfileScreen() {
       // Upload new photo if selected
       if (newPhotoUri && newPhotoBase64) {
         const fileName = `${user.id}-${Date.now()}.jpg`;
-        console.log('Uploading photo, base64 size:', newPhotoBase64.length);
 
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('member-photos')
           .upload(fileName, decode(newPhotoBase64), {
             contentType: 'image/jpeg',
@@ -129,28 +125,22 @@ export default function EditProfileScreen() {
           });
 
         if (uploadError) {
-          console.error('Upload error:', uploadError);
+          console.error('Photo upload error:', uploadError);
           Alert.alert('Error', `Failed to upload photo: ${uploadError.message}`);
           setLoading(false);
           return;
         }
-
-        console.log('Upload successful:', uploadData);
 
         // Get public URL
         const { data: { publicUrl } } = supabase.storage
           .from('member-photos')
           .getPublicUrl(fileName);
 
-        console.log('Public URL generated:', publicUrl);
         photoUrl = publicUrl;
       }
 
       // Update member profile
-      console.log('Updating member profile with photo_url:', photoUrl);
-      console.log('Member ID:', memberId);
-
-      const { data: updateData, error: updateError } = await supabase
+      const { error: updateError } = await supabase
         .from('members')
         .update({
           first_name: firstName.trim(),
@@ -162,17 +152,15 @@ export default function EditProfileScreen() {
         .eq('id', memberId)
         .select();
 
-      console.log('Update result:', updateData);
-
       if (updateError) {
-        console.error('Update error:', updateError);
+        console.error('Profile update error:', updateError);
         Alert.alert('Error', 'Failed to update profile. Please try again.');
         return;
       }
 
       Alert.alert(
         'Success',
-        `Profile updated! New photo URL saved.`,
+        'Profile updated successfully!',
         [{ text: 'OK', onPress: () => router.back() }]
       );
     } catch (err) {

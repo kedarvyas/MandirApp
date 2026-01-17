@@ -31,7 +31,7 @@ export default function OrgCodeScreen() {
   // Format org code as user types (uppercase, add dash if needed)
   function formatOrgCode(value: string): string {
     // Remove spaces, convert to uppercase
-    let formatted = value.toUpperCase().replace(/\s/g, '');
+    const formatted = value.toUpperCase().replace(/\s/g, '');
 
     // If user hasn't typed the dash and we have enough chars, don't auto-add
     // Let them type naturally

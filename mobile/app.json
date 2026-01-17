@@ -18,8 +18,21 @@
       "bundleIdentifier": "com.sanctum.app",
       "infoPlist": {
         "NSCameraUsageDescription": "We need camera access to take profile photos and scan QR codes.",
-        "NSPhotoLibraryUsageDescription": "We need photo library access to select profile photos."
+        "NSPhotoLibraryUsageDescription": "We need photo library access to select profile photos.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+          }
+        ]
       }
+    },
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#4A2040"
     },
     "android": {
       "adaptiveIcon": {
@@ -30,8 +43,12 @@
       "package": "com.sanctum.app",
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.READ_EXTERNAL_STORAGE"
-      ]
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE",
+        "android.permission.SCHEDULE_EXACT_ALARM"
+      ],
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -52,7 +69,16 @@
           "photosPermission": "Allow Sanctum to access your photos for profile pictures."
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#4A2040",
+          "defaultChannel": "default",
+          "sounds": []
+        }
+      ]
     ]
   }
 }

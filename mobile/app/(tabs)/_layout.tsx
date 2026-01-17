@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs } from 'expo-router';
 import { View, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { colors, typography } from '../../src/constants/theme';
-import { AppHeader, DrawerMenu } from '../../src/components';
+import { AppHeader, DrawerMenu, NotificationPrompt } from '../../src/components';
+import { supabase } from '../../src/lib/supabase';
 
 // Clean icon component using Feather icons
 function TabIcon({ name, focused }: { name: 'home' | 'bell'; focused: boolean }) {
@@ -20,6 +21,24 @@ function TabIcon({ name, focused }: { name: 'home' | 'bell'; focused: boolean })
 
 export default function TabsLayout() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [memberId, setMemberId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    async function fetchMemberId() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.phone) {
+        const { data } = await supabase
+          .from('members')
+          .select('id')
+          .eq('phone', user.phone)
+          .maybeSingle();
+        if (data) {
+          setMemberId(data.id);
+        }
+      }
+    }
+    fetchMemberId();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -78,6 +97,9 @@ export default function TabsLayout() {
 
       {/* Drawer Menu */}
       <DrawerMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+
+      {/* Notification Permission Prompt (shows once on first launch) */}
+      <NotificationPrompt memberId={memberId} />
     </View>
   );
 }

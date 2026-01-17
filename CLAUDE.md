@@ -81,10 +81,17 @@ Error:             #C45B4A
 - [x] Database: org_code column, generate_org_code(), RLS policies
 - [x] Marketing: Landing page (/), Pricing page (/pricing)
 - [x] Signup: Organization onboarding flow (/signup)
+- [x] Mobile: Org code entry, multi-org support, auth flow complete
+- [x] Mobile: Console logs cleaned up, ESLint configured
+- [x] Skills: test-auth-flow, deploy-ota, expo-build, sync-types
+- [x] Skills: react-native-expert, mobile-debugging, expo-configuration, ui-ux-design
 
-**Next:**
-- [ ] Mobile: Org code entry screen before phone auth
-- [ ] Dashboard: Org context/selector, scoped queries
+**Next (Mobile Focus):**
+- [ ] Implement Settings placeholders (Privacy Policy, Terms, Help, Contact)
+- [ ] Add Change Phone Number flow
+- [ ] Set up Notifications
+- [ ] Fix database function search_path security warnings
+- [ ] UI/UX improvements and polish
 
 ## Code Conventions
 - Use TypeScript strict mode
@@ -97,6 +104,32 @@ Error:             #C45B4A
 ## Testing Notes
 - No test suite set up yet (opportunity for TDD)
 - Manual testing via Expo Go (mobile) and browser (web)
+- Run `npm run lint` in mobile/ to check code quality
+
+---
+
+# MCPs & Skills (IMPORTANT - READ THIS)
+
+**Claude MUST read `mobile/.claude/MCP_AND_SKILLS_GUIDE.md` at the start of each session.**
+
+This project has powerful tools available:
+
+## Quick Reference
+| Need | Use This |
+|------|----------|
+| Database queries/schema | **Supabase MCP** (`mcp__supabase__*`) |
+| Security/performance check | `mcp__supabase__get_advisors` |
+| Create PR | **GitHub MCP** |
+| Test auth flow | `/test-auth-flow` skill |
+| Deploy OTA update | `/deploy-ota` skill |
+| Build iOS/Android | `/expo-build` skill |
+| Sync DB types | `/sync-types` skill |
+| RN best practices | `/react-native-expert` skill |
+| Debug issues | `/mobile-debugging` skill |
+| Configure Expo | `/expo-configuration` skill |
+| UI/UX guidance | `/ui-ux-design` skill |
+
+**Always tell the user when using an MCP or skill.** Example: "I'll use the Supabase MCP to check the schema..."
 
 ---
 
