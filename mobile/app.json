@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.sanctum.app",
+      "bundleIdentifier": "com.sanctumapp.mobile",
       "infoPlist": {
         "NSCameraUsageDescription": "We need camera access to take profile photos and scan QR codes.",
         "NSPhotoLibraryUsageDescription": "We need photo library access to select profile photos.",
@@ -25,7 +25,9 @@
         "NSPrivacyAccessedAPITypes": [
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
-            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
           }
         ]
       }
@@ -40,7 +42,7 @@
         "backgroundColor": "#4A2040"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.sanctum.app",
+      "package": "com.sanctumapp.mobile",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -79,6 +81,13 @@
           "sounds": []
         }
       ]
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "dead8ecd-5e04-4ac7-a256-019593482bd1"
+      }
+    },
+    "owner": "kxdar19"
   }
 }

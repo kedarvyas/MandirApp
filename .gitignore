@@ -34,3 +34,7 @@ coverage/
 
 # MCP configuration (contains secrets)
 .mcp.json
+
+# Firebase config (contains API keys, regenerate from Firebase console)
+google-services.json
+GoogleService-Info.plist
