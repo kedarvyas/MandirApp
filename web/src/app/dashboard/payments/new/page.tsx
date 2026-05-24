@@ -106,8 +106,8 @@ export default function NewPaymentPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Record Payment</h1>
-          <p className="text-gray-600">Record a donation or membership payment</p>
+          <h1 className="text-2xl font-bold">Record Payment</h1>
+          <p className="text-muted-foreground">Record a donation or membership payment</p>
         </div>
       </div>
 
@@ -124,7 +124,7 @@ export default function NewPaymentPage() {
             <div className="space-y-2">
               <Label>Member *</Label>
               {selectedMember ? (
-                <div className="flex items-center justify-between p-3 border rounded-lg bg-orange-50">
+                <div className="flex items-center justify-between p-3 border rounded-lg bg-primary/10">
                   <div>
                     <p className="font-medium">
                       {selectedMember.first_name} {selectedMember.last_name}
@@ -206,7 +206,7 @@ export default function NewPaymentPage() {
                     key={method.value}
                     type="button"
                     variant={formData.payment_method === method.value ? 'default' : 'outline'}
-                    className={formData.payment_method === method.value ? 'bg-orange-500 hover:bg-orange-600' : ''}
+                    className={formData.payment_method === method.value ? 'bg-primary hover:bg-[#5D2850]' : ''}
                     onClick={() => setFormData({ ...formData, payment_method: method.value })}
                   >
                     {method.label}
@@ -241,7 +241,7 @@ export default function NewPaymentPage() {
               <Link href="/dashboard/payments">
                 <Button type="button" variant="outline">Cancel</Button>
               </Link>
-              <Button type="submit" disabled={loading} className="bg-orange-500 hover:bg-orange-600">
+              <Button type="submit" disabled={loading} className="bg-primary hover:bg-[#5D2850]">
                 {loading ? 'Recording...' : 'Record Payment'}
               </Button>
             </div>

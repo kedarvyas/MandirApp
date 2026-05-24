@@ -158,15 +158,6 @@ export default function SettingsScreen() {
           subtitle="Update your name, photo, and email"
           onPress={() => router.push('/edit-profile')}
         />
-        <View style={styles.divider} />
-        <SettingsItem
-          title="Change Phone Number"
-          subtitle="Update your phone number"
-          onPress={() => {
-            // TODO: Implement change phone flow
-            Alert.alert('Coming Soon', 'Phone number change will be available in a future update.');
-          }}
-        />
       </Card>
 
       {/* My Organizations Section */}
