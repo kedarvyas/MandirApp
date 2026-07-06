@@ -32,6 +32,9 @@ coverage/
 # Misc
 *.pem
 
+# Local dev screenshots (simulator captures, not source)
+App_Screenshots/
+
 # MCP configuration (contains secrets)
 .mcp.json
 
