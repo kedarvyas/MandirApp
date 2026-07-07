@@ -107,11 +107,17 @@ export default function VerifyScreen() {
           return;
         }
 
+        // Supabase stores the phone without a "+" prefix (e.g. "16156814944"),
+        // so match against the session user's phone rather than the "+1"-prefixed
+        // input — otherwise returning members never match and are wrongly sent
+        // back through profile-setup on every login.
+        const memberPhone = data.session.user.phone ?? phone;
+
         // Check if user has completed profile for this organization
         const { data: member } = await supabase
           .from('members')
           .select('status, photo_url')
-          .eq('phone', phone)
+          .eq('phone', memberPhone)
           .eq('organization_id', storedOrg.id)
           .single();
 
