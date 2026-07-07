@@ -33,7 +33,10 @@
   "submit": {
     "production": {
       "ios": {
-        "ascAppId": "6759615514"
+        "ascAppId": "6759615514",
+        "ascApiKeyPath": "/Users/kedarvyas/private/AuthKey_96WWK28HJB.p8",
+        "ascApiKeyId": "96WWK28HJB",
+        "ascApiKeyIssuerId": "41772834-9c54-4c0b-b937-88b554a6f366"
       }
     }
   }
