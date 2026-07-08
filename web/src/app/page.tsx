@@ -25,17 +25,19 @@ export default function LandingPage() {
               <span className="text-primary">
                 <RollingText
                   words={[
-                    'Non-Profit Organization',
-                    'Religious Association',
-                    'Cultural Community',
+                    'Non-Profit',
+                    'Cultural Association',
+                    'Fitness Club',
+                    'Faith Community',
+                    'Community Group',
                   ]}
                   interval={2500}
                 />
               </span>
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Streamline attendance tracking, family management, and donation records for your temple,
-              church, mosque, or spiritual community—all in one beautiful app.
+              Streamline attendance tracking, family management, and donation records for your club,
+              nonprofit, cultural association, or faith community—all in one beautiful app.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center w-full max-w-md sm:max-w-none mx-auto">
               <GetQuoteButton className="w-full sm:w-auto px-8 py-6 text-lg" />
@@ -303,7 +305,7 @@ export default function LandingPage() {
                 <span className="font-bold">Sanctum</span>
               </div>
               <p className="text-sm text-background/70">
-                Modern member management for religious communities.
+                Modern member management for every kind of organization.
               </p>
             </div>
             <div>

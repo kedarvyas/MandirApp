@@ -23,11 +23,11 @@ export function DashboardPreview() {
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div>
           <h3 className="text-base sm:text-lg font-bold text-[#2D1A24]">Dashboard</h3>
-          <p className="text-xs sm:text-sm text-[#2D1A24]/60">Welcome to Lotus Temple</p>
+          <p className="text-xs sm:text-sm text-[#2D1A24]/60">Welcome to Riverside Community</p>
         </div>
         <div className="flex items-center gap-1 sm:gap-2">
           <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[#4A2040] flex items-center justify-center">
-            <span className="text-white text-xs sm:text-sm">LT</span>
+            <span className="text-white text-xs sm:text-sm">RC</span>
           </div>
         </div>
       </div>

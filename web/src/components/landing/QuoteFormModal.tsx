@@ -199,7 +199,7 @@ ${formData.message || 'No additional message'}
                   </label>
                   <Input
                     type="text"
-                    placeholder="Your Temple / Church / Organization"
+                    placeholder="Your Club, Non-Profit, or Organization"
                     value={formData.organization}
                     onChange={(e) =>
                       setFormData({ ...formData, organization: e.target.value })
