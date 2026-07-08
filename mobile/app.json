@@ -14,7 +14,7 @@
       "backgroundColor": "#4A2040"
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.sanctumapp.mobile",
       "infoPlist": {
         "NSCameraUsageDescription": "We need camera access to take profile photos and scan QR codes.",
