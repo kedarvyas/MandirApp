@@ -89,8 +89,10 @@ export default function OrgCodeScreen() {
             }
           }, 500);
         } else {
-          // No user session (shouldn't happen in new flow)
-          router.replace('/');
+          // No session yet (first-time sign-in reached org-code before phone).
+          // The org is now saved, so continue to phone verification instead of
+          // bouncing back to the welcome screen.
+          router.replace('/(auth)/phone');
         }
       }
     } else {
