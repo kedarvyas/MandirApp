@@ -38,7 +38,14 @@ export default function PhoneScreen() {
   // Format phone number as user types
   function formatPhoneNumber(value: string): string {
     // Remove all non-digits
-    const digits = value.replace(/\D/g, '');
+    let digits = value.replace(/\D/g, '');
+
+    // Drop a leading US country code so pasted/typed numbers like
+    // "+1 555 555 0123", "1 555 555 0123", or "15555550123" all normalize
+    // to the 10-digit local number instead of being truncated to the wrong one.
+    if (digits.length > 10 && digits.startsWith('1')) {
+      digits = digits.slice(1);
+    }
 
     // Limit to 10 digits
     const limited = digits.slice(0, 10);
