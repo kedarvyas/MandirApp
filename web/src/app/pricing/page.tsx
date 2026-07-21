@@ -128,7 +128,7 @@ export default function PricingPage() {
               <Check className="h-5 w-5 text-[#4A7C59] shrink-0 mt-0.5" />
               <div>
                 <h4 className="font-medium text-foreground">Mobile App Access</h4>
-                <p className="text-sm text-muted-foreground">iOS & Android for members</p>
+                <p className="text-sm text-muted-foreground">Mobile app for members</p>
               </div>
             </div>
             <div className="flex items-start gap-3 p-4 bg-background rounded-lg">

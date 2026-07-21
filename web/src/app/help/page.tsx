@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft, Smartphone, QrCode, Users, Bell, Settings, Mail } from 'lucide-react'
+import { Smartphone, QrCode, Users, Mail } from 'lucide-react'
 
 export default function HelpPage() {
   const gettingStarted = [
     {
       icon: Smartphone,
       title: 'Download the App',
-      description: 'Download Sanctum from the App Store (iOS) or Google Play Store (Android). The app is free for all members.',
+      description: 'Download Sanctum from the App Store. The app is free for all members.',
     },
     {
       icon: QrCode,
@@ -79,7 +79,7 @@ export default function HelpPage() {
     },
     {
       question: 'The app is crashing or not loading',
-      answer: 'Try force-closing the app and reopening it. If issues persist, check for app updates in the App Store or Play Store. You can also try uninstalling and reinstalling the app.',
+      answer: 'Try force-closing the app and reopening it. If issues persist, check for app updates in the App Store. You can also try uninstalling and reinstalling the app.',
     },
   ]
 
@@ -89,7 +89,7 @@ export default function HelpPage() {
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
-            <Link href="/" className="flex items-center gap-2 md:gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
               <Image
                 src="/logo.svg"
                 alt="Sanctum"
@@ -98,7 +98,7 @@ export default function HelpPage() {
                 className="w-10 h-10 md:w-12 md:h-12"
               />
               <span className="text-xl md:text-2xl font-bold text-foreground">Sanctum</span>
-            </Link>
+            </div>
           </div>
         </div>
       </nav>
@@ -106,13 +106,6 @@ export default function HelpPage() {
       {/* Header */}
       <section className="py-12 sm:py-16 bg-gradient-to-b from-primary/5 to-transparent">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </Link>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">
             Help Center
           </h1>
@@ -215,9 +208,6 @@ export default function HelpPage() {
               <span className="font-bold">Sanctum</span>
             </div>
             <div className="flex gap-6 text-sm text-background/70">
-              <Link href="/" className="hover:text-background">
-                Home
-              </Link>
               <Link href="/privacy" className="hover:text-background">
                 Privacy
               </Link>

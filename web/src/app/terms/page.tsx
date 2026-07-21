@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft } from 'lucide-react'
 
 export default function TermsOfServicePage() {
   return (
@@ -9,7 +8,7 @@ export default function TermsOfServicePage() {
       <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
-            <Link href="/" className="flex items-center gap-2 md:gap-3">
+            <div className="flex items-center gap-2 md:gap-3">
               <Image
                 src="/logo.svg"
                 alt="Sanctum"
@@ -18,7 +17,7 @@ export default function TermsOfServicePage() {
                 className="w-10 h-10 md:w-12 md:h-12"
               />
               <span className="text-xl md:text-2xl font-bold text-foreground">Sanctum</span>
-            </Link>
+            </div>
           </div>
         </div>
       </nav>
@@ -26,13 +25,6 @@ export default function TermsOfServicePage() {
       {/* Header */}
       <section className="py-12 sm:py-16 bg-gradient-to-b from-primary/5 to-transparent">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </Link>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">
             Terms of Service
           </h1>
@@ -190,9 +182,6 @@ export default function TermsOfServicePage() {
               <span className="font-bold">Sanctum</span>
             </div>
             <div className="flex gap-6 text-sm text-background/70">
-              <Link href="/" className="hover:text-background">
-                Home
-              </Link>
               <Link href="/privacy" className="hover:text-background">
                 Privacy
               </Link>
