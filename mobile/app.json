@@ -8,6 +8,13 @@
     "userInterfaceStyle": "light",
     "scheme": "sanctum",
     "newArchEnabled": false,
+    "updates": {
+      "url": "https://u.expo.dev/dead8ecd-5e04-4ac7-a256-019593482bd1",
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -80,7 +87,8 @@
           "defaultChannel": "default",
           "sounds": []
         }
-      ]
+      ],
+      "expo-font"
     ],
     "extra": {
       "router": {},
