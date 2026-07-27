@@ -3,34 +3,37 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, typography, spacing } from '../src/constants/theme';
 import { Button, Logo } from '../src/components';
-import { supabase } from '../src/lib/supabase';
+import { useAuth } from '../src/lib/authContext';
 import { getStoredOrganization } from '../src/lib/orgContext';
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const { session, loading: authLoading } = useAuth();
+  const [resolving, setResolving] = useState(true);
 
+  // Forward an already-signed-in user into the app. The session comes from
+  // AuthProvider rather than a second getSession() call, so a sign-out that
+  // just landed here cannot be undone by a stale read.
   useEffect(() => {
-    checkSession();
-  }, []);
+    if (authLoading) return;
 
-  async function checkSession() {
-    // Check if user is already logged in
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      // User is logged in, check if they need to select org or go to app
-      const org = await getStoredOrganization();
-      if (org) {
-        router.replace('/(tabs)');
-      } else {
-        // Has session but no org - need to select organization
-        router.replace('/(auth)/org-code');
-      }
+    if (!session) {
+      setResolving(false);
       return;
     }
 
-    setLoading(false);
-  }
+    let active = true;
+    getStoredOrganization().then((org) => {
+      if (!active) return;
+      router.replace(org ? '/(tabs)' : '/(auth)/org-code');
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [session, authLoading, router]);
+
+  const loading = authLoading || resolving;
 
   function handlePhoneSignIn() {
     // Go to phone auth - org will be requested after authentication
