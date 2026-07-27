@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
@@ -11,7 +11,6 @@ export default function RootLayout() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const segments = useSegments();
-  const hasNavigated = useRef(false);
 
   useEffect(() => {
     // Check initial session
@@ -22,19 +21,27 @@ export default function RootLayout() {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (_event, session) => {
         setSession(session);
-
-        // Sign out is now handled directly in settings.tsx with AsyncStorage flag
-        // This is a backup in case it's triggered from elsewhere
-        if (event === 'SIGNED_OUT') {
-          router.replace('/');
-        }
       }
     );
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Losing the session must always land on the welcome screen. Screens do not
+  // navigate on sign-out themselves: two navigations racing each other is what
+  // previously left the signed-out user sitting on the home tab.
+  // The welcome screen and the (auth) flow legitimately run without a session.
+  useEffect(() => {
+    if (loading) return;
+    // undefined = the welcome screen at "/", which has no segment of its own
+    const group = segments[0] as string | undefined;
+    const needsSession = group !== undefined && group !== '(auth)';
+    if (!session && needsSession) {
+      router.replace('/');
+    }
+  }, [session, loading, segments, router]);
 
   if (loading) {
     return (

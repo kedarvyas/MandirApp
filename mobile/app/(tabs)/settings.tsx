@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   Linking,
 } from 'react-native';
-import { useRouter, router as globalRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
@@ -21,7 +21,6 @@ import {
   getAllOrganizations,
   getActiveOrgId,
   setActiveOrganization,
-  setJustSignedOut,
   StoredOrganization,
 } from '../../src/lib/orgContext';
 
@@ -112,24 +111,14 @@ export default function SettingsScreen() {
           onPress: async () => {
             setLoggingOut(true);
             try {
-              // Set flag BEFORE signing out to prevent race condition
-              await setJustSignedOut();
-
-              // Sign out with local scope to ensure session is cleared from device
+              // Clear the session from the device. The root layout watches the
+              // session and moves to the welcome screen once it clears, so this
+              // screen must not navigate as well.
               const { error } = await supabase.auth.signOut({ scope: 'local' });
 
               if (error) {
                 throw error;
               }
-
-              // Small delay to ensure session is cleared before navigation
-              await new Promise(resolve => setTimeout(resolve, 200));
-
-              // Navigate to welcome screen using dismissTo to reset stack
-              if (globalRouter.canDismiss()) {
-                globalRouter.dismissAll();
-              }
-              globalRouter.replace('/');
             } catch (err) {
               console.error('Sign out error:', err);
               Alert.alert('Error', 'Failed to sign out. Please try again.');

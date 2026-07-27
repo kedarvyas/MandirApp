@@ -4,25 +4,15 @@ import { useRouter } from 'expo-router';
 import { colors, typography, spacing } from '../src/constants/theme';
 import { Button, Logo } from '../src/components';
 import { supabase } from '../src/lib/supabase';
-import { getStoredOrganization, checkAndClearSignedOut } from '../src/lib/orgContext';
+import { getStoredOrganization } from '../src/lib/orgContext';
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkSignOutAndSession();
-  }, []);
-
-  async function checkSignOutAndSession() {
-    // Check if user just signed out - if so, skip session check
-    const justSignedOut = await checkAndClearSignedOut();
-    if (justSignedOut) {
-      setLoading(false);
-      return;
-    }
     checkSession();
-  }
+  }, []);
 
   async function checkSession() {
     // Check if user is already logged in

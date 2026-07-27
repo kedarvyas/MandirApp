@@ -5,7 +5,6 @@ import type { Organization } from '../types/database';
 const ORG_STORAGE_KEY = '@Sanctum:organization';
 const ORGS_STORAGE_KEY = '@Sanctum:organizations';
 const ACTIVE_ORG_KEY = '@Sanctum:activeOrgId';
-const SIGNED_OUT_KEY = '@Sanctum:justSignedOut';
 
 export interface StoredOrganization {
   id: string;
@@ -285,38 +284,5 @@ export async function clearAllOrganizations(): Promise<void> {
     await AsyncStorage.multiRemove([ORG_STORAGE_KEY, ORGS_STORAGE_KEY, ACTIVE_ORG_KEY]);
   } catch (err) {
     console.error('Error clearing organizations:', err);
-  }
-}
-
-// ============================================
-// Sign-out state tracking
-// ============================================
-
-/**
- * Set a flag indicating user just signed out (to prevent auto-redirect)
- */
-export async function setJustSignedOut(): Promise<void> {
-  try {
-    await AsyncStorage.setItem(SIGNED_OUT_KEY, 'true');
-  } catch (err) {
-    console.error('Error setting signed out flag:', err);
-  }
-}
-
-/**
- * Check and clear the signed-out flag
- * Returns true if user just signed out
- */
-export async function checkAndClearSignedOut(): Promise<boolean> {
-  try {
-    const value = await AsyncStorage.getItem(SIGNED_OUT_KEY);
-    if (value === 'true') {
-      await AsyncStorage.removeItem(SIGNED_OUT_KEY);
-      return true;
-    }
-    return false;
-  } catch (err) {
-    console.error('Error checking signed out flag:', err);
-    return false;
   }
 }
