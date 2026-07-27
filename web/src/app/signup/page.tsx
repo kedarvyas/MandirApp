@@ -141,8 +141,10 @@ export default function SignupPage() {
         .replace(/\s+/g, '-')
         .substring(0, 50)
 
-      // 3. Create the organization using the database function
-      const { data: orgData, error: orgError } = await supabase
+      // 3. Create the organization and its owner staff record in one call.
+      // Runs anonymously: signUp() issues no session while email confirmation
+      // is enabled, so the function validates the user id server-side instead.
+      const { data: orgRows, error: orgError } = await supabase
         .rpc('create_organization_with_admin', {
           p_org_name: formData.orgName,
           p_org_slug: slug,
@@ -153,53 +155,20 @@ export default function SignupPage() {
         })
 
       if (orgError) {
-        // If org creation fails, we should ideally delete the user
-        // For now, just show the error
-        console.error('Organization creation error:', orgError)
-
-        // Fallback: Create org directly without the RPC function
-        const { data: newOrg, error: directOrgError } = await supabase
-          .from('organizations')
-          .insert({
-            name: formData.orgName,
-            slug: `${slug}-${Date.now()}`,
-            org_code: `${formData.orgName.substring(0, 6).toUpperCase().replace(/[^A-Z0-9]/g, '')}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-            settings: { type: formData.orgType },
-          })
-          .select()
-          .single()
-
-        if (directOrgError) {
-          throw new Error('Failed to create organization: ' + directOrgError.message)
-        }
-
-        // Create staff record
-        const { error: staffError } = await supabase
-          .from('staff')
-          .insert({
-            organization_id: newOrg.id,
-            user_id: authData.user.id,
-            name: formData.adminName,
-            email: formData.adminEmail,
-            role: 'admin',
-          })
-
-        if (staffError) {
-          console.error('Staff creation error:', staffError)
-        }
-
-        setResult({
-          orgCode: newOrg.org_code,
-          orgName: newOrg.name,
-          adminEmail: formData.adminEmail,
-        })
-      } else {
-        setResult({
-          orgCode: orgData.org_code,
-          orgName: formData.orgName,
-          adminEmail: formData.adminEmail,
-        })
+        throw new Error('Failed to create organization: ' + orgError.message)
       }
+
+      const org = Array.isArray(orgRows) ? orgRows[0] : orgRows
+
+      if (!org?.org_code) {
+        throw new Error('Organization was created but no code was returned. Please contact support.')
+      }
+
+      setResult({
+        orgCode: org.org_code,
+        orgName: formData.orgName,
+        adminEmail: formData.adminEmail,
+      })
 
       setStep(3)
     } catch (err) {
