@@ -392,10 +392,13 @@ CREATE POLICY "Users can upload own photos"
         auth.role() = 'authenticated'
     );
 
--- Allow public read access to photos
-CREATE POLICY "Public read access to photos"
+-- Photos are served through public object URLs, which bypass RLS. A broad SELECT
+-- policy here would additionally allow listing every file in the bucket, so reads
+-- are scoped to the uploader (see migration 007).
+CREATE POLICY "Owners can read own member photos"
     ON storage.objects FOR SELECT
-    USING (bucket_id = 'member-photos');
+    TO authenticated
+    USING (bucket_id = 'member-photos' AND owner = auth.uid());
 
 -- =============================================
 -- HELPER FUNCTIONS
