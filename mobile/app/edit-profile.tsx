@@ -45,14 +45,14 @@ export default function EditProfileScreen() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.phone) {
-        router.replace('/');
+        router.replace('/welcome');
         return;
       }
 
       // Get the current organization
       const storedOrg = await getStoredOrganization();
       if (!storedOrg) {
-        router.replace('/');
+        router.replace('/(auth)/org-code');
         return;
       }
 
@@ -107,7 +107,7 @@ export default function EditProfileScreen() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         Alert.alert('Error', 'Session expired. Please sign in again.');
-        router.replace('/');
+        router.replace('/welcome');
         return;
       }
 

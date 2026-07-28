@@ -23,12 +23,17 @@ function RootNavigator() {
   // previously left the signed-out user sitting on the home tab.
   // The welcome screen and the (auth) flow legitimately run without a session.
   useEffect(() => {
+    // Routes that are legitimately reachable without a session. "index" is the
+    // cold-start router and "welcome" is the signed-out landing screen.
+    // Redirect to "/welcome", never "/": "(tabs)" is a group and adds no path
+    // segment, so app/(tabs)/index.tsx also answers to "/" and would win from
+    // inside the tabs, leaving a signed-out user on the member home screen.
     if (loading) return;
-    // undefined = the welcome screen at "/", which has no segment of its own
     const group = segments[0] as string | undefined;
-    const needsSession = group !== undefined && group !== '(auth)';
-    if (!session && needsSession) {
-      router.replace('/');
+    const isPublic =
+      group === undefined || group === '(auth)' || group === 'welcome';
+    if (!session && !isPublic) {
+      router.replace('/welcome');
     }
   }, [session, loading, segments, router]);
 
@@ -59,6 +64,12 @@ function RootNavigator() {
       >
         <Stack.Screen
           name="index"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="welcome"
           options={{
             headerShown: false,
           }}

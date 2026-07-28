@@ -1,24 +1,24 @@
-import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { useEffect } from 'react';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { colors, typography, spacing } from '../src/constants/theme';
-import { Button, Logo } from '../src/components';
+import { colors } from '../src/constants/theme';
 import { useAuth } from '../src/lib/authContext';
 import { getStoredOrganization } from '../src/lib/orgContext';
 
-export default function WelcomeScreen() {
+/**
+ * Cold-start entry point. Decides where the app opens and renders nothing of
+ * its own; the signed-out UI lives at "/welcome" so that it has a path the
+ * (tabs) group cannot shadow.
+ */
+export default function IndexScreen() {
   const router = useRouter();
-  const { session, loading: authLoading } = useAuth();
-  const [resolving, setResolving] = useState(true);
+  const { session, loading } = useAuth();
 
-  // Forward an already-signed-in user into the app. The session comes from
-  // AuthProvider rather than a second getSession() call, so a sign-out that
-  // just landed here cannot be undone by a stale read.
   useEffect(() => {
-    if (authLoading) return;
+    if (loading) return;
 
     if (!session) {
-      setResolving(false);
+      router.replace('/welcome');
       return;
     }
 
@@ -31,47 +31,11 @@ export default function WelcomeScreen() {
     return () => {
       active = false;
     };
-  }, [session, authLoading, router]);
-
-  const loading = authLoading || resolving;
-
-  function handlePhoneSignIn() {
-    // Go to phone auth - org will be requested after authentication
-    router.push('/(auth)/phone');
-  }
-
-  if (loading) {
-    return (
-      <View style={[styles.container, styles.centered]}>
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
-    );
-  }
+  }, [session, loading, router]);
 
   return (
     <View style={styles.container}>
-      <View style={styles.heroSection}>
-        <View style={styles.logoContainer}>
-          <Logo size={120} />
-        </View>
-        <Text style={styles.title}>Sanctum</Text>
-        <Text style={styles.tagline}>Member Check-in</Text>
-      </View>
-
-      <View style={styles.footer}>
-        <Text style={styles.welcomeText}>
-          Welcome to your community
-        </Text>
-        <Button
-          title="Sign In with Phone"
-          onPress={handlePhoneSignIn}
-          size="lg"
-          fullWidth
-        />
-        <Text style={styles.footerNote}>
-          New members: Please visit the front desk to register
-        </Text>
-      </View>
+      <ActivityIndicator size="large" color={colors.primary.maroon} />
     </View>
   );
 }
@@ -79,56 +43,8 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: colors.background.primary,
-    paddingHorizontal: spacing.xl,
-    paddingBottom: spacing.xl,
-  },
-  centered: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: typography.size.md,
-    color: colors.text.secondary,
-  },
-  heroSection: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: spacing.xxl,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.xl,
-  },
-  title: {
-    fontSize: 48,
-    fontWeight: typography.weight.bold,
-    color: colors.primary.maroon,
-    letterSpacing: 2,
-    marginBottom: spacing.xs,
-  },
-  tagline: {
-    fontSize: typography.size.md,
-    color: colors.text.tertiary,
-    letterSpacing: 1,
-  },
-  footer: {
-    alignItems: 'center',
-    paddingBottom: spacing.lg,
-  },
-  welcomeText: {
-    fontSize: typography.size.lg,
-    fontWeight: typography.weight.medium,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-  },
-  footerNote: {
-    marginTop: spacing.md,
-    fontSize: typography.size.sm,
-    color: colors.text.tertiary,
-    textAlign: 'center',
   },
 });

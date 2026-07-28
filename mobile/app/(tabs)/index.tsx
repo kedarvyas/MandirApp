@@ -36,9 +36,10 @@ export default function HomeScreen() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
 
-      // If no user or no phone, redirect to auth
+      // If no user or no phone, redirect to auth. Must be "/welcome": "/" would
+      // resolve to this very screen, since (tabs) adds no path segment.
       if (!user) {
-        router.replace('/');
+        router.replace('/welcome');
         return;
       }
 
