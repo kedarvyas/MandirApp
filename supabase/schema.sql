@@ -25,35 +25,36 @@ CREATE TABLE organizations (
 CREATE INDEX idx_organizations_org_code ON organizations(org_code);
 
 -- Function to generate a unique org code
+-- Members read these codes aloud and type them in, so they carry a prefix taken
+-- from the organization name (SHRIS-CA7E56). Strip non-alphanumerics before
+-- uppercasing: filtering on [^A-Z0-9] first would delete every lowercase letter
+-- and collapse most names to the ORG fallback.
 CREATE OR REPLACE FUNCTION generate_org_code(org_name TEXT)
-RETURNS TEXT AS $$
+RETURNS TEXT
+LANGUAGE plpgsql
+SET search_path TO 'public'
+AS $$
 DECLARE
-    prefix TEXT;
-    suffix TEXT;
+    prefix   TEXT;
     new_code TEXT;
     attempts INT := 0;
 BEGIN
-    -- Create prefix from org name (first 6 chars, uppercase, alphanumeric only)
-    prefix := UPPER(REGEXP_REPLACE(LEFT(org_name, 6), '[^A-Z0-9]', '', 'g'));
+    prefix := UPPER(REGEXP_REPLACE(COALESCE(org_name, ''), '[^a-zA-Z0-9]', '', 'g'));
+    prefix := LEFT(prefix, 5);
     IF LENGTH(prefix) < 3 THEN
         prefix := 'ORG';
     END IF;
 
     LOOP
-        -- Generate random 6-character alphanumeric suffix
-        suffix := UPPER(SUBSTRING(MD5(RANDOM()::TEXT) FROM 1 FOR 6));
-        new_code := prefix || '-' || suffix;
-
-        -- Check if code exists
-        IF NOT EXISTS (SELECT 1 FROM organizations WHERE org_code = new_code) THEN
-            RETURN new_code;
-        END IF;
-
+        new_code := prefix || '-' || UPPER(SUBSTRING(MD5(RANDOM()::TEXT) FROM 1 FOR 6));
+        EXIT WHEN NOT EXISTS (SELECT 1 FROM organizations o WHERE o.org_code = new_code);
         attempts := attempts + 1;
-        IF attempts > 100 THEN
-            RAISE EXCEPTION 'Could not generate unique org code';
+        IF attempts > 25 THEN
+            RAISE EXCEPTION 'Could not allocate a unique organization code';
         END IF;
     END LOOP;
+
+    RETURN new_code;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -476,56 +477,87 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- ORGANIZATION MANAGEMENT FUNCTIONS
 -- =============================================
 
--- Function to create organization with admin in one transaction
+-- Creates the organization and its owner staff record in one transaction.
+--
+-- The signup page calls this anonymously: auth.signUp() returns no session
+-- while email confirmation is enabled, so everything after it runs as `anon`.
+-- The guards below are what make that safe -- the referenced user must exist,
+-- and an account may own only one organization, so creating an org still costs
+-- a real, email-gated signup.
 CREATE OR REPLACE FUNCTION create_organization_with_admin(
-    p_org_name TEXT,
-    p_org_slug TEXT,
-    p_org_type TEXT,
+    p_org_name      TEXT,
+    p_org_slug      TEXT,
+    p_org_type      TEXT,
     p_admin_user_id UUID,
-    p_admin_name TEXT,
-    p_admin_email TEXT
+    p_admin_name    TEXT,
+    p_admin_email   TEXT
 )
-RETURNS TABLE (
-    id UUID,
-    name TEXT,
-    slug TEXT,
-    org_code TEXT
-) AS $$
+RETURNS TABLE (org_id UUID, org_code TEXT)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $$
 DECLARE
-    new_org_id UUID;
-    new_org_code TEXT;
-    final_slug TEXT;
+    v_org_id  UUID;
+    v_code    TEXT;
+    v_slug    TEXT;
+    v_base    TEXT;
+    v_attempt INT := 0;
 BEGIN
-    -- Generate unique org code
-    new_org_code := generate_org_code(p_org_name);
+    IF p_admin_user_id IS NULL
+       OR NOT EXISTS (SELECT 1 FROM auth.users u WHERE u.id = p_admin_user_id) THEN
+        RAISE EXCEPTION 'Unknown user' USING ERRCODE = '42501';
+    END IF;
 
-    -- Ensure slug is unique by appending random suffix if needed
-    final_slug := p_org_slug;
-    WHILE EXISTS (SELECT 1 FROM organizations WHERE organizations.slug = final_slug) LOOP
-        final_slug := p_org_slug || '-' || SUBSTRING(MD5(RANDOM()::TEXT) FROM 1 FOR 4);
+    IF EXISTS (SELECT 1 FROM staff s WHERE s.user_id = p_admin_user_id) THEN
+        RAISE EXCEPTION 'This account already belongs to an organization'
+          USING ERRCODE = '23505';
+    END IF;
+
+    IF COALESCE(TRIM(p_org_name), '') = '' THEN
+        RAISE EXCEPTION 'Organization name is required';
+    END IF;
+
+    -- slug is NOT NULL and UNIQUE
+    v_base := NULLIF(REGEXP_REPLACE(LOWER(COALESCE(p_org_slug, p_org_name)),
+                                    '[^a-z0-9]+', '-', 'g'), '');
+    v_base := TRIM(BOTH '-' FROM COALESCE(v_base, 'org'));
+    IF v_base = '' THEN
+        v_base := 'org';
+    END IF;
+    v_base := LEFT(v_base, 50);
+
+    v_slug := v_base;
+    WHILE EXISTS (SELECT 1 FROM organizations o WHERE o.slug = v_slug) LOOP
+        v_attempt := v_attempt + 1;
+        v_slug := LEFT(v_base, 44) || '-' || UPPER(SUBSTRING(MD5(RANDOM()::TEXT) FROM 1 FOR 5));
+        IF v_attempt > 20 THEN
+            RAISE EXCEPTION 'Could not allocate a unique slug';
+        END IF;
     END LOOP;
 
-    -- Create the organization
+    v_code := generate_org_code(TRIM(p_org_name));
+
     INSERT INTO organizations (name, slug, org_code, settings)
     VALUES (
-        p_org_name,
-        final_slug,
-        new_org_code,
-        jsonb_build_object('type', p_org_type)
+        TRIM(p_org_name),
+        v_slug,
+        v_code,
+        CASE WHEN p_org_type IS NULL THEN '{}'::JSONB
+             ELSE JSONB_BUILD_OBJECT('type', p_org_type) END
     )
-    RETURNING organizations.id INTO new_org_id;
+    RETURNING id INTO v_org_id;
 
-    -- Create the admin staff record
     INSERT INTO staff (organization_id, user_id, name, email, role)
-    VALUES (new_org_id, p_admin_user_id, p_admin_name, p_admin_email, 'admin');
+    VALUES (v_org_id, p_admin_user_id, p_admin_name, p_admin_email, 'owner');
 
-    -- Return the created organization
-    RETURN QUERY
-    SELECT o.id, o.name, o.slug, o.org_code
-    FROM organizations o
-    WHERE o.id = new_org_id;
+    RETURN QUERY SELECT v_org_id, v_code;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
+
+REVOKE EXECUTE ON FUNCTION create_organization_with_admin(TEXT,TEXT,TEXT,UUID,TEXT,TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION create_organization_with_admin(TEXT,TEXT,TEXT,UUID,TEXT,TEXT)
+    TO anon, authenticated, service_role;
 
 -- Policy to allow creating organizations (for signup)
 CREATE POLICY "Authenticated users can create organizations"
