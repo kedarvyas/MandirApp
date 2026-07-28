@@ -9,7 +9,8 @@
       "Bash(xcrun simctl list *)",
       "Bash(xcrun simctl launch *)",
       "Bash(xcrun simctl terminate *)",
-      "Bash(xcrun simctl io * screenshot *)"
+      "Bash(xcrun simctl io * screenshot *)",
+      "Bash(npx eas-cli *)"
     ]
   }
 }
