@@ -169,14 +169,14 @@ export default function PhoneScreen() {
           help. See our{' '}
           <Text
             style={styles.smsConsentLink}
-            onPress={() => Linking.openURL('https://sanctumapp.vercel.app/privacy')}
+            onPress={() => Linking.openURL('https://sanctumcommunity.com/privacy')}
           >
             Privacy Policy
           </Text>{' '}
           and{' '}
           <Text
             style={styles.smsConsentLink}
-            onPress={() => Linking.openURL('https://sanctumapp.vercel.app/terms')}
+            onPress={() => Linking.openURL('https://sanctumcommunity.com/terms')}
           >
             Terms of Service
           </Text>

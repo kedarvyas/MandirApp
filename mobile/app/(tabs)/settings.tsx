@@ -25,9 +25,9 @@ import {
 } from '../../src/lib/orgContext';
 
 // Legal and support URLs
-const PRIVACY_POLICY_URL = 'https://sanctumapp.vercel.app/privacy';
-const TERMS_OF_SERVICE_URL = 'https://sanctumapp.vercel.app/terms';
-const HELP_URL = 'https://sanctumapp.vercel.app/help';
+const PRIVACY_POLICY_URL = 'https://sanctumcommunity.com/privacy';
+const TERMS_OF_SERVICE_URL = 'https://sanctumcommunity.com/terms';
+const HELP_URL = 'https://sanctumcommunity.com/help';
 const CONTACT_EMAIL = 'kedarvyas17@gmail.com';
 
 interface SettingsItemProps {
