@@ -110,6 +110,24 @@ export default function PrivacyPolicyPage() {
               </div>
 
               <div>
+                <h2 className="text-xl font-semibold text-foreground mb-3">SMS Text Messaging</h2>
+                <div className="bg-card rounded-xl p-6 border border-border">
+                  <p className="text-muted-foreground mb-4">
+                    When you enter your phone number to sign in to the Sanctum mobile app, you consent to receive a one-time verification code by text message. This code confirms your membership in your organization and is required to access your account.
+                  </p>
+                  <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
+                    <li><strong>Message frequency:</strong> Varies based on how often you sign in. We send one message per sign-in attempt.</li>
+                    <li><strong>Cost:</strong> Message and data rates may apply, depending on your mobile carrier plan.</li>
+                    <li><strong>Opt out:</strong> Reply STOP to any message to stop receiving texts. Reply HELP for assistance.</li>
+                    <li><strong>Marketing:</strong> We do not send marketing or promotional text messages. Verification codes are the only texts we send.</li>
+                  </ul>
+                  <p className="text-muted-foreground">
+                    Mobile information and phone numbers collected for text messaging are never sold, rented, or shared with third parties for marketing purposes. Phone numbers are shared only with our SMS delivery provider for the sole purpose of transmitting your verification code. Opting out of text messages will prevent you from signing in to the mobile app, since verification codes are how we authenticate members.
+                  </p>
+                </div>
+              </div>
+
+              <div>
                 <h2 className="text-xl font-semibold text-foreground mb-3">Your Rights</h2>
                 <div className="bg-card rounded-xl p-6 border border-border">
                   <p className="text-muted-foreground mb-4">You have the right to:</p>
@@ -118,6 +136,7 @@ export default function PrivacyPolicyPage() {
                     <li>Update or correct your information</li>
                     <li>Delete your account and associated data</li>
                     <li>Opt out of push notifications</li>
+                    <li>Opt out of SMS verification codes by replying STOP</li>
                     <li>Request a copy of your data</li>
                   </ul>
                 </div>

@@ -7,6 +7,7 @@ import {
   Platform,
   ScrollView,
   TouchableOpacity,
+  Linking,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors, typography, spacing, borderRadius } from '../../src/constants/theme';
@@ -161,6 +162,27 @@ export default function PhoneScreen() {
           </Text>
         </Card>
 
+        <Text style={styles.smsConsent}>
+          By tapping Continue, you agree to receive a one-time verification code
+          by text message. Message frequency varies based on how often you sign
+          in. Message and data rates may apply. Reply STOP to opt out or HELP for
+          help. See our{' '}
+          <Text
+            style={styles.smsConsentLink}
+            onPress={() => Linking.openURL('https://sanctumapp.vercel.app/privacy')}
+          >
+            Privacy Policy
+          </Text>{' '}
+          and{' '}
+          <Text
+            style={styles.smsConsentLink}
+            onPress={() => Linking.openURL('https://sanctumapp.vercel.app/terms')}
+          >
+            Terms of Service
+          </Text>
+          .
+        </Text>
+
         <View style={styles.footer}>
           <Button
             title="Continue"
@@ -233,6 +255,16 @@ const styles = StyleSheet.create({
     fontSize: typography.size.xs,
     color: colors.text.tertiary,
     marginTop: spacing.xs,
+  },
+  smsConsent: {
+    fontSize: typography.size.xs,
+    color: colors.text.tertiary,
+    lineHeight: typography.size.xs * 1.5,
+    marginBottom: spacing.lg,
+  },
+  smsConsentLink: {
+    color: colors.primary.maroon,
+    textDecorationLine: 'underline',
   },
   footer: {
     marginTop: 'auto',
