@@ -123,6 +123,10 @@ export default function SignupPage() {
           data: {
             name: formData.adminName,
           },
+          // Without this the confirmation link falls back to the project's
+          // Site URL, which sends real customers to their own localhost.
+          // Using the live origin keeps dev and production correct.
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       })
 
