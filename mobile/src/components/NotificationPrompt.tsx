@@ -183,7 +183,7 @@ export function NotificationPrompt({ memberId, onComplete }: NotificationPromptP
             <Button
               title="Maybe Later"
               onPress={handleSkip}
-              variant="text"
+              variant="ghost"
               disabled={loading}
             />
           </Card>
