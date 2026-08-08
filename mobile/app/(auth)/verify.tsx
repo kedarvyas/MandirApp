@@ -44,24 +44,33 @@ export default function VerifyScreen() {
   function handleCodeChange(index: number, value: string) {
     setError('');
 
-    // Only allow digits
-    const digit = value.replace(/\D/g, '').slice(-1);
+    const digits = value.replace(/\D/g, '');
 
-    const newCode = [...code];
-    newCode[index] = digit;
-    setCode(newCode);
-
-    // Auto-advance to next input
-    if (digit && index < CODE_LENGTH - 1) {
-      inputRefs.current[index + 1]?.focus();
+    // Deletion clears this box without advancing.
+    if (!digits) {
+      const cleared = [...code];
+      cleared[index] = '';
+      setCode(cleared);
+      return;
     }
 
-    // Auto-submit when complete
-    if (digit && index === CODE_LENGTH - 1) {
-      const fullCode = newCode.join('');
-      if (fullCode.length === CODE_LENGTH) {
-        handleVerify(fullCode);
-      }
+    // iOS SMS autofill and paste deliver the whole code into the focused box,
+    // so spread the digits across the boxes from here rather than keeping one.
+    const newCode = [...code];
+    const written = Math.min(digits.length, CODE_LENGTH - index);
+    for (let i = 0; i < written; i++) {
+      newCode[index + i] = digits[i];
+    }
+    setCode(newCode);
+
+    // Focus the box after the last one we filled.
+    const nextIndex = Math.min(index + written, CODE_LENGTH - 1);
+    inputRefs.current[nextIndex]?.focus();
+
+    // Auto-submit once every box has a digit.
+    const fullCode = newCode.join('');
+    if (fullCode.length === CODE_LENGTH) {
+      handleVerify(fullCode);
     }
   }
 
@@ -200,7 +209,10 @@ export default function VerifyScreen() {
               onChangeText={(value) => handleCodeChange(index, value)}
               onKeyPress={({ nativeEvent }) => handleKeyPress(index, nativeEvent.key)}
               keyboardType="number-pad"
-              maxLength={1}
+              // Must exceed 1 or iOS clips autofill to a single digit.
+              maxLength={CODE_LENGTH}
+              textContentType="oneTimeCode"
+              autoComplete="sms-otp"
               selectTextOnFocus
             />
           ))}
