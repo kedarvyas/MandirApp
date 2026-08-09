@@ -30,6 +30,7 @@ import {
 import { useTheme, useThemedStyles } from '../../src/lib/themeContext';
 import { supabase } from '../../src/lib/supabase';
 import { getStoredOrganization, refreshOrganization, StoredOrganization } from '../../src/lib/orgContext';
+import { formatPhone } from '../../src/lib/phone';
 import type { Member } from '../../src/types/database';
 
 /**
@@ -308,10 +309,7 @@ export default function HomeScreen() {
             styles={styles}
             icon="phone"
             label="Phone"
-            value={
-              member.phone?.replace(/(\+1)(\d{3})(\d{3})(\d{4})/, '($2) $3-$4') ||
-              'N/A'
-            }
+            value={formatPhone(member.phone) || 'N/A'}
           />
           {member.email ? (
             <DetailRow

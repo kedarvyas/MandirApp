@@ -27,6 +27,7 @@ import {
 import { useTheme, useThemedStyles } from '../../src/lib/themeContext';
 import { supabase } from '../../src/lib/supabase';
 import { getStoredOrganization, type StoredOrganization } from '../../src/lib/orgContext';
+import { formatPhoneInput, toE164 } from '../../src/lib/phone';
 
 export default function PhoneScreen() {
   const router = useRouter();
@@ -52,39 +53,14 @@ export default function PhoneScreen() {
     setOrganization(org);
   }
 
-  // Format phone number as user types
-  function formatPhoneNumber(value: string): string {
-    // Remove all non-digits
-    let digits = value.replace(/\D/g, '');
-
-    // Drop a leading US country code so pasted/typed numbers like
-    // "+1 555 555 0123", "1 555 555 0123", or "15555550123" all normalize
-    // to the 10-digit local number instead of being truncated to the wrong one.
-    if (digits.length > 10 && digits.startsWith('1')) {
-      digits = digits.slice(1);
-    }
-
-    // Limit to 10 digits
-    const limited = digits.slice(0, 10);
-
-    // Format as (XXX) XXX-XXXX
-    if (limited.length <= 3) {
-      return limited;
-    } else if (limited.length <= 6) {
-      return `(${limited.slice(0, 3)}) ${limited.slice(3)}`;
-    } else {
-      return `(${limited.slice(0, 3)}) ${limited.slice(3, 6)}-${limited.slice(6)}`;
-    }
-  }
-
   function handlePhoneChange(value: string) {
     setError('');
-    setPhone(formatPhoneNumber(value));
+    setPhone(formatPhoneInput(value));
   }
 
   // Get raw phone number for API
   function getRawPhone(): string {
-    return '+1' + phone.replace(/\D/g, '');
+    return toE164(phone);
   }
 
   async function handleContinue() {

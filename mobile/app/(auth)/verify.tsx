@@ -20,6 +20,7 @@ import { Button, GlassHeader, useHeaderHeight } from '../../src/components';
 import { useThemedStyles } from '../../src/lib/themeContext';
 import { supabase } from '../../src/lib/supabase';
 import { getStoredOrganization } from '../../src/lib/orgContext';
+import { formatPhone } from '../../src/lib/phone';
 
 const CODE_LENGTH = 6;
 
@@ -180,12 +181,6 @@ export default function VerifyScreen() {
     }
   }
 
-  // Format phone for display
-  function formatPhoneDisplay(phoneNumber: string): string {
-    const digits = phoneNumber.replace(/\D/g, '').slice(-10);
-    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-  }
-
   return (
     <View style={styles.container}>
       <GlassHeader
@@ -209,7 +204,7 @@ export default function VerifyScreen() {
           <Text style={styles.title}>Verify your phone</Text>
           <Text style={styles.subtitle}>
             Enter the 6-digit code sent to{'\n'}
-            <Text style={styles.phoneText}>{formatPhoneDisplay(phone || '')}</Text>
+            <Text style={styles.phoneText}>{formatPhone(phone)}</Text>
           </Text>
         </View>
 
