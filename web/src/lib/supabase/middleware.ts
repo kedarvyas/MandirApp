@@ -39,8 +39,11 @@ export async function updateSession(request: NextRequest) {
     // Ignore auth errors - user will be treated as not logged in
   }
 
-  // Public routes that don't require authentication
-  const publicRoutes = ['/', '/login', '/signup', '/pricing', '/auth', '/faq', '/privacy', '/terms', '/help']
+  // Public routes that don't require authentication.
+  // The password reset pages must be here: /forgot-password is only ever
+  // reached while signed out, and /reset-password has to render its
+  // expired-link state when the recovery token no longer yields a session.
+  const publicRoutes = ['/', '/login', '/signup', '/pricing', '/auth', '/faq', '/privacy', '/terms', '/help', '/forgot-password', '/reset-password']
   const isPublicRoute = publicRoutes.some(route =>
     route === '/'
       ? request.nextUrl.pathname === '/'
