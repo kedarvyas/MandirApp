@@ -10,7 +10,20 @@ import {
 } from 'react-native';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
-import { colors, typography, spacing, borderRadius, shadows } from '../src/constants/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  borderRadius,
+  spacing,
+  Theme,
+  typography,
+} from '../src/constants/theme';
+import {
+  GlassHeader,
+  GlassSurface,
+  GradientBackdrop,
+  useHeaderHeight,
+} from '../src/components';
+import { useTheme, useThemedStyles } from '../src/lib/themeContext';
 import {
   getAllOrganizations,
   getActiveOrgId,
@@ -21,6 +34,10 @@ import {
 
 export default function OrganizationsScreen() {
   const router = useRouter();
+  const theme = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const headerHeight = useHeaderHeight();
+  const insets = useSafeAreaInsets();
   const [organizations, setOrganizations] = useState<StoredOrganization[]>([]);
   const [activeOrgId, setActiveOrgIdState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -94,12 +111,29 @@ export default function OrganizationsScreen() {
 
     return (
       <TouchableOpacity
-        style={[styles.orgCard, isActive && styles.orgCardActive]}
         onPress={() => handleSelectOrg(org)}
-        activeOpacity={0.7}
+        activeOpacity={0.8}
+        accessibilityRole="button"
+        accessibilityState={{ selected: isActive }}
+        style={styles.orgCardWrapper}
       >
+        <GlassSurface
+          variant="strong"
+          padding="md"
+          radius={borderRadius.xl}
+          contentStyle={styles.orgCard}
+          style={isActive ? styles.orgCardActive : undefined}
+        >
         {/* Org Logo/Initial */}
-        <View style={[styles.orgLogo, { backgroundColor: org.primary_color || colors.primary.maroon }]}>
+        <View
+          style={[
+            styles.orgLogo,
+            {
+              backgroundColor:
+                org.primary_color || theme.colors.primary.brand,
+            },
+          ]}
+        >
           <Text style={styles.orgLogoText}>
             {org.name.charAt(0).toUpperCase()}
           </Text>
@@ -111,7 +145,11 @@ export default function OrganizationsScreen() {
           <Text style={styles.orgCode}>Code: {org.org_code}</Text>
           {isActive && (
             <View style={styles.activeIndicator}>
-              <Feather name="check-circle" size={14} color={colors.semantic.success} />
+              <Feather
+                name="check-circle"
+                size={14}
+                color={theme.colors.semantic.success}
+              />
               <Text style={styles.activeText}>Active</Text>
             </View>
           )}
@@ -125,41 +163,54 @@ export default function OrganizationsScreen() {
               onPress={() => handleRemoveOrg(org)}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Feather name="x" size={20} color={colors.text.tertiary} />
+              <Feather name="x" size={20} color={theme.colors.text.tertiary} />
             </TouchableOpacity>
           )}
-          <Feather name="chevron-right" size={24} color={colors.text.tertiary} />
+          <Feather
+            name="chevron-right"
+            size={22}
+            color={theme.colors.text.tertiary}
+          />
         </View>
+        </GlassSurface>
       </TouchableOpacity>
     );
   }
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Feather name="arrow-left" size={24} color={colors.text.inverse} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Organizations</Text>
-        <View style={{ width: 40 }} />
-      </View>
+      <GradientBackdrop />
+      <GlassHeader
+        title="My Organizations"
+        onBack={router.canGoBack() ? () => router.back() : undefined}
+      />
 
       {/* Content */}
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary.maroon} />
+          <ActivityIndicator
+            size="large"
+            color={theme.colors.primary.maroon}
+          />
         </View>
       ) : (
-        <View style={styles.content}>
+        <View
+          style={[
+            styles.content,
+            {
+              paddingTop: headerHeight + spacing.lg,
+              paddingBottom: Math.max(insets.bottom, spacing.md),
+            },
+          ]}
+        >
           {organizations.length === 0 ? (
             <View style={styles.emptyContainer}>
               <View style={styles.emptyIcon}>
-                <Feather name="home" size={48} color={colors.text.tertiary} />
+                <Feather
+                  name="home"
+                  size={40}
+                  color={theme.colors.text.tertiary}
+                />
               </View>
               <Text style={styles.emptyTitle}>No Organizations</Text>
               <Text style={styles.emptyText}>
@@ -182,7 +233,11 @@ export default function OrganizationsScreen() {
             onPress={handleAddOrg}
             activeOpacity={0.8}
           >
-            <Feather name="plus" size={24} color={colors.text.inverse} />
+            <Feather
+              name="plus"
+              size={22}
+              color={theme.colors.text.inverse}
+            />
             <Text style={styles.addButtonText}>Join Another Organization</Text>
           </TouchableOpacity>
         </View>
@@ -191,144 +246,128 @@ export default function OrganizationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.primary,
-  },
-  header: {
-    backgroundColor: colors.primary.maroon,
-    paddingTop: 60,
-    paddingBottom: spacing.md,
-    paddingHorizontal: spacing.lg,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  backButton: {
-    padding: spacing.xs,
-  },
-  headerTitle: {
-    fontSize: typography.size.xl,
-    fontWeight: '600',
-    color: colors.text.inverse,
-    letterSpacing: 0.5,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-  },
-  listContent: {
-    paddingBottom: spacing.lg,
-  },
-  orgCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.utility.white,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-    ...shadows.sm,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  orgCardActive: {
-    borderColor: colors.semantic.success,
-    backgroundColor: colors.semantic.successLight,
-  },
-  orgLogo: {
-    width: 56,
-    height: 56,
-    borderRadius: borderRadius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  orgLogoText: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.text.inverse,
-  },
-  orgInfo: {
-    flex: 1,
-    marginLeft: spacing.md,
-  },
-  orgName: {
-    fontSize: typography.size.lg,
-    fontWeight: '600',
-    color: colors.text.primary,
-    marginBottom: 2,
-  },
-  orgCode: {
-    fontSize: typography.size.sm,
-    color: colors.text.tertiary,
-  },
-  activeIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: spacing.xs,
-    gap: 4,
-  },
-  activeText: {
-    fontSize: typography.size.sm,
-    fontWeight: '500',
-    color: colors.semantic.success,
-  },
-  orgActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  removeButton: {
-    padding: spacing.xs,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingBottom: 100,
-  },
-  emptyIcon: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.background.secondary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.lg,
-  },
-  emptyTitle: {
-    fontSize: typography.size.xl,
-    fontWeight: '600',
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-  },
-  emptyText: {
-    fontSize: typography.size.md,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-  },
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primary.maroon,
-    borderRadius: borderRadius.lg,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    marginTop: 'auto',
-    marginBottom: spacing.xl,
-    gap: spacing.sm,
-    ...shadows.md,
-  },
-  addButtonText: {
-    fontSize: typography.size.lg,
-    fontWeight: '600',
-    color: colors.text.inverse,
-  },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background.primary,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    content: {
+      flex: 1,
+      paddingHorizontal: spacing.lg,
+    },
+    listContent: {
+      paddingBottom: spacing.lg,
+    },
+    orgCardWrapper: {
+      marginBottom: spacing.md,
+    },
+    orgCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    orgCardActive: {
+      borderWidth: 1.5,
+      borderColor: theme.colors.semantic.success,
+      borderRadius: borderRadius.xl,
+    },
+    orgLogo: {
+      width: 52,
+      height: 52,
+      borderRadius: borderRadius.lg,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    orgLogoText: {
+      fontSize: 22,
+      fontWeight: typography.weight.bold,
+      // The tile is filled with the org's own brand colour, which is dark by
+      // convention, so this stays white in both appearances.
+      color: '#FFFFFF',
+    },
+    orgInfo: {
+      flex: 1,
+      marginLeft: spacing.md,
+    },
+    orgName: {
+      fontSize: typography.size.lg,
+      fontWeight: typography.weight.semibold,
+      color: theme.colors.text.primary,
+      marginBottom: 2,
+    },
+    orgCode: {
+      fontSize: typography.size.sm,
+      color: theme.colors.text.tertiary,
+      letterSpacing: 0.5,
+    },
+    activeIndicator: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: spacing.xs,
+      gap: 4,
+    },
+    activeText: {
+      fontSize: typography.size.sm,
+      fontWeight: typography.weight.medium,
+      color: theme.colors.semantic.success,
+    },
+    orgActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    removeButton: {
+      padding: spacing.xs,
+    },
+    emptyContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingBottom: 100,
+    },
+    emptyIcon: {
+      width: 92,
+      height: 92,
+      borderRadius: 46,
+      backgroundColor: theme.glass.surface,
+      borderWidth: 1,
+      borderColor: theme.glass.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: spacing.lg,
+    },
+    emptyTitle: {
+      fontSize: typography.size.xl,
+      fontWeight: typography.weight.semibold,
+      color: theme.colors.text.primary,
+      marginBottom: spacing.sm,
+    },
+    emptyText: {
+      fontSize: typography.size.md,
+      color: theme.colors.text.tertiary,
+      textAlign: 'center',
+    },
+    addButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.primary.maroon,
+      borderRadius: borderRadius.full,
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.lg,
+      marginTop: 'auto',
+      marginBottom: spacing.md,
+      gap: spacing.sm,
+      ...theme.shadows.md,
+    },
+    addButtonText: {
+      fontSize: typography.size.md,
+      fontWeight: typography.weight.semibold,
+      color: theme.colors.text.inverse,
+    },
+  });

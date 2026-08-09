@@ -11,15 +11,31 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Feather } from '@expo/vector-icons';
 import { decode } from 'base64-arraybuffer';
-import { colors, typography, spacing } from '../../src/constants/theme';
-import { Button, Input, Card } from '../../src/components';
+import {
+  borderRadius,
+  spacing,
+  Theme,
+  typography,
+} from '../../src/constants/theme';
+import {
+  Button,
+  Input,
+  GlassHeader,
+  GlassSurface,
+  useHeaderHeight,
+} from '../../src/components';
+import { useTheme, useThemedStyles } from '../../src/lib/themeContext';
 import { supabase } from '../../src/lib/supabase';
 import { getStoredOrganization, type StoredOrganization } from '../../src/lib/orgContext';
 import { usePhotoUpload } from '../../src/hooks/usePhotoUpload';
 
 export default function ProfileSetupScreen() {
   const router = useRouter();
+  const theme = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const headerHeight = useHeaderHeight();
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -256,13 +272,22 @@ export default function ProfileSetupScreen() {
   const displayPhotoUri = photoUri || existingPhotoUrl;
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
+    <View style={styles.container}>
+      {/* No back affordance: the profile must be completed before the app is
+          usable, which is why the old stack header hid its back button too. */}
+      <GlassHeader title="Complete Profile" />
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+      >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: headerHeight + spacing.lg },
+        ]}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
           <Text style={styles.title}>
@@ -285,7 +310,11 @@ export default function ProfileSetupScreen() {
             <Image source={{ uri: displayPhotoUri }} style={styles.photo} />
           ) : (
             <View style={styles.photoPlaceholder}>
-              <Text style={styles.photoPlaceholderIcon}>+</Text>
+              <Feather
+                name="camera"
+                size={30}
+                color={theme.colors.primary.maroon}
+              />
               <Text style={styles.photoPlaceholderText}>Add Photo</Text>
             </View>
           )}
@@ -297,7 +326,12 @@ export default function ProfileSetupScreen() {
           {existingPhotoUrl ? 'Tap to change your photo' : 'Tap to add your photo (required)'}
         </Text>
 
-        <Card style={styles.formCard}>
+        <GlassSurface
+          variant="strong"
+          padding="md"
+          radius={borderRadius.xl}
+          style={styles.formCard}
+        >
           <Input
             label="First Name"
             placeholder="Enter your first name"
@@ -334,7 +368,7 @@ export default function ProfileSetupScreen() {
             autoCapitalize="none"
             error={errors.email}
           />
-        </Card>
+        </GlassSurface>
 
         <View style={styles.footer}>
           <Button
@@ -346,89 +380,88 @@ export default function ProfileSetupScreen() {
           />
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.primary,
-  },
-  centered: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: typography.size.md,
-    color: colors.text.secondary,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
-  },
-  header: {
-    marginBottom: spacing.xl,
-  },
-  title: {
-    fontSize: typography.size.xxl,
-    fontWeight: typography.weight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-  },
-  subtitle: {
-    fontSize: typography.size.md,
-    color: colors.text.secondary,
-    lineHeight: typography.size.md * 1.5,
-  },
-  photoContainer: {
-    alignSelf: 'center',
-    marginBottom: spacing.sm,
-  },
-  photo: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: colors.background.tertiary,
-  },
-  photoPlaceholder: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: colors.background.secondary,
-    borderWidth: 2,
-    borderColor: colors.accent.rose,
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  photoPlaceholderIcon: {
-    fontSize: 40,
-    color: colors.primary.maroon,
-    marginBottom: spacing.xs,
-  },
-  photoPlaceholderText: {
-    fontSize: typography.size.sm,
-    color: colors.text.secondary,
-  },
-  photoError: {
-    fontSize: typography.size.xs,
-    color: colors.semantic.error,
-    textAlign: 'center',
-    marginBottom: spacing.xs,
-  },
-  photoHint: {
-    fontSize: typography.size.xs,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-  },
-  formCard: {
-    marginBottom: spacing.lg,
-  },
-  footer: {
-    marginTop: 'auto',
-  },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    centered: {
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontSize: typography.size.md,
+      color: theme.colors.text.secondary,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.xl,
+    },
+    header: {
+      marginBottom: spacing.xl,
+    },
+    title: {
+      fontSize: typography.size.xxl,
+      fontWeight: typography.weight.bold,
+      color: theme.colors.text.primary,
+      marginBottom: spacing.sm,
+      letterSpacing: -0.3,
+    },
+    subtitle: {
+      fontSize: typography.size.md,
+      color: theme.colors.text.secondary,
+      lineHeight: typography.size.md * 1.5,
+    },
+    photoContainer: {
+      alignSelf: 'center',
+      marginBottom: spacing.sm,
+    },
+    photo: {
+      width: 132,
+      height: 132,
+      borderRadius: 66,
+      backgroundColor: theme.colors.background.tertiary,
+      borderWidth: 1,
+      borderColor: theme.glass.border,
+    },
+    photoPlaceholder: {
+      width: 132,
+      height: 132,
+      borderRadius: 66,
+      backgroundColor: theme.glass.surfaceStrong,
+      borderWidth: 2,
+      borderColor: theme.colors.primary.maroon,
+      borderStyle: 'dashed',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.xs,
+    },
+    photoPlaceholderText: {
+      fontSize: typography.size.sm,
+      color: theme.colors.text.secondary,
+    },
+    photoError: {
+      fontSize: typography.size.xs,
+      color: theme.colors.semantic.error,
+      textAlign: 'center',
+      marginBottom: spacing.xs,
+    },
+    photoHint: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.tertiary,
+      textAlign: 'center',
+      marginBottom: spacing.xl,
+    },
+    formCard: {
+      marginBottom: spacing.lg,
+    },
+    footer: {
+      marginTop: 'auto',
+    },
+  });

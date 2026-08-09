@@ -1,6 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Animated, StyleSheet, ViewStyle, DimensionValue } from 'react-native';
-import { colors, borderRadius, spacing } from '../constants/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  borderRadius,
+  spacing,
+  Theme,
+} from '../constants/theme';
+import { useTheme } from '../lib/themeContext';
 
 interface SkeletonProps {
   width?: DimensionValue;
@@ -18,6 +24,7 @@ export function Skeleton({
   borderRadius: radius = borderRadius.sm,
   style,
 }: SkeletonProps) {
+  const theme = useTheme();
   const shimmerAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -48,8 +55,8 @@ export function Skeleton({
   return (
     <Animated.View
       style={[
-        styles.skeleton,
         {
+          backgroundColor: theme.colors.background.tertiary,
           width,
           height,
           borderRadius: radius,
@@ -100,6 +107,7 @@ export function SkeletonText({
  * Skeleton for the Home screen profile card
  */
 export function SkeletonProfileCard() {
+  const styles = useSkeletonStyles();
   return (
     <View style={styles.profileCard}>
       <View style={styles.profileRow}>
@@ -118,12 +126,13 @@ export function SkeletonProfileCard() {
  * Skeleton for the QR code card
  */
 export function SkeletonQRCard() {
+  const styles = useSkeletonStyles();
   return (
     <View style={styles.qrCard}>
       <SkeletonText width={160} height={20} style={{ marginBottom: spacing.xs, alignSelf: 'center' }} />
       <SkeletonText width={200} height={14} style={{ marginBottom: spacing.lg, alignSelf: 'center' }} />
       <View style={styles.qrWrapper}>
-        <Skeleton width={200} height={200} borderRadius={borderRadius.lg} />
+        <Skeleton width={190} height={190} borderRadius={borderRadius.lg} />
       </View>
       <SkeletonText width={180} height={12} style={{ marginTop: spacing.md, alignSelf: 'center' }} />
     </View>
@@ -134,6 +143,7 @@ export function SkeletonQRCard() {
  * Skeleton for info card rows
  */
 export function SkeletonInfoCard() {
+  const styles = useSkeletonStyles();
   return (
     <View style={styles.infoCard}>
       <View style={styles.infoRow}>
@@ -152,6 +162,7 @@ export function SkeletonInfoCard() {
  * Skeleton for family member card
  */
 export function SkeletonMemberCard() {
+  const styles = useSkeletonStyles();
   return (
     <View style={styles.memberCard}>
       <View style={styles.memberRow}>
@@ -173,9 +184,10 @@ export function SkeletonMemberCard() {
  * Skeleton for news card
  */
 export function SkeletonNewsCard() {
+  const styles = useSkeletonStyles();
   return (
     <View style={styles.newsCard}>
-      <Skeleton width="100%" height={180} borderRadius={0} style={styles.newsImage} />
+      <Skeleton width="100%" height={180} borderRadius={0} />
       <View style={styles.newsContent}>
         <View style={styles.newsHeader}>
           <SkeletonText width={60} height={12} />
@@ -191,15 +203,22 @@ export function SkeletonNewsCard() {
 }
 
 /**
- * Full Home screen skeleton
+ * Full Home screen skeleton.
+ *
+ * Mirrors the real layout -- a deep hero with the pass card riding up over its
+ * bottom edge -- so the screen does not visibly reflow once data lands.
  */
 export function SkeletonHomeScreen() {
+  const styles = useSkeletonStyles();
+  const insets = useSafeAreaInsets();
   return (
-    <View style={styles.screenContainer}>
-      <SkeletonProfileCard />
-      <SkeletonText width={120} height={12} style={{ alignSelf: 'center', marginBottom: spacing.md }} />
-      <SkeletonQRCard />
-      <SkeletonInfoCard />
+    <View>
+      <View style={[styles.hero, { paddingTop: insets.top + spacing.md }]} />
+      <View style={styles.passArea}>
+        <SkeletonProfileCard />
+        <SkeletonQRCard />
+        <SkeletonInfoCard />
+      </View>
     </View>
   );
 }
@@ -208,6 +227,7 @@ export function SkeletonHomeScreen() {
  * Full Family screen skeleton
  */
 export function SkeletonFamilyScreen() {
+  const styles = useSkeletonStyles();
   return (
     <View style={styles.screenContainer}>
       <View style={styles.header}>
@@ -226,6 +246,7 @@ export function SkeletonFamilyScreen() {
  * Full News screen skeleton
  */
 export function SkeletonNewsScreen() {
+  const styles = useSkeletonStyles();
   return (
     <View style={styles.screenContainer}>
       <SkeletonNewsCard />
@@ -234,103 +255,114 @@ export function SkeletonNewsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  skeleton: {
-    backgroundColor: colors.background.tertiary,
-  },
-  screenContainer: {
-    padding: spacing.lg,
-  },
+function useSkeletonStyles() {
+  const theme = useTheme();
+  return React.useMemo(() => createStyles(theme), [theme]);
+}
 
-  // Profile Card
-  profileCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  profileRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  profileInfo: {
-    flex: 1,
-    marginLeft: spacing.md,
-  },
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    screenContainer: {
+      padding: spacing.lg,
+    },
 
-  // QR Card
-  qrCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-    padding: spacing.lg,
-    marginBottom: spacing.lg,
-    alignItems: 'center',
-  },
-  qrWrapper: {
-    padding: spacing.md,
-    backgroundColor: colors.utility.white,
-    borderRadius: borderRadius.lg,
-  },
+    // Home hero
+    hero: {
+      height: 190,
+      backgroundColor: theme.backdrop.hero[0],
+      borderBottomLeftRadius: borderRadius.xxl,
+      borderBottomRightRadius: borderRadius.xxl,
+    },
+    passArea: {
+      paddingHorizontal: spacing.lg,
+      marginTop: -52,
+    },
 
-  // Info Card
-  infoCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.utility.divider,
-  },
+    // Profile Card
+    profileCard: {
+      backgroundColor: theme.glass.fallback,
+      borderRadius: borderRadius.xl,
+      padding: spacing.md,
+      marginBottom: spacing.md,
+    },
+    profileRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    profileInfo: {
+      flex: 1,
+      marginLeft: spacing.md,
+    },
 
-  // Member Card
-  memberCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  memberRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  memberInfo: {
-    flex: 1,
-    marginLeft: spacing.md,
-  },
-  badgeRow: {
-    flexDirection: 'row',
-  },
+    // QR Card
+    qrCard: {
+      backgroundColor: theme.glass.fallback,
+      borderRadius: borderRadius.xl,
+      padding: spacing.lg,
+      marginBottom: spacing.md,
+      alignItems: 'center',
+    },
+    qrWrapper: {
+      padding: spacing.md,
+      backgroundColor: theme.colors.utility.white,
+      borderRadius: borderRadius.lg,
+    },
 
-  // News Card
-  newsCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.md,
-    overflow: 'hidden',
-  },
-  newsImage: {
-    borderTopLeftRadius: borderRadius.md,
-    borderTopRightRadius: borderRadius.md,
-  },
-  newsContent: {
-    padding: spacing.md,
-  },
-  newsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.sm,
-  },
+    // Info Card
+    infoCard: {
+      backgroundColor: theme.glass.fallback,
+      borderRadius: borderRadius.xl,
+      padding: spacing.md,
+      marginBottom: spacing.lg,
+    },
+    infoRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: spacing.sm,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: theme.colors.utility.divider,
+    },
 
-  // Header
-  header: {
-    marginBottom: spacing.lg,
-  },
-});
+    // Member Card
+    memberCard: {
+      backgroundColor: theme.glass.fallback,
+      borderRadius: borderRadius.xl,
+      padding: spacing.md,
+      marginBottom: spacing.sm,
+    },
+    memberRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    memberInfo: {
+      flex: 1,
+      marginLeft: spacing.md,
+    },
+    badgeRow: {
+      flexDirection: 'row',
+    },
+
+    // News Card
+    newsCard: {
+      backgroundColor: theme.glass.fallback,
+      borderRadius: borderRadius.xl,
+      marginBottom: spacing.md,
+      overflow: 'hidden',
+    },
+    newsContent: {
+      padding: spacing.md,
+    },
+    newsHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: spacing.sm,
+    },
+
+    // Header
+    header: {
+      marginBottom: spacing.lg,
+    },
+  });
 
 export default Skeleton;

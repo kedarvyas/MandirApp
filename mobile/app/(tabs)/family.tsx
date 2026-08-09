@@ -5,12 +5,27 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
+  TouchableOpacity,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
-import { colors, typography, spacing, borderRadius } from '../../src/constants/theme';
-import { Card, Avatar, Button, SkeletonFamilyScreen } from '../../src/components';
+import {
+  borderRadius,
+  spacing,
+  Theme,
+  typography,
+} from '../../src/constants/theme';
+import {
+  Avatar,
+  Button,
+  GlassHeader,
+  GlassSurface,
+  SkeletonFamilyScreen,
+  useHeaderHeight,
+  useTabBarInset,
+} from '../../src/components';
+import { useTheme, useThemedStyles } from '../../src/lib/themeContext';
 import { supabase } from '../../src/lib/supabase';
 import { getStoredOrganization } from '../../src/lib/orgContext';
 import type { Member, RelationshipType } from '../../src/types/database';
@@ -27,6 +42,11 @@ const relationshipLabels: Record<RelationshipType, string> = {
 
 export default function FamilyScreen() {
   const router = useRouter();
+  const theme = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const headerHeight = useHeaderHeight();
+  const tabBarInset = useTabBarInset();
+
   const [familyMembers, setFamilyMembers] = useState<Member[]>([]);
   const [currentMember, setCurrentMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState(true);
@@ -92,283 +112,324 @@ export default function FamilyScreen() {
     setRefreshing(false);
   }
 
-  if (loading) {
-    return (
-      <ScrollView style={styles.container}>
-        <SkeletonFamilyScreen />
-      </ScrollView>
-    );
-  }
+  const canAddFamily = Boolean(currentMember?.is_prime_member);
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={colors.primary.maroon}
-        />
-      }
-    >
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Your Family</Text>
-        <Text style={styles.subtitle}>
-          Manage family members linked to your membership
-        </Text>
-      </View>
+    <View style={styles.container}>
+      <GlassHeader
+        title="Family"
+        right={
+          canAddFamily ? (
+            <TouchableOpacity
+              onPress={() => router.push('/add-family-member')}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              accessibilityRole="button"
+              accessibilityLabel="Add family member"
+              activeOpacity={0.7}
+            >
+              <Feather
+                name="plus"
+                size={24}
+                color={theme.colors.primary.maroon}
+              />
+            </TouchableOpacity>
+          ) : undefined
+        }
+      />
 
-      {/* Current Member (You) */}
-      {currentMember && (
-        <Card style={styles.memberCard}>
-          <View style={styles.memberRow}>
-            <Avatar
-              source={currentMember.photo_url}
-              name={`${currentMember.first_name} ${currentMember.last_name}`}
-              size="md"
-            />
-            <View style={styles.memberInfo}>
-              <Text style={styles.memberName}>
-                {currentMember.first_name} {currentMember.last_name}
-              </Text>
-              <View style={styles.badges}>
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>You</Text>
-                </View>
-                {currentMember.is_prime_member && (
-                  <View style={[styles.badge, styles.primeBadge]}>
-                    <Text style={[styles.badgeText, styles.primeBadgeText]}>
-                      Primary
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </View>
-            <View style={styles.qrIndicator}>
-              <Feather name="check" size={16} color={colors.semantic.success} />
-            </View>
-          </View>
-        </Card>
-      )}
-
-      {/* Family Members */}
-      {familyMembers.length > 0 ? (
-        <>
-          <Text style={styles.sectionTitle}>
-            Family Members ({familyMembers.length})
-          </Text>
-          {familyMembers.map((member) => (
-            <Card key={member.id} style={styles.memberCard}>
-              <View style={styles.memberRow}>
-                <Avatar
-                  source={member.photo_url}
-                  name={`${member.first_name} ${member.last_name}`}
-                  size="md"
-                />
-                <View style={styles.memberInfo}>
-                  <Text style={styles.memberName}>
-                    {member.first_name} {member.last_name}
-                  </Text>
-                  <View style={styles.badges}>
-                    <View style={styles.badge}>
-                      <Text style={styles.badgeText}>
-                        {relationshipLabels[member.relationship_to_prime] || 'Family'}
-                      </Text>
-                    </View>
-                    {!member.is_independent && (
-                      <View style={[styles.badge, styles.dependentBadge]}>
-                        <Text style={[styles.badgeText, styles.dependentBadgeText]}>
-                          Dependent
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
-                {member.is_independent && member.qr_token && (
-                  <View style={styles.qrIndicator}>
-                    <Feather name="check" size={16} color={colors.semantic.success} />
-                  </View>
-                )}
-              </View>
-            </Card>
-          ))}
-        </>
-      ) : (
-        <Card style={styles.emptyCard}>
-          <View style={styles.emptyIconContainer}>
-            <Feather name="users" size={48} color={colors.text.tertiary} />
-          </View>
-          <Text style={styles.emptyTitle}>No Family Members Yet</Text>
-          <Text style={styles.emptyText}>
-            Add your spouse, children, parents, or other family members to link them to your membership.
-          </Text>
-        </Card>
-      )}
-
-      {/* Add Family Button */}
-      {currentMember?.is_prime_member && (
-        <View style={styles.addButtonContainer}>
-          <Button
-            title="Add Family Member"
-            onPress={() => router.push('/add-family-member')}
-            variant="secondary"
-            fullWidth
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: headerHeight + spacing.md, paddingBottom: tabBarInset },
+        ]}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.colors.primary.maroon}
+            progressViewOffset={headerHeight}
           />
-        </View>
-      )}
+        }
+      >
+        {loading ? (
+          <SkeletonFamilyScreen />
+        ) : (
+          <>
+            {/* Current Member (You) */}
+            {currentMember && (
+              <>
+                <Text style={styles.sectionTitle}>You</Text>
+                <GlassSurface
+                  variant="strong"
+                  radius={borderRadius.xl}
+                  style={styles.memberCard}
+                >
+                  <View style={styles.memberRow}>
+                    <Avatar
+                      source={currentMember.photo_url}
+                      name={`${currentMember.first_name} ${currentMember.last_name}`}
+                      size="md"
+                    />
+                    <View style={styles.memberInfo}>
+                      <Text style={styles.memberName}>
+                        {currentMember.first_name} {currentMember.last_name}
+                      </Text>
+                      <View style={styles.badges}>
+                        {currentMember.is_prime_member && (
+                          <View style={[styles.badge, styles.primeBadge]}>
+                            <Text
+                              style={[styles.badgeText, styles.primeBadgeText]}
+                            >
+                              Primary
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+                    </View>
+                    <View style={styles.qrIndicator}>
+                      <Feather
+                        name="check"
+                        size={16}
+                        color={theme.colors.semantic.success}
+                      />
+                    </View>
+                  </View>
+                </GlassSurface>
+              </>
+            )}
 
-      {/* Info Note */}
-      <View style={styles.infoNote}>
-        <Text style={styles.infoNoteText}>
-          {currentMember?.is_prime_member
-            ? 'As the primary member, you can add family members to your group.'
-            : 'Contact the primary member to add or manage family members.'}
-        </Text>
-      </View>
-    </ScrollView>
+            {/* Family Members */}
+            {familyMembers.length > 0 ? (
+              <>
+                <Text style={styles.sectionTitle}>
+                  Family members ({familyMembers.length})
+                </Text>
+                {familyMembers.map((member) => (
+                  <GlassSurface
+                    key={member.id}
+                    variant="strong"
+                    radius={borderRadius.xl}
+                    style={styles.memberCard}
+                  >
+                    <View style={styles.memberRow}>
+                      <Avatar
+                        source={member.photo_url}
+                        name={`${member.first_name} ${member.last_name}`}
+                        size="md"
+                      />
+                      <View style={styles.memberInfo}>
+                        <Text style={styles.memberName}>
+                          {member.first_name} {member.last_name}
+                        </Text>
+                        <View style={styles.badges}>
+                          <View style={styles.badge}>
+                            <Text style={styles.badgeText}>
+                              {relationshipLabels[member.relationship_to_prime] ||
+                                'Family'}
+                            </Text>
+                          </View>
+                          {!member.is_independent && (
+                            <View style={[styles.badge, styles.dependentBadge]}>
+                              <Text
+                                style={[
+                                  styles.badgeText,
+                                  styles.dependentBadgeText,
+                                ]}
+                              >
+                                Dependent
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                      {member.is_independent && member.qr_token && (
+                        <View style={styles.qrIndicator}>
+                          <Feather
+                            name="check"
+                            size={16}
+                            color={theme.colors.semantic.success}
+                          />
+                        </View>
+                      )}
+                    </View>
+                  </GlassSurface>
+                ))}
+              </>
+            ) : (
+              <GlassSurface
+                variant="strong"
+                padding="lg"
+                radius={borderRadius.xl}
+                style={styles.emptyCard}
+                contentStyle={styles.emptyContent}
+              >
+                <View style={styles.emptyIconCircle}>
+                  <Feather
+                    name="users"
+                    size={28}
+                    color={theme.colors.text.tertiary}
+                  />
+                </View>
+                <Text style={styles.emptyTitle}>No family members yet</Text>
+                <Text style={styles.emptyText}>
+                  {canAddFamily
+                    ? 'Add your spouse, children, parents, or other family members to link them to your membership.'
+                    : 'Contact the primary member to add or manage family members.'}
+                </Text>
+                {canAddFamily && (
+                  <Button
+                    title="Add Family Member"
+                    onPress={() => router.push('/add-family-member')}
+                    variant="secondary"
+                    style={styles.emptyButton}
+                  />
+                )}
+              </GlassSurface>
+            )}
+
+            {/* Info Note */}
+            <View style={styles.infoNote}>
+              <Feather
+                name="info"
+                size={14}
+                color={theme.colors.semantic.info}
+              />
+              <Text style={styles.infoNoteText}>
+                {canAddFamily
+                  ? 'As the primary member, you can add family members to your group.'
+                  : 'Contact the primary member to add or manage family members.'}
+              </Text>
+            </View>
+          </>
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.primary,
-  },
-  content: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background.primary,
-  },
-  loadingText: {
-    fontSize: typography.size.md,
-    color: colors.text.secondary,
-  },
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    content: {
+      paddingHorizontal: spacing.lg,
+    },
 
-  // Header
-  header: {
-    marginBottom: spacing.lg,
-  },
-  title: {
-    fontSize: typography.size.xxl,
-    fontWeight: typography.weight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    fontSize: typography.size.md,
-    color: colors.text.secondary,
-  },
+    // Section
+    sectionTitle: {
+      fontSize: typography.size.xs,
+      fontWeight: typography.weight.semibold,
+      color: theme.colors.text.tertiary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+      marginTop: spacing.md,
+      marginBottom: spacing.sm,
+      marginLeft: spacing.xs,
+    },
 
-  // Section
-  sectionTitle: {
-    fontSize: typography.size.lg,
-    fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
-    marginTop: spacing.lg,
-    marginBottom: spacing.md,
-  },
+    // Member Card
+    memberCard: {
+      marginBottom: spacing.sm,
+    },
+    memberRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    memberInfo: {
+      flex: 1,
+      marginLeft: spacing.md,
+    },
+    memberName: {
+      fontSize: typography.size.md,
+      fontWeight: typography.weight.semibold,
+      color: theme.colors.text.primary,
+      marginBottom: spacing.xs,
+    },
+    badges: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.xs,
+    },
+    badge: {
+      backgroundColor: theme.colors.background.tertiary,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: 2,
+      borderRadius: borderRadius.full,
+    },
+    badgeText: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.secondary,
+    },
+    primeBadge: {
+      backgroundColor: theme.colors.primary.maroon,
+    },
+    primeBadgeText: {
+      color: theme.colors.text.inverse,
+      fontWeight: typography.weight.medium,
+    },
+    dependentBadge: {
+      backgroundColor: theme.colors.semantic.warningLight,
+    },
+    dependentBadgeText: {
+      color: theme.colors.semantic.warning,
+    },
+    qrIndicator: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      backgroundColor: theme.colors.semantic.successLight,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
 
-  // Member Card
-  memberCard: {
-    marginBottom: spacing.sm,
-  },
-  memberRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  memberInfo: {
-    flex: 1,
-    marginLeft: spacing.md,
-  },
-  memberName: {
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  badges: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.xs,
-  },
-  badge: {
-    backgroundColor: colors.background.tertiary,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
-    borderRadius: borderRadius.full,
-  },
-  badgeText: {
-    fontSize: typography.size.xs,
-    color: colors.text.secondary,
-  },
-  primeBadge: {
-    backgroundColor: colors.primary.maroon,
-  },
-  primeBadgeText: {
-    color: colors.text.inverse,
-  },
-  dependentBadge: {
-    backgroundColor: colors.semantic.warningLight,
-  },
-  dependentBadgeText: {
-    color: colors.semantic.warning,
-  },
-  qrIndicator: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.semantic.successLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  qrIcon: {
-    fontSize: 16,
-    color: colors.semantic.success,
-  },
+    // Empty State
+    emptyCard: {
+      marginTop: spacing.md,
+    },
+    emptyContent: {
+      alignItems: 'center',
+    },
+    emptyIconCircle: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.background.tertiary,
+      marginBottom: spacing.md,
+    },
+    emptyTitle: {
+      fontSize: typography.size.lg,
+      fontWeight: typography.weight.semibold,
+      color: theme.colors.text.primary,
+      marginBottom: spacing.sm,
+    },
+    emptyText: {
+      fontSize: typography.size.sm,
+      color: theme.colors.text.secondary,
+      textAlign: 'center',
+      lineHeight: typography.size.sm * 1.5,
+    },
+    emptyButton: {
+      marginTop: spacing.lg,
+    },
 
-  // Empty State
-  emptyCard: {
-    alignItems: 'center',
-    paddingVertical: spacing.xl,
-  },
-  emptyIconContainer: {
-    marginBottom: spacing.md,
-  },
-  emptyTitle: {
-    fontSize: typography.size.lg,
-    fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-  },
-  emptyText: {
-    fontSize: typography.size.sm,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: typography.size.sm * 1.5,
-  },
-
-  // Add Button
-  addButtonContainer: {
-    marginTop: spacing.lg,
-  },
-
-  // Info Note
-  infoNote: {
-    marginTop: spacing.lg,
-    padding: spacing.md,
-    backgroundColor: colors.semantic.infoLight,
-    borderRadius: borderRadius.sm,
-  },
-  infoNoteText: {
-    fontSize: typography.size.sm,
-    color: colors.semantic.info,
-    textAlign: 'center',
-  },
-});
+    // Info Note
+    infoNote: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: spacing.sm,
+      marginTop: spacing.lg,
+      padding: spacing.md,
+      backgroundColor: theme.colors.semantic.infoLight,
+      borderRadius: borderRadius.lg,
+    },
+    infoNoteText: {
+      flex: 1,
+      fontSize: typography.size.sm,
+      color: theme.colors.semantic.info,
+      lineHeight: typography.size.sm * 1.45,
+    },
+  });

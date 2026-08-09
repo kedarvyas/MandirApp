@@ -11,10 +11,23 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Feather } from '@expo/vector-icons';
 import { decode } from 'base64-arraybuffer';
-import { colors, typography, spacing, borderRadius } from '../src/constants/theme';
-import { Button, Input, Card } from '../src/components';
+import {
+  borderRadius,
+  spacing,
+  Theme,
+  typography,
+} from '../src/constants/theme';
+import {
+  Button,
+  Input,
+  GlassHeader,
+  GlassSurface,
+  GradientBackdrop,
+  useHeaderHeight,
+} from '../src/components';
+import { useTheme, useThemedStyles } from '../src/lib/themeContext';
 import { supabase } from '../src/lib/supabase';
 import { getStoredOrganization } from '../src/lib/orgContext';
 import { usePhotoUpload } from '../src/hooks/usePhotoUpload';
@@ -31,6 +44,9 @@ const relationshipOptions: { value: RelationshipType; label: string }[] = [
 
 export default function AddFamilyMemberScreen() {
   const router = useRouter();
+  const theme = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const headerHeight = useHeaderHeight();
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -160,23 +176,21 @@ export default function AddFamilyMemberScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <View style={styles.container}>
+      <GradientBackdrop />
+      <GlassHeader title="Add Family Member" onBack={() => router.back()} />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Text style={styles.backButtonText}>Cancel</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Add Family Member</Text>
-          <View style={styles.backButton} />
-        </View>
-
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingTop: headerHeight + spacing.lg },
+          ]}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           {/* Photo Upload */}
           <TouchableOpacity
@@ -188,14 +202,23 @@ export default function AddFamilyMemberScreen() {
               <Image source={{ uri: photoUri }} style={styles.photo} />
             ) : (
               <View style={styles.photoPlaceholder}>
-                <Text style={styles.photoPlaceholderIcon}>+</Text>
+                <Feather
+                  name="camera"
+                  size={24}
+                  color={theme.colors.primary.maroon}
+                />
                 <Text style={styles.photoPlaceholderText}>Add Photo</Text>
               </View>
             )}
           </TouchableOpacity>
           <Text style={styles.photoHint}>Tap to add photo (optional)</Text>
 
-          <Card style={styles.formCard}>
+          <GlassSurface
+            variant="strong"
+            padding="md"
+            radius={borderRadius.xl}
+            style={styles.formCard}
+          >
             <Input
               label="First Name"
               placeholder="Enter first name"
@@ -232,6 +255,10 @@ export default function AddFamilyMemberScreen() {
                       relationship === option.value && styles.relationshipOptionSelected,
                     ]}
                     onPress={() => setRelationship(option.value)}
+                    accessibilityRole="button"
+                    accessibilityState={{
+                      selected: relationship === option.value,
+                    }}
                   >
                     <Text
                       style={[
@@ -286,7 +313,7 @@ export default function AddFamilyMemberScreen() {
                 </TouchableOpacity>
               </View>
             </View>
-          </Card>
+          </GlassSurface>
 
           <View style={styles.footer}>
             <Button
@@ -299,149 +326,125 @@ export default function AddFamilyMemberScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.primary.maroon,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.primary,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.primary.maroon,
-  },
-  backButton: {
-    width: 60,
-  },
-  backButtonText: {
-    fontSize: typography.size.md,
-    color: colors.text.inverse,
-  },
-  headerTitle: {
-    fontSize: typography.size.lg,
-    fontWeight: typography.weight.semibold,
-    color: colors.text.inverse,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-    paddingBottom: spacing.xl,
-  },
-  photoContainer: {
-    alignSelf: 'center',
-    marginBottom: spacing.sm,
-  },
-  photo: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.background.tertiary,
-  },
-  photoPlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.background.secondary,
-    borderWidth: 2,
-    borderColor: colors.accent.rose,
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  photoPlaceholderIcon: {
-    fontSize: 28,
-    color: colors.primary.maroon,
-    marginBottom: spacing.xs,
-  },
-  photoPlaceholderText: {
-    fontSize: typography.size.xs,
-    color: colors.text.secondary,
-  },
-  photoHint: {
-    fontSize: typography.size.xs,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-  },
-  formCard: {
-    marginBottom: spacing.lg,
-  },
-  fieldContainer: {
-    marginTop: spacing.md,
-  },
-  fieldLabel: {
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium,
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-  },
-  relationshipGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  relationshipOption: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: borderRadius.full,
-    backgroundColor: colors.background.tertiary,
-    borderWidth: 1,
-    borderColor: colors.background.tertiary,
-  },
-  relationshipOptionSelected: {
-    backgroundColor: colors.primary.maroon,
-    borderColor: colors.primary.maroon,
-  },
-  relationshipOptionText: {
-    fontSize: typography.size.sm,
-    color: colors.text.secondary,
-  },
-  relationshipOptionTextSelected: {
-    color: colors.text.inverse,
-    fontWeight: typography.weight.medium,
-  },
-  toggleContainer: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  toggleOption: {
-    flex: 1,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.background.tertiary,
-    borderWidth: 2,
-    borderColor: colors.background.tertiary,
-    alignItems: 'center',
-  },
-  toggleOptionSelected: {
-    borderColor: colors.primary.maroon,
-    backgroundColor: colors.background.secondary,
-  },
-  toggleOptionText: {
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium,
-    color: colors.text.secondary,
-    marginBottom: spacing.xs,
-  },
-  toggleOptionTextSelected: {
-    color: colors.primary.maroon,
-  },
-  toggleOptionHint: {
-    fontSize: typography.size.xs,
-    color: colors.text.tertiary,
-  },
-  footer: {
-    marginTop: 'auto',
-  },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background.primary,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.xl,
+    },
+    photoContainer: {
+      alignSelf: 'center',
+      marginBottom: spacing.sm,
+    },
+    photo: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      backgroundColor: theme.colors.background.tertiary,
+      borderWidth: 1,
+      borderColor: theme.glass.border,
+    },
+    photoPlaceholder: {
+      width: 100,
+      height: 100,
+      borderRadius: 50,
+      backgroundColor: theme.glass.surfaceStrong,
+      borderWidth: 2,
+      borderColor: theme.colors.primary.maroon,
+      borderStyle: 'dashed',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.xs,
+    },
+    photoPlaceholderText: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.secondary,
+    },
+    photoHint: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.tertiary,
+      textAlign: 'center',
+      marginBottom: spacing.lg,
+    },
+    formCard: {
+      marginBottom: spacing.lg,
+    },
+    fieldContainer: {
+      marginTop: spacing.md,
+    },
+    fieldLabel: {
+      fontSize: typography.size.sm,
+      fontWeight: typography.weight.medium,
+      color: theme.colors.text.secondary,
+      marginBottom: spacing.sm,
+      marginLeft: spacing.xs,
+    },
+    relationshipGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    relationshipOption: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      borderRadius: borderRadius.full,
+      backgroundColor: theme.colors.background.tertiary,
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    relationshipOptionSelected: {
+      backgroundColor: theme.colors.primary.maroon,
+      borderColor: theme.colors.primary.maroon,
+    },
+    relationshipOptionText: {
+      fontSize: typography.size.sm,
+      color: theme.colors.text.secondary,
+    },
+    relationshipOptionTextSelected: {
+      color: theme.colors.text.inverse,
+      fontWeight: typography.weight.semibold,
+    },
+    toggleContainer: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+    },
+    toggleOption: {
+      flex: 1,
+      padding: spacing.md,
+      borderRadius: borderRadius.lg,
+      backgroundColor: theme.colors.background.tertiary,
+      borderWidth: 1.5,
+      borderColor: 'transparent',
+      alignItems: 'center',
+    },
+    toggleOptionSelected: {
+      borderColor: theme.colors.primary.maroon,
+      backgroundColor: theme.glass.surfaceStrong,
+    },
+    toggleOptionText: {
+      fontSize: typography.size.sm,
+      fontWeight: typography.weight.medium,
+      color: theme.colors.text.secondary,
+      marginBottom: spacing.xs,
+    },
+    toggleOptionTextSelected: {
+      color: theme.colors.primary.maroon,
+      fontWeight: typography.weight.semibold,
+    },
+    toggleOptionHint: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.tertiary,
+    },
+    footer: {
+      marginTop: 'auto',
+    },
+  });

@@ -2,19 +2,23 @@ import { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { colors } from '../src/constants/theme';
 import { AuthProvider, useAuth } from '../src/lib/authContext';
+import { ThemeProvider, useTheme, useThemeContext } from '../src/lib/themeContext';
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <RootNavigator />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <RootNavigator />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
 function RootNavigator() {
   const { session, loading } = useAuth();
+  const { isDark } = useThemeContext();
+  const theme = useTheme();
   const router = useRouter();
   const segments = useSegments();
 
@@ -37,11 +41,20 @@ function RootNavigator() {
     }
   }, [session, loading, segments, router]);
 
+  // The status bar follows the resolved appearance, not the system one -- a
+  // member who overrides the theme should get matching bar contents.
+  const statusBar = <StatusBar style={isDark ? 'light' : 'dark'} />;
+
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary.maroon} />
-        <StatusBar style="dark" />
+      <View
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: theme.colors.background.primary },
+        ]}
+      >
+        <ActivityIndicator size="large" color={theme.colors.primary.maroon} />
+        {statusBar}
       </View>
     );
   }
@@ -50,62 +63,21 @@ function RootNavigator() {
     <>
       <Stack
         screenOptions={{
-          headerStyle: {
-            backgroundColor: colors.primary.maroon,
-          },
-          headerTintColor: colors.text.inverse,
-          headerTitleStyle: {
-            fontWeight: '600',
-          },
+          headerShown: false,
           contentStyle: {
-            backgroundColor: colors.background.primary,
+            backgroundColor: theme.colors.background.primary,
           },
         }}
       >
-        <Stack.Screen
-          name="index"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="welcome"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="(auth)"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="(tabs)"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="edit-profile"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="add-family-member"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="organizations"
-          options={{
-            headerShown: false,
-          }}
-        />
+        <Stack.Screen name="index" />
+        <Stack.Screen name="welcome" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="edit-profile" />
+        <Stack.Screen name="add-family-member" />
+        <Stack.Screen name="organizations" />
       </Stack>
-      <StatusBar style="dark" />
+      {statusBar}
     </>
   );
 }
@@ -115,6 +87,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background.primary,
   },
 });

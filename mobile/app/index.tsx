@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { colors } from '../src/constants/theme';
 import { useAuth } from '../src/lib/authContext';
+import { useTheme } from '../src/lib/themeContext';
 import { getStoredOrganization } from '../src/lib/orgContext';
 
 /**
@@ -13,6 +13,7 @@ import { getStoredOrganization } from '../src/lib/orgContext';
 export default function IndexScreen() {
   const router = useRouter();
   const { session, loading } = useAuth();
+  const theme = useTheme();
 
   useEffect(() => {
     if (loading) return;
@@ -34,8 +35,13 @@ export default function IndexScreen() {
   }, [session, loading, router]);
 
   return (
-    <View style={styles.container}>
-      <ActivityIndicator size="large" color={colors.primary.maroon} />
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: theme.colors.background.primary },
+      ]}
+    >
+      <ActivityIndicator size="large" color={theme.colors.primary.maroon} />
     </View>
   );
 }
@@ -45,6 +51,5 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background.primary,
   },
 });

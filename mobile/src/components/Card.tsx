@@ -1,6 +1,15 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
-import { colors, spacing, borderRadius, shadows } from '../constants/theme';
+import { ViewStyle } from 'react-native';
+import { borderRadius } from '../constants/theme';
+import { GlassSurface } from './GlassSurface';
+
+/**
+ * The general-purpose surface.
+ *
+ * Card keeps its original API so existing screens did not have to change, but
+ * it is now a glass panel rather than an opaque cream rectangle. Reach for
+ * `GlassSurface` directly when you need to control blur, sheen, or radius.
+ */
 
 interface CardProps {
   children: React.ReactNode;
@@ -16,49 +25,18 @@ export function Card({
   style,
 }: CardProps) {
   return (
-    <View
-      style={[
-        styles.base,
-        styles[variant],
-        padding !== 'none' && styles[`${padding}Padding`],
-        style,
-      ]}
+    <GlassSurface
+      variant={variant === 'outlined' ? 'surface' : 'strong'}
+      padding={padding}
+      radius={borderRadius.xl}
+      elevation={
+        variant === 'elevated' ? 'md' : variant === 'outlined' ? 'none' : 'sm'
+      }
+      style={style}
     >
       {children}
-    </View>
+    </GlassSurface>
   );
 }
-
-const styles = StyleSheet.create({
-  base: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-  },
-
-  // Variants
-  default: {
-    ...shadows.sm,
-  },
-  elevated: {
-    ...shadows.md,
-  },
-  outlined: {
-    borderWidth: 1,
-    borderColor: colors.accent.rose,
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-
-  // Padding
-  smPadding: {
-    padding: spacing.sm,
-  },
-  mdPadding: {
-    padding: spacing.md,
-  },
-  lgPadding: {
-    padding: spacing.lg,
-  },
-});
 
 export default Card;

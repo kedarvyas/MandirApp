@@ -10,13 +10,29 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
-import { colors, typography, spacing } from '../../src/constants/theme';
-import { Card, SkeletonNewsScreen } from '../../src/components';
+import {
+  borderRadius,
+  spacing,
+  Theme,
+  typography,
+} from '../../src/constants/theme';
+import {
+  GlassHeader,
+  GlassSurface,
+  SkeletonNewsScreen,
+  useHeaderHeight,
+  useTabBarInset,
+} from '../../src/components';
+import { useTheme, useThemedStyles } from '../../src/lib/themeContext';
 import { supabase } from '../../src/lib/supabase';
 import { getStoredOrganization } from '../../src/lib/orgContext';
 import type { AnnouncementWithAuthor } from '../../src/types/database';
 
 export default function NewsScreen() {
+  const theme = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const headerHeight = useHeaderHeight();
+  const tabBarInset = useTabBarInset();
   const [announcements, setAnnouncements] = useState<AnnouncementWithAuthor[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -114,180 +130,200 @@ export default function NewsScreen() {
     setExpandedId(expandedId === id ? null : id);
   }
 
-  if (loading) {
-    return (
-      <ScrollView style={styles.container}>
-        <SkeletonNewsScreen />
-      </ScrollView>
-    );
-  }
-
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={colors.primary.maroon}
-        />
-      }
-    >
-      {announcements.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <View style={styles.emptyIconContainer}>
-            <Feather name="bell-off" size={64} color={colors.text.tertiary} />
-          </View>
-          <Text style={styles.emptyTitle}>No News Yet</Text>
-          <Text style={styles.emptyText}>
-            Check back later for announcements and updates from your organization.
-          </Text>
-        </View>
-      ) : (
-        announcements.map((announcement) => {
-          const isExpanded = expandedId === announcement.id;
-          const contentText = stripHtml(announcement.content);
-          const shouldTruncate = contentText.length > 150;
+    <View style={styles.container}>
+      <GlassHeader title="News" />
 
-          return (
-            <Card key={announcement.id} style={styles.newsCard} variant="elevated">
-              {announcement.image_url && (
-                <Image
-                  source={{ uri: announcement.image_url }}
-                  style={styles.featuredImage}
-                  resizeMode="cover"
-                />
-              )}
-              <View style={styles.cardContent}>
-                <View style={styles.cardHeader}>
-                  <Text style={styles.date}>
-                    {formatDate(announcement.published_at)}
-                  </Text>
-                  {announcement.author && (
-                    <Text style={styles.author}>
-                      by {announcement.author.name}
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: headerHeight + spacing.md, paddingBottom: tabBarInset },
+        ]}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.colors.primary.maroon}
+            progressViewOffset={headerHeight}
+          />
+        }
+      >
+        {loading ? (
+          <SkeletonNewsScreen />
+        ) : announcements.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconCircle}>
+              <Feather
+                name="bell-off"
+                size={30}
+                color={theme.colors.text.tertiary}
+              />
+            </View>
+            <Text style={styles.emptyTitle}>No news yet</Text>
+            <Text style={styles.emptyText}>
+              Check back later for announcements and updates from your
+              organization.
+            </Text>
+          </View>
+        ) : (
+          announcements.map((announcement) => {
+            const isExpanded = expandedId === announcement.id;
+            const contentText = stripHtml(announcement.content);
+            const shouldTruncate = contentText.length > 150;
+
+            return (
+              <GlassSurface
+                key={announcement.id}
+                variant="strong"
+                padding="none"
+                radius={borderRadius.xl}
+                style={styles.newsCard}
+              >
+                {announcement.image_url && (
+                  <Image
+                    source={{ uri: announcement.image_url }}
+                    style={styles.featuredImage}
+                    resizeMode="cover"
+                  />
+                )}
+                <View style={styles.cardContent}>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.date}>
+                      {formatDate(announcement.published_at)}
                     </Text>
+                    {announcement.author && (
+                      <Text style={styles.author}>
+                        by {announcement.author.name}
+                      </Text>
+                    )}
+                  </View>
+
+                  <Text style={styles.title}>{announcement.title}</Text>
+
+                  <Text style={styles.contentText}>
+                    {isExpanded || !shouldTruncate
+                      ? contentText
+                      : truncateText(announcement.content)}
+                  </Text>
+
+                  {shouldTruncate && (
+                    <TouchableOpacity
+                      onPress={() => toggleExpand(announcement.id)}
+                      style={styles.readMoreButton}
+                      accessibilityRole="button"
+                    >
+                      <Text style={styles.readMoreText}>
+                        {isExpanded ? 'Show less' : 'Read more'}
+                      </Text>
+                      <Feather
+                        name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                        size={15}
+                        color={theme.colors.primary.maroon}
+                      />
+                    </TouchableOpacity>
                   )}
                 </View>
-
-                <Text style={styles.title}>{announcement.title}</Text>
-
-                <Text style={styles.contentText}>
-                  {isExpanded || !shouldTruncate
-                    ? contentText
-                    : truncateText(announcement.content)}
-                </Text>
-
-                {shouldTruncate && (
-                  <TouchableOpacity
-                    onPress={() => toggleExpand(announcement.id)}
-                    style={styles.readMoreButton}
-                  >
-                    <Text style={styles.readMoreText}>
-                      {isExpanded ? 'Show less' : 'Read more'}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </Card>
-          );
-        })
-      )}
-    </ScrollView>
+              </GlassSurface>
+            );
+          })
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.primary,
-  },
-  content: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background.primary,
-  },
-  loadingText: {
-    fontSize: typography.size.md,
-    color: colors.text.secondary,
-  },
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    content: {
+      paddingHorizontal: spacing.lg,
+    },
 
-  // Empty State
-  emptyContainer: {
-    alignItems: 'center',
-    paddingVertical: spacing.xxxl,
-  },
-  emptyIconContainer: {
-    marginBottom: spacing.lg,
-  },
-  emptyTitle: {
-    fontSize: typography.size.xl,
-    fontWeight: typography.weight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-  },
-  emptyText: {
-    fontSize: typography.size.md,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    paddingHorizontal: spacing.xl,
-    lineHeight: typography.size.md * 1.5,
-  },
+    // Empty State
+    emptyContainer: {
+      alignItems: 'center',
+      paddingVertical: spacing.xxxl,
+    },
+    emptyIconCircle: {
+      width: 72,
+      height: 72,
+      borderRadius: 36,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.glass.surface,
+      borderWidth: 1,
+      borderColor: theme.glass.border,
+      marginBottom: spacing.lg,
+    },
+    emptyTitle: {
+      fontSize: typography.size.xl,
+      fontWeight: typography.weight.bold,
+      color: theme.colors.text.primary,
+      marginBottom: spacing.sm,
+    },
+    emptyText: {
+      fontSize: typography.size.md,
+      color: theme.colors.text.secondary,
+      textAlign: 'center',
+      paddingHorizontal: spacing.lg,
+      lineHeight: typography.size.md * 1.5,
+    },
 
-  // News Card
-  newsCard: {
-    marginBottom: spacing.md,
-    padding: 0,
-    overflow: 'hidden',
-  },
-  featuredImage: {
-    width: '100%',
-    height: 180,
-    backgroundColor: colors.background.tertiary,
-  },
-  cardContent: {
-    padding: spacing.md,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.sm,
-  },
-  date: {
-    fontSize: typography.size.xs,
-    color: colors.text.tertiary,
-    fontWeight: typography.weight.medium,
-  },
-  author: {
-    fontSize: typography.size.xs,
-    color: colors.text.tertiary,
-  },
-  title: {
-    fontSize: typography.size.lg,
-    fontWeight: typography.weight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-    lineHeight: typography.size.lg * 1.3,
-  },
-  contentText: {
-    fontSize: typography.size.md,
-    color: colors.text.secondary,
-    lineHeight: typography.size.md * 1.6,
-  },
-  readMoreButton: {
-    marginTop: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  readMoreText: {
-    fontSize: typography.size.sm,
-    color: colors.primary.maroon,
-    fontWeight: typography.weight.medium,
-  },
-});
+    // News Card
+    newsCard: {
+      marginBottom: spacing.md,
+    },
+    featuredImage: {
+      width: '100%',
+      height: 180,
+      backgroundColor: theme.colors.background.tertiary,
+    },
+    cardContent: {
+      padding: spacing.md,
+    },
+    cardHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: spacing.sm,
+    },
+    date: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.tertiary,
+      fontWeight: typography.weight.medium,
+      textTransform: 'uppercase',
+      letterSpacing: 0.6,
+    },
+    author: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.tertiary,
+    },
+    title: {
+      fontSize: typography.size.lg,
+      fontWeight: typography.weight.bold,
+      color: theme.colors.text.primary,
+      marginBottom: spacing.sm,
+      lineHeight: typography.size.lg * 1.3,
+      letterSpacing: -0.2,
+    },
+    contentText: {
+      fontSize: typography.size.md,
+      color: theme.colors.text.secondary,
+      lineHeight: typography.size.md * 1.6,
+    },
+    readMoreButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      marginTop: spacing.sm,
+      paddingVertical: spacing.xs,
+    },
+    readMoreText: {
+      fontSize: typography.size.sm,
+      color: theme.colors.primary.maroon,
+      fontWeight: typography.weight.semibold,
+    },
+  });

@@ -11,16 +11,32 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Feather } from '@expo/vector-icons';
 import { decode } from 'base64-arraybuffer';
-import { colors, typography, spacing, borderRadius } from '../src/constants/theme';
-import { Button, Input, Card } from '../src/components';
+import {
+  borderRadius,
+  spacing,
+  Theme,
+  typography,
+} from '../src/constants/theme';
+import {
+  Button,
+  Input,
+  GlassHeader,
+  GlassSurface,
+  GradientBackdrop,
+  useHeaderHeight,
+} from '../src/components';
+import { useTheme, useThemedStyles } from '../src/lib/themeContext';
 import { supabase } from '../src/lib/supabase';
 import { getStoredOrganization } from '../src/lib/orgContext';
 import { usePhotoUpload } from '../src/hooks/usePhotoUpload';
 
 export default function EditProfileScreen() {
   const router = useRouter();
+  const theme = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const headerHeight = useHeaderHeight();
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -176,32 +192,32 @@ export default function EditProfileScreen() {
 
   if (initialLoading) {
     return (
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <View style={styles.container}>
+        <GradientBackdrop />
+        <GlassHeader title="Edit Profile" onBack={() => router.back()} />
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Loading...</Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <View style={styles.container}>
+      <GradientBackdrop />
+      <GlassHeader title="Edit Profile" onBack={() => router.back()} />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>
-            <Text style={styles.headerButtonText}>Cancel</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Edit Profile</Text>
-          <View style={styles.headerButton} />
-        </View>
-
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingTop: headerHeight + spacing.xl },
+          ]}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           {/* Photo Upload */}
           <TouchableOpacity
@@ -213,7 +229,11 @@ export default function EditProfileScreen() {
               <Image source={{ uri: displayPhotoUri }} style={styles.photo} />
             ) : (
               <View style={styles.photoPlaceholder}>
-                <Text style={styles.photoPlaceholderIcon}>+</Text>
+                <Feather
+                  name="camera"
+                  size={26}
+                  color={theme.colors.primary.maroon}
+                />
                 <Text style={styles.photoPlaceholderText}>Add Photo</Text>
               </View>
             )}
@@ -230,7 +250,12 @@ export default function EditProfileScreen() {
             </Text>
           )}
 
-          <Card style={styles.formCard}>
+          <GlassSurface
+            variant="strong"
+            padding="md"
+            radius={borderRadius.xl}
+            style={styles.formCard}
+          >
             <Input
               label="First Name"
               placeholder="Enter your first name"
@@ -267,7 +292,7 @@ export default function EditProfileScreen() {
               autoCapitalize="none"
               error={errors.email}
             />
-          </Card>
+          </GlassSurface>
 
           <View style={styles.footer}>
             <Button
@@ -280,117 +305,91 @@ export default function EditProfileScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.primary.maroon,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.primary,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background.primary,
-  },
-  loadingText: {
-    fontSize: typography.size.md,
-    color: colors.text.secondary,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    backgroundColor: colors.primary.maroon,
-  },
-  headerButton: {
-    width: 60,
-  },
-  headerButtonText: {
-    fontSize: typography.size.md,
-    color: colors.text.inverse,
-  },
-  headerTitle: {
-    fontSize: typography.size.lg,
-    fontWeight: typography.weight.semibold,
-    color: colors.text.inverse,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.xl,
-  },
-  photoContainer: {
-    alignSelf: 'center',
-    marginBottom: spacing.sm,
-    position: 'relative',
-  },
-  photo: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: colors.background.tertiary,
-  },
-  photoPlaceholder: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: colors.background.secondary,
-    borderWidth: 2,
-    borderColor: colors.accent.rose,
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  photoPlaceholderIcon: {
-    fontSize: 32,
-    color: colors.primary.maroon,
-    marginBottom: spacing.xs,
-  },
-  photoPlaceholderText: {
-    fontSize: typography.size.xs,
-    color: colors.text.secondary,
-  },
-  editBadge: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: colors.primary.maroon,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.full,
-  },
-  editBadgeText: {
-    fontSize: typography.size.xs,
-    color: colors.text.inverse,
-    fontWeight: typography.weight.medium,
-  },
-  photoHint: {
-    fontSize: typography.size.xs,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-  },
-  debugText: {
-    fontSize: typography.size.xs,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-    marginBottom: spacing.md,
-    paddingHorizontal: spacing.md,
-  },
-  formCard: {
-    marginBottom: spacing.lg,
-  },
-  footer: {
-    marginTop: 'auto',
-  },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background.primary,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontSize: typography.size.md,
+      color: theme.colors.text.secondary,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.xl,
+    },
+    photoContainer: {
+      alignSelf: 'center',
+      marginBottom: spacing.sm,
+      position: 'relative',
+    },
+    photo: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      backgroundColor: theme.colors.background.tertiary,
+      borderWidth: 1,
+      borderColor: theme.glass.border,
+    },
+    photoPlaceholder: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      backgroundColor: theme.glass.surfaceStrong,
+      borderWidth: 2,
+      borderColor: theme.colors.primary.maroon,
+      borderStyle: 'dashed',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.xs,
+    },
+    photoPlaceholderText: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.secondary,
+    },
+    editBadge: {
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      backgroundColor: theme.colors.primary.maroon,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs,
+      borderRadius: borderRadius.full,
+      ...theme.shadows.sm,
+    },
+    editBadgeText: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.inverse,
+      fontWeight: typography.weight.semibold,
+    },
+    photoHint: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.tertiary,
+      textAlign: 'center',
+      marginBottom: spacing.lg,
+    },
+    debugText: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.tertiary,
+      textAlign: 'center',
+      marginBottom: spacing.md,
+      paddingHorizontal: spacing.md,
+    },
+    formCard: {
+      marginBottom: spacing.lg,
+    },
+    footer: {
+      marginTop: 'auto',
+    },
+  });

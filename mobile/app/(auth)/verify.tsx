@@ -10,8 +10,14 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { colors, typography, spacing, borderRadius } from '../../src/constants/theme';
-import { Button } from '../../src/components';
+import {
+  borderRadius,
+  spacing,
+  Theme,
+  typography,
+} from '../../src/constants/theme';
+import { Button, GlassHeader, useHeaderHeight } from '../../src/components';
+import { useThemedStyles } from '../../src/lib/themeContext';
 import { supabase } from '../../src/lib/supabase';
 import { getStoredOrganization } from '../../src/lib/orgContext';
 
@@ -19,6 +25,8 @@ const CODE_LENGTH = 6;
 
 export default function VerifyScreen() {
   const router = useRouter();
+  const styles = useThemedStyles(createStyles);
+  const headerHeight = useHeaderHeight();
   const { phone } = useLocalSearchParams<{ phone: string }>();
 
   const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
@@ -179,13 +187,23 @@ export default function VerifyScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
+    <View style={styles.container}>
+      <GlassHeader
+        title="Verify Phone"
+        onBack={router.canGoBack() ? () => router.back() : undefined}
+      />
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+      >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: headerHeight + spacing.xl },
+        ]}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
           <Text style={styles.title}>Verify your phone</Text>
@@ -221,7 +239,7 @@ export default function VerifyScreen() {
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <View style={styles.resendContainer}>
-          <Text style={styles.resendText}>Didn't receive a code? </Text>
+          <Text style={styles.resendText}>Didn&apos;t receive a code? </Text>
           <TouchableOpacity
             onPress={handleResend}
             disabled={resendCountdown > 0 || loading}
@@ -248,88 +266,88 @@ export default function VerifyScreen() {
           />
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.primary,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xl,
-  },
-  header: {
-    marginBottom: spacing.xxl,
-  },
-  title: {
-    fontSize: typography.size.xxl,
-    fontWeight: typography.weight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-  },
-  subtitle: {
-    fontSize: typography.size.md,
-    color: colors.text.secondary,
-    lineHeight: typography.size.md * 1.5,
-  },
-  phoneText: {
-    fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
-  },
-  codeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.md,
-  },
-  codeInput: {
-    width: 48,
-    height: 56,
-    borderWidth: 2,
-    borderColor: colors.accent.rose,
-    borderRadius: borderRadius.sm,
-    backgroundColor: colors.utility.white,
-    fontSize: typography.size.xxl,
-    fontWeight: typography.weight.bold,
-    color: colors.text.primary,
-    textAlign: 'center',
-  },
-  codeInputFilled: {
-    borderColor: colors.primary.maroon,
-    backgroundColor: colors.background.secondary,
-  },
-  codeInputError: {
-    borderColor: colors.semantic.error,
-  },
-  error: {
-    fontSize: typography.size.sm,
-    color: colors.semantic.error,
-    textAlign: 'center',
-    marginBottom: spacing.md,
-  },
-  resendContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: spacing.lg,
-  },
-  resendText: {
-    fontSize: typography.size.sm,
-    color: colors.text.secondary,
-  },
-  resendLink: {
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.semibold,
-    color: colors.primary.maroon,
-  },
-  resendLinkDisabled: {
-    color: colors.text.tertiary,
-  },
-  footer: {
-    marginTop: 'auto',
-    paddingBottom: spacing.xl,
-  },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingHorizontal: spacing.lg,
+    },
+    header: {
+      marginBottom: spacing.xxl,
+    },
+    title: {
+      fontSize: typography.size.xxl,
+      fontWeight: typography.weight.bold,
+      color: theme.colors.text.primary,
+      marginBottom: spacing.sm,
+      letterSpacing: -0.3,
+    },
+    subtitle: {
+      fontSize: typography.size.md,
+      color: theme.colors.text.secondary,
+      lineHeight: typography.size.md * 1.5,
+    },
+    phoneText: {
+      fontWeight: typography.weight.semibold,
+      color: theme.colors.text.primary,
+    },
+    codeContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: spacing.md,
+    },
+    codeInput: {
+      width: 48,
+      height: 58,
+      borderWidth: 1,
+      borderColor: theme.colors.utility.divider,
+      borderRadius: borderRadius.lg,
+      backgroundColor: theme.glass.surfaceStrong,
+      fontSize: typography.size.xxl,
+      fontWeight: typography.weight.bold,
+      color: theme.colors.text.primary,
+      textAlign: 'center',
+    },
+    codeInputFilled: {
+      borderColor: theme.colors.primary.maroon,
+    },
+    codeInputError: {
+      borderColor: theme.colors.semantic.error,
+    },
+    error: {
+      fontSize: typography.size.sm,
+      color: theme.colors.semantic.error,
+      textAlign: 'center',
+      marginBottom: spacing.md,
+    },
+    resendContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: spacing.lg,
+    },
+    resendText: {
+      fontSize: typography.size.sm,
+      color: theme.colors.text.secondary,
+    },
+    resendLink: {
+      fontSize: typography.size.sm,
+      fontWeight: typography.weight.semibold,
+      color: theme.colors.primary.maroon,
+    },
+    resendLinkDisabled: {
+      color: theme.colors.text.tertiary,
+    },
+    footer: {
+      marginTop: 'auto',
+      paddingBottom: spacing.xl,
+    },
+  });

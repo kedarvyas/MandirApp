@@ -10,13 +10,29 @@ import {
   Linking,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { colors, typography, spacing, borderRadius } from '../../src/constants/theme';
-import { Button, Input, Card, Logo } from '../../src/components';
+import {
+  borderRadius,
+  spacing,
+  Theme,
+  typography,
+} from '../../src/constants/theme';
+import {
+  Button,
+  Input,
+  GlassHeader,
+  GlassSurface,
+  Logo,
+  useHeaderHeight,
+} from '../../src/components';
+import { useTheme, useThemedStyles } from '../../src/lib/themeContext';
 import { supabase } from '../../src/lib/supabase';
 import { getStoredOrganization, type StoredOrganization } from '../../src/lib/orgContext';
 
 export default function PhoneScreen() {
   const router = useRouter();
+  const theme = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const headerHeight = useHeaderHeight();
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -113,40 +129,63 @@ export default function PhoneScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
+    <View style={styles.container}>
+      <GlassHeader
+        title="Sign In"
+        onBack={router.canGoBack() ? () => router.back() : undefined}
+      />
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+      >
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: headerHeight + spacing.lg },
+        ]}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
         {/* Logo */}
         <View style={styles.logoContainer}>
-          <Logo size={60} />
+          <Logo size={56} color={theme.colors.primary.maroon} />
         </View>
 
         {/* Organization Badge */}
         {organization && (
           <TouchableOpacity
-            style={styles.orgBadge}
             onPress={() => router.push('/(auth)/org-code')}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={`Signing in to ${organization.name}. Tap to change.`}
+            style={styles.orgBadgeWrapper}
           >
-            <Text style={styles.orgBadgeLabel}>Signing in to</Text>
-            <Text style={styles.orgBadgeName}>{organization.name}</Text>
-            <Text style={styles.orgBadgeChange}>Tap to change</Text>
+            <GlassSurface
+              padding="md"
+              radius={borderRadius.xl}
+              contentStyle={styles.orgBadge}
+            >
+              <Text style={styles.orgBadgeLabel}>Signing in to</Text>
+              <Text style={styles.orgBadgeName}>{organization.name}</Text>
+              <Text style={styles.orgBadgeChange}>Tap to change</Text>
+            </GlassSurface>
           </TouchableOpacity>
         )}
 
         <View style={styles.header}>
           <Text style={styles.title}>Enter your phone number</Text>
           <Text style={styles.subtitle}>
-            We'll send you a verification code to confirm your membership.
+            We&apos;ll send you a verification code to confirm your membership.
           </Text>
         </View>
 
-        <Card style={styles.card}>
+        <GlassSurface
+          variant="strong"
+          padding="md"
+          radius={borderRadius.xl}
+          style={styles.card}
+        >
           <Input
             label="Phone Number"
             placeholder="(555) 123-4567"
@@ -160,7 +199,7 @@ export default function PhoneScreen() {
           <Text style={styles.countryNote}>
             Currently only US phone numbers (+1) are supported.
           </Text>
-        </Card>
+        </GlassSurface>
 
         <Text style={styles.smsConsent}>
           By tapping Continue, you agree to receive a one-time verification code
@@ -194,80 +233,82 @@ export default function PhoneScreen() {
           />
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.primary,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  orgBadge: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: borderRadius.md,
-    padding: spacing.md,
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-  },
-  orgBadgeLabel: {
-    fontSize: typography.size.xs,
-    color: colors.text.tertiary,
-  },
-  orgBadgeName: {
-    fontSize: typography.size.lg,
-    fontWeight: typography.weight.semibold,
-    color: colors.primary.maroon,
-    marginVertical: spacing.xs,
-  },
-  orgBadgeChange: {
-    fontSize: typography.size.xs,
-    color: colors.text.tertiary,
-    textDecorationLine: 'underline',
-  },
-  header: {
-    marginBottom: spacing.xl,
-  },
-  title: {
-    fontSize: typography.size.xxl,
-    fontWeight: typography.weight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-  },
-  subtitle: {
-    fontSize: typography.size.md,
-    color: colors.text.secondary,
-    lineHeight: typography.size.md * 1.5,
-  },
-  card: {
-    marginBottom: spacing.lg,
-  },
-  countryNote: {
-    fontSize: typography.size.xs,
-    color: colors.text.tertiary,
-    marginTop: spacing.xs,
-  },
-  smsConsent: {
-    fontSize: typography.size.xs,
-    color: colors.text.tertiary,
-    lineHeight: typography.size.xs * 1.5,
-    marginBottom: spacing.lg,
-  },
-  smsConsentLink: {
-    color: colors.primary.maroon,
-    textDecorationLine: 'underline',
-  },
-  footer: {
-    marginTop: 'auto',
-    paddingBottom: spacing.xl,
-  },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingHorizontal: spacing.lg,
+    },
+    logoContainer: {
+      alignItems: 'center',
+      marginBottom: spacing.md,
+    },
+    orgBadgeWrapper: {
+      marginBottom: spacing.lg,
+    },
+    orgBadge: {
+      alignItems: 'center',
+    },
+    orgBadgeLabel: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.tertiary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+    },
+    orgBadgeName: {
+      fontSize: typography.size.lg,
+      fontWeight: typography.weight.semibold,
+      color: theme.colors.primary.maroon,
+      marginVertical: spacing.xs,
+      textAlign: 'center',
+    },
+    orgBadgeChange: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.tertiary,
+    },
+    header: {
+      marginBottom: spacing.xl,
+    },
+    title: {
+      fontSize: typography.size.xxl,
+      fontWeight: typography.weight.bold,
+      color: theme.colors.text.primary,
+      marginBottom: spacing.sm,
+      letterSpacing: -0.3,
+    },
+    subtitle: {
+      fontSize: typography.size.md,
+      color: theme.colors.text.secondary,
+      lineHeight: typography.size.md * 1.5,
+    },
+    card: {
+      marginBottom: spacing.lg,
+    },
+    countryNote: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.tertiary,
+      marginTop: spacing.xs,
+    },
+    smsConsent: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.tertiary,
+      lineHeight: typography.size.xs * 1.5,
+      marginBottom: spacing.lg,
+    },
+    smsConsentLink: {
+      color: theme.colors.primary.maroon,
+      textDecorationLine: 'underline',
+    },
+    footer: {
+      marginTop: 'auto',
+      paddingBottom: spacing.xl,
+    },
+  });

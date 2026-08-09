@@ -9,16 +9,55 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Feather } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
 import * as Haptics from 'expo-haptics';
-import { colors, typography, spacing, borderRadius, shadows } from '../../src/constants/theme';
-import { Card, Avatar, QRModal, SkeletonHomeScreen } from '../../src/components';
+import {
+  borderRadius,
+  spacing,
+  Theme,
+  typography,
+} from '../../src/constants/theme';
+import {
+  Avatar,
+  GlassSurface,
+  QRModal,
+  SkeletonHomeScreen,
+  useTabBarInset,
+} from '../../src/components';
+import { useTheme, useThemedStyles } from '../../src/lib/themeContext';
 import { supabase } from '../../src/lib/supabase';
 import { getStoredOrganization, refreshOrganization, StoredOrganization } from '../../src/lib/orgContext';
 import type { Member } from '../../src/types/database';
 
+/**
+ * The member's check-in pass.
+ *
+ * The QR code is the only reason this screen exists, so it is the hero: a
+ * lifted glass pass card overlapping a deep gradient, with everything else
+ * demoted beneath it.
+ */
+
+/** How far the pass card rides up over the hero's bottom edge. */
+const PASS_OVERLAP = 52;
+const QR_SIZE = 190;
+
+/**
+ * The hero gradient is extended upwards by this much and pulled back with a
+ * matching negative margin, so a rubber-band overscroll reveals more gradient
+ * instead of a bare strip of app background.
+ */
+const OVERSCROLL_PAD = 400;
+
 export default function HomeScreen() {
   const router = useRouter();
+  const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const tabBarInset = useTabBarInset();
+  const styles = useThemedStyles(createStyles);
+
   const [member, setMember] = useState<Member | null>(null);
   const [organization, setOrganization] = useState<StoredOrganization | null>(null);
   const [loading, setLoading] = useState(true);
@@ -110,6 +149,13 @@ export default function HomeScreen() {
     });
   }
 
+  function greeting(): string {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
   if (loading) {
     return (
       <ScrollView style={styles.container}>
@@ -127,250 +173,377 @@ export default function HomeScreen() {
     );
   }
 
+  const fullName = `${member.first_name ?? ''} ${member.last_name ?? ''}`.trim();
+
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-          tintColor={colors.primary.maroon}
-        />
-      }
-    >
-      {/* Member Info Header */}
-      <Card style={styles.profileCard} variant="elevated">
-        <View style={styles.profileHeader}>
-          <Avatar
-            source={member.photo_url}
-            name={`${member.first_name || ''} ${member.last_name || ''}`}
-            size="lg"
+    <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: tabBarInset + spacing.lg },
+        ]}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={theme.colors.text.onImmersive}
+            // The refresh spinner sits over the dark hero, so it needs the
+            // light treatment regardless of appearance.
+            progressBackgroundColor={theme.colors.background.secondary}
           />
-          <View style={styles.profileInfo}>
-            <Text style={styles.memberName}>
-              {member.first_name} {member.last_name}
+        }
+      >
+        {/* Hero: branding and greeting on a deep gradient */}
+        <LinearGradient
+          colors={[theme.backdrop.hero[0], theme.backdrop.hero[1]]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={[
+            styles.hero,
+            { paddingTop: insets.top + spacing.md + OVERSCROLL_PAD },
+          ]}
+        >
+          <Text style={styles.wordmark}>sanctum</Text>
+          <Text style={styles.greeting}>
+            {greeting()}
+            {member.first_name ? `, ${member.first_name}` : ''}
+          </Text>
+          {organization ? (
+            <Text style={styles.orgName} numberOfLines={1}>
+              {organization.name}
             </Text>
-            <Text style={styles.memberSince}>
-              Member since {formatDate(member.membership_date)}
-            </Text>
+          ) : null}
+        </LinearGradient>
+
+        {/* The pass itself */}
+        <GlassSurface
+          variant="strong"
+          padding="none"
+          radius={borderRadius.xxl}
+          elevation="pass"
+          style={styles.pass}
+        >
+          <View style={styles.passIdentity}>
+            <Avatar source={member.photo_url} name={fullName} size="md" />
+            <View style={styles.passIdentityText}>
+              <Text style={styles.memberName} numberOfLines={1}>
+                {fullName || 'Member'}
+              </Text>
+              <Text style={styles.memberSince} numberOfLines={1}>
+                Member since {formatDate(member.membership_date)}
+              </Text>
+            </View>
             <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>Active Member</Text>
+              <View style={styles.statusDot} />
+              <Text style={styles.statusText}>Active</Text>
             </View>
           </View>
-        </View>
-      </Card>
 
-      {/* Organization Header */}
-      {organization && (
-        <View style={styles.orgHeader}>
-          <Text style={styles.orgName}>{organization.name}</Text>
-        </View>
-      )}
-
-      {/* QR Code Card */}
-      <Card style={styles.qrCard} variant="elevated" padding="lg">
-        <Text style={styles.qrTitle}>Your Check-in Code</Text>
-        <Text style={styles.qrSubtitle}>
-          Tap to expand for easier scanning
-        </Text>
-
-        <TouchableOpacity
-          style={styles.qrContainer}
-          onPress={() => {
-            if (member.qr_token) {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              setQrModalVisible(true);
-            }
-          }}
-          activeOpacity={0.8}
-        >
-          <View style={styles.qrWrapper}>
-            {member.qr_token ? (
-              <QRCode
-                value={member.qr_token}
-                size={200}
-                color={colors.primary.maroon}
-                backgroundColor={colors.utility.white}
-              />
-            ) : (
-              <View style={styles.qrPlaceholder}>
-                <Text style={styles.qrPlaceholderText}>
-                  QR Code Not Available
-                </Text>
-              </View>
-            )}
+          {/* A dashed rule, the way a ticket stub tears. React Native only
+              honours borderStyle when every side has a width, so the dashes
+              come from a fully-bordered box clipped down to its top edge. */}
+          <View style={styles.perforationClip}>
+            <View style={styles.perforationDashes} />
           </View>
-        </TouchableOpacity>
 
-        <Text style={styles.qrHint}>
-          Pull down to refresh if the code doesn't scan
+          <TouchableOpacity
+            style={styles.qrSection}
+            onPress={() => {
+              if (member.qr_token) {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                setQrModalVisible(true);
+              }
+            }}
+            activeOpacity={0.85}
+            disabled={!member.qr_token}
+            accessibilityRole="button"
+            accessibilityLabel="Check-in code. Tap to enlarge."
+          >
+            {/* The QR plate stays white in both appearances -- scanners need
+                dark modules on a light field. */}
+            <View style={styles.qrPlate}>
+              {member.qr_token ? (
+                <QRCode
+                  value={member.qr_token}
+                  size={QR_SIZE}
+                  color="#1A0D14"
+                  backgroundColor="#FFFFFF"
+                />
+              ) : (
+                <View style={styles.qrPlaceholder}>
+                  <Feather
+                    name="alert-circle"
+                    size={28}
+                    color={theme.colors.text.tertiary}
+                  />
+                  <Text style={styles.qrPlaceholderText}>
+                    QR code not available
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            {member.qr_token ? (
+              <View style={styles.expandHint}>
+                <Feather
+                  name="maximize-2"
+                  size={13}
+                  color={theme.colors.primary.maroon}
+                />
+                <Text style={styles.expandHintText}>Tap to enlarge</Text>
+              </View>
+            ) : null}
+          </TouchableOpacity>
+        </GlassSurface>
+
+        <Text style={styles.refreshHint}>
+          Pull down to refresh if the code doesn&apos;t scan
         </Text>
-      </Card>
+
+        {/* Secondary details */}
+        <GlassSurface padding="none" radius={borderRadius.xl} style={styles.details}>
+          <DetailRow
+            theme={theme}
+            styles={styles}
+            icon="phone"
+            label="Phone"
+            value={
+              member.phone?.replace(/(\+1)(\d{3})(\d{3})(\d{4})/, '($2) $3-$4') ||
+              'N/A'
+            }
+          />
+          {member.email ? (
+            <DetailRow
+              theme={theme}
+              styles={styles}
+              icon="mail"
+              label="Email"
+              value={member.email}
+              last
+            />
+          ) : null}
+        </GlassSurface>
+      </ScrollView>
 
       {/* QR Expansion Modal */}
-      {member.qr_token && (
+      {member.qr_token ? (
         <QRModal
           visible={qrModalVisible}
           qrValue={member.qr_token}
           onClose={() => setQrModalVisible(false)}
-          memberName={`${member.first_name} ${member.last_name}`}
+          memberName={fullName}
         />
-      )}
-
-      {/* Quick Info */}
-      <Card style={styles.infoCard}>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Phone</Text>
-          <Text style={styles.infoValue}>
-            {member.phone?.replace(/(\+1)(\d{3})(\d{3})(\d{4})/, '($2) $3-$4') || 'N/A'}
-          </Text>
-        </View>
-        {member.email && (
-          <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
-            <Text style={styles.infoLabel}>Email</Text>
-            <Text style={styles.infoValue}>{member.email}</Text>
-          </View>
-        )}
-      </Card>
-    </ScrollView>
+      ) : null}
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.primary,
-  },
-  content: {
-    padding: spacing.lg,
-    paddingBottom: spacing.xxl,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background.primary,
-  },
-  loadingText: {
-    fontSize: typography.size.md,
-    color: colors.text.secondary,
-  },
+function DetailRow({
+  theme,
+  styles,
+  icon,
+  label,
+  value,
+  last = false,
+}: {
+  theme: Theme;
+  styles: ReturnType<typeof createStyles>;
+  icon: keyof typeof Feather.glyphMap;
+  label: string;
+  value: string;
+  last?: boolean;
+}) {
+  return (
+    <View style={[styles.detailRow, last && styles.detailRowLast]}>
+      <Feather name={icon} size={16} color={theme.colors.text.tertiary} />
+      <Text style={styles.detailLabel}>{label}</Text>
+      <Text style={styles.detailValue} numberOfLines={1}>
+        {value}
+      </Text>
+    </View>
+  );
+}
 
-  // Organization Header
-  orgHeader: {
-    marginBottom: spacing.md,
-    alignItems: 'center',
-  },
-  orgName: {
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium,
-    color: colors.text.secondary,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    content: {
+      // The hero is full-bleed, so horizontal padding lives on the children.
+      paddingBottom: spacing.xxl,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    loadingText: {
+      fontSize: typography.size.md,
+      color: theme.colors.text.secondary,
+    },
 
-  // Profile Card
-  profileCard: {
-    marginBottom: spacing.lg,
-  },
-  profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  profileInfo: {
-    marginLeft: spacing.md,
-    flex: 1,
-  },
-  memberName: {
-    fontSize: typography.size.xl,
-    fontWeight: typography.weight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  memberSince: {
-    fontSize: typography.size.sm,
-    color: colors.text.secondary,
-    marginBottom: spacing.sm,
-  },
-  statusBadge: {
-    backgroundColor: colors.semantic.successLight,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: borderRadius.full,
-    alignSelf: 'flex-start',
-  },
-  statusText: {
-    fontSize: typography.size.xs,
-    fontWeight: typography.weight.medium,
-    color: colors.semantic.success,
-  },
+    // Hero
+    hero: {
+      marginTop: -OVERSCROLL_PAD,
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.xl + PASS_OVERLAP,
+      borderBottomLeftRadius: borderRadius.xxl,
+      borderBottomRightRadius: borderRadius.xxl,
+    },
+    wordmark: {
+      fontSize: typography.size.lg,
+      fontWeight: typography.weight.semibold,
+      color: theme.colors.text.onImmersive,
+      letterSpacing: 3,
+      opacity: 0.75,
+      marginBottom: spacing.lg,
+    },
+    greeting: {
+      fontSize: typography.size.xxl,
+      fontWeight: typography.weight.bold,
+      color: theme.colors.text.onImmersive,
+      letterSpacing: -0.3,
+    },
+    orgName: {
+      fontSize: typography.size.sm,
+      fontWeight: typography.weight.medium,
+      color: theme.colors.text.onImmersive,
+      opacity: 0.7,
+      letterSpacing: 1.1,
+      textTransform: 'uppercase',
+      marginTop: spacing.xs,
+    },
 
-  // QR Card
-  qrCard: {
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-  },
-  qrTitle: {
-    fontSize: typography.size.xl,
-    fontWeight: typography.weight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  qrSubtitle: {
-    fontSize: typography.size.sm,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-  },
-  qrContainer: {
-    padding: spacing.md,
-    backgroundColor: colors.utility.white,
-    borderRadius: borderRadius.lg,
-    ...shadows.md,
-  },
-  qrWrapper: {
-    padding: spacing.md,
-  },
-  qrPlaceholder: {
-    width: 200,
-    height: 200,
-    backgroundColor: colors.background.tertiary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: borderRadius.sm,
-  },
-  qrPlaceholderText: {
-    fontSize: typography.size.sm,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-  },
-  qrHint: {
-    fontSize: typography.size.xs,
-    color: colors.text.tertiary,
-    marginTop: spacing.md,
-    textAlign: 'center',
-  },
+    // Pass card
+    pass: {
+      marginHorizontal: spacing.lg,
+      marginTop: -PASS_OVERLAP,
+    },
+    passIdentity: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: spacing.md,
+      gap: spacing.sm + 4,
+    },
+    passIdentityText: {
+      flex: 1,
+    },
+    memberName: {
+      fontSize: typography.size.lg,
+      fontWeight: typography.weight.bold,
+      color: theme.colors.text.primary,
+      letterSpacing: -0.2,
+    },
+    memberSince: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.tertiary,
+      marginTop: 2,
+    },
+    statusBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs + 1,
+      backgroundColor: theme.colors.semantic.successLight,
+      paddingHorizontal: spacing.sm,
+      paddingVertical: spacing.xs + 1,
+      borderRadius: borderRadius.full,
+    },
+    statusDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: theme.colors.semantic.success,
+    },
+    statusText: {
+      fontSize: typography.size.xs,
+      fontWeight: typography.weight.semibold,
+      color: theme.colors.semantic.success,
+    },
+    perforationClip: {
+      height: 1,
+      overflow: 'hidden',
+      marginHorizontal: spacing.md,
+    },
+    perforationDashes: {
+      height: 2,
+      borderWidth: 1,
+      borderStyle: 'dashed',
+      borderColor: theme.colors.utility.divider,
+      borderRadius: 1,
+    },
 
-  // Info Card
-  infoCard: {
-    marginBottom: spacing.lg,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.utility.divider,
-  },
-  infoLabel: {
-    fontSize: typography.size.sm,
-    color: colors.text.secondary,
-  },
-  infoValue: {
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.medium,
-    color: colors.text.primary,
-  },
-});
+    // QR
+    qrSection: {
+      alignItems: 'center',
+      paddingTop: spacing.lg,
+      paddingBottom: spacing.md,
+    },
+    qrPlate: {
+      backgroundColor: '#FFFFFF',
+      padding: spacing.md,
+      borderRadius: borderRadius.lg,
+      ...theme.shadows.sm,
+    },
+    qrPlaceholder: {
+      width: QR_SIZE,
+      height: QR_SIZE,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.sm,
+    },
+    qrPlaceholderText: {
+      fontSize: typography.size.sm,
+      color: theme.colors.text.tertiary,
+      textAlign: 'center',
+    },
+    expandHint: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs + 2,
+      marginTop: spacing.md,
+    },
+    expandHintText: {
+      fontSize: typography.size.xs,
+      fontWeight: typography.weight.medium,
+      color: theme.colors.primary.maroon,
+      letterSpacing: 0.2,
+    },
+
+    refreshHint: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.tertiary,
+      textAlign: 'center',
+      marginTop: spacing.md,
+      marginBottom: spacing.lg,
+    },
+
+    // Details
+    details: {
+      marginHorizontal: spacing.lg,
+    },
+    detailRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm + 2,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.md - 2,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: theme.colors.utility.divider,
+    },
+    detailRowLast: {
+      borderBottomWidth: 0,
+    },
+    detailLabel: {
+      fontSize: typography.size.sm,
+      color: theme.colors.text.secondary,
+    },
+    detailValue: {
+      flex: 1,
+      textAlign: 'right',
+      fontSize: typography.size.sm,
+      fontWeight: typography.weight.medium,
+      color: theme.colors.text.primary,
+    },
+  });

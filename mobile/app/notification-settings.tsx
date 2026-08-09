@@ -9,16 +9,34 @@ import {
   Linking,
   Platform,
 } from 'react-native';
-import { Stack } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import * as Device from 'expo-device';
-import { colors, typography, spacing } from '../src/constants/theme';
-import { Card, Button } from '../src/components';
+import {
+  borderRadius,
+  spacing,
+  Theme,
+  typography,
+} from '../src/constants/theme';
+import {
+  Button,
+  GlassHeader,
+  GlassSurface,
+  GradientBackdrop,
+  useHeaderHeight,
+} from '../src/components';
+import { useTheme, useThemedStyles } from '../src/lib/themeContext';
 import { useNotifications } from '../src/lib/notifications';
 import { supabase } from '../src/lib/supabase';
 
 export default function NotificationSettingsScreen() {
+  const router = useRouter();
+  const theme = useTheme();
+  const styles = useThemedStyles(createStyles);
+  const headerHeight = useHeaderHeight();
+  const insets = useSafeAreaInsets();
   const [memberId, setMemberId] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -138,24 +156,37 @@ export default function NotificationSettingsScreen() {
   const permissionGranted = permissionStatus === 'granted';
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          title: 'Notifications',
-          headerStyle: { backgroundColor: colors.background.primary },
-          headerTintColor: colors.primary.maroon,
-          headerBackTitle: 'Back',
-        }}
+    <View style={styles.container}>
+      <GradientBackdrop />
+      <GlassHeader
+        title="Notifications"
+        onBack={router.canGoBack() ? () => router.back() : undefined}
       />
+
       <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop: headerHeight + spacing.lg,
+            paddingBottom: Math.max(insets.bottom, spacing.lg) + spacing.lg,
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
       >
         {/* Main Toggle */}
-        <Card style={styles.card}>
+        <GlassSurface
+          variant="strong"
+          padding="md"
+          radius={borderRadius.xl}
+          style={styles.card}
+        >
           <View style={styles.toggleRow}>
             <View style={styles.toggleInfo}>
-              <Feather name="bell" size={24} color={colors.primary.maroon} />
+              <Feather
+                name="bell"
+                size={22}
+                color={theme.colors.primary.maroon}
+              />
               <View style={styles.toggleText}>
                 <Text style={styles.toggleTitle}>Push Notifications</Text>
                 <Text style={styles.toggleSubtitle}>
@@ -167,21 +198,30 @@ export default function NotificationSettingsScreen() {
               value={isNotificationsEnabled && permissionGranted}
               onValueChange={handleToggleNotifications}
               trackColor={{
-                false: colors.utility.divider,
-                true: colors.semantic.success,
+                false: theme.colors.background.tertiary,
+                true: theme.colors.semantic.success,
               }}
-              thumbColor={colors.utility.white}
+              thumbColor={theme.colors.utility.white}
               disabled={isLoading || isUpdating}
             />
           </View>
-        </Card>
+        </GlassSurface>
 
         {/* Permission Status */}
         {!permissionGranted && (
-          <Card style={styles.card}>
+          <GlassSurface
+            variant="strong"
+            padding="md"
+            radius={borderRadius.xl}
+            style={styles.card}
+          >
             <View style={styles.permissionCard}>
               <View style={styles.permissionIcon}>
-                <Feather name="alert-circle" size={24} color={colors.semantic.warning} />
+                <Feather
+                  name="alert-circle"
+                  size={24}
+                  color={theme.colors.semantic.warning}
+                />
               </View>
               <Text style={styles.permissionTitle}>Notifications Disabled</Text>
               <Text style={styles.permissionText}>
@@ -196,14 +236,23 @@ export default function NotificationSettingsScreen() {
                 style={styles.permissionButton}
               />
             </View>
-          </Card>
+          </GlassSurface>
         )}
 
         {/* Notification Types Info */}
-        <Text style={styles.sectionTitle}>What You'll Receive</Text>
-        <Card style={styles.card} padding="none">
+        <Text style={styles.sectionTitle}>What you&apos;ll receive</Text>
+        <GlassSurface
+          variant="strong"
+          padding="none"
+          radius={borderRadius.xl}
+          style={styles.card}
+        >
           <View style={styles.typeItem}>
-            <Feather name="radio" size={20} color={colors.primary.plum} />
+            <Feather
+              name="radio"
+              size={20}
+              color={theme.colors.primary.plum}
+            />
             <View style={styles.typeInfo}>
               <Text style={styles.typeTitle}>Announcements</Text>
               <Text style={styles.typeSubtitle}>
@@ -213,7 +262,11 @@ export default function NotificationSettingsScreen() {
           </View>
           <View style={styles.divider} />
           <View style={styles.typeItem}>
-            <Feather name="check-circle" size={20} color={colors.semantic.success} />
+            <Feather
+              name="check-circle"
+              size={20}
+              color={theme.colors.semantic.success}
+            />
             <View style={styles.typeInfo}>
               <Text style={styles.typeTitle}>Check-in Confirmations</Text>
               <Text style={styles.typeSubtitle}>
@@ -223,7 +276,11 @@ export default function NotificationSettingsScreen() {
           </View>
           <View style={styles.divider} />
           <View style={styles.typeItem}>
-            <Feather name="calendar" size={20} color={colors.accent.rose} />
+            <Feather
+              name="calendar"
+              size={20}
+              color={theme.colors.accent.rose}
+            />
             <View style={styles.typeInfo}>
               <Text style={styles.typeTitle}>Event Reminders</Text>
               <Text style={styles.typeSubtitle}>
@@ -231,134 +288,135 @@ export default function NotificationSettingsScreen() {
               </Text>
             </View>
           </View>
-        </Card>
+        </GlassSurface>
 
         {/* Privacy Note */}
         <View style={styles.privacyNote}>
-          <Feather name="shield" size={16} color={colors.text.tertiary} />
+          <Feather name="shield" size={16} color={theme.colors.text.tertiary} />
           <Text style={styles.privacyText}>
             We respect your privacy. You can disable notifications at any time.
           </Text>
         </View>
       </ScrollView>
-    </>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background.primary,
-  },
-  content: {
-    padding: spacing.lg,
-  },
-  card: {
-    marginBottom: spacing.md,
-  },
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background.primary,
+    },
+    content: {
+      paddingHorizontal: spacing.lg,
+    },
+    card: {
+      marginBottom: spacing.md,
+    },
 
-  // Toggle Row
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  toggleInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  toggleText: {
-    marginLeft: spacing.md,
-    flex: 1,
-  },
-  toggleTitle: {
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
-  },
-  toggleSubtitle: {
-    fontSize: typography.size.sm,
-    color: colors.text.tertiary,
-    marginTop: 2,
-  },
+    // Toggle Row
+    toggleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    toggleInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    toggleText: {
+      marginLeft: spacing.md,
+      flex: 1,
+    },
+    toggleTitle: {
+      fontSize: typography.size.md,
+      fontWeight: typography.weight.semibold,
+      color: theme.colors.text.primary,
+    },
+    toggleSubtitle: {
+      fontSize: typography.size.sm,
+      color: theme.colors.text.tertiary,
+      marginTop: 2,
+    },
 
-  // Permission Card
-  permissionCard: {
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-  },
-  permissionIcon: {
-    marginBottom: spacing.sm,
-  },
-  permissionTitle: {
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.semibold,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  permissionText: {
-    fontSize: typography.size.sm,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    marginBottom: spacing.md,
-    lineHeight: 20,
-  },
-  permissionButton: {
-    minWidth: 200,
-  },
+    // Permission Card
+    permissionCard: {
+      alignItems: 'center',
+      paddingVertical: spacing.md,
+    },
+    permissionIcon: {
+      marginBottom: spacing.sm,
+    },
+    permissionTitle: {
+      fontSize: typography.size.md,
+      fontWeight: typography.weight.semibold,
+      color: theme.colors.text.primary,
+      marginBottom: spacing.xs,
+    },
+    permissionText: {
+      fontSize: typography.size.sm,
+      color: theme.colors.text.secondary,
+      textAlign: 'center',
+      marginBottom: spacing.md,
+      lineHeight: 20,
+    },
+    permissionButton: {
+      minWidth: 200,
+    },
 
-  // Section
-  sectionTitle: {
-    fontSize: typography.size.sm,
-    fontWeight: typography.weight.semibold,
-    color: colors.text.tertiary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: spacing.sm,
-    marginTop: spacing.md,
-    marginLeft: spacing.xs,
-  },
+    // Section
+    sectionTitle: {
+      fontSize: typography.size.xs,
+      fontWeight: typography.weight.semibold,
+      color: theme.colors.text.tertiary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+      marginBottom: spacing.sm,
+      marginTop: spacing.md,
+      marginLeft: spacing.xs,
+    },
 
-  // Notification Types
-  typeItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.md,
-  },
-  typeInfo: {
-    marginLeft: spacing.md,
-    flex: 1,
-  },
-  typeTitle: {
-    fontSize: typography.size.md,
-    fontWeight: typography.weight.medium,
-    color: colors.text.primary,
-  },
-  typeSubtitle: {
-    fontSize: typography.size.sm,
-    color: colors.text.tertiary,
-    marginTop: 2,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: colors.utility.divider,
-    marginLeft: spacing.md + 20 + spacing.md,
-  },
+    // Notification Types
+    typeItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: spacing.md,
+    },
+    typeInfo: {
+      marginLeft: spacing.md,
+      flex: 1,
+    },
+    typeTitle: {
+      fontSize: typography.size.md,
+      fontWeight: typography.weight.medium,
+      color: theme.colors.text.primary,
+    },
+    typeSubtitle: {
+      fontSize: typography.size.sm,
+      color: theme.colors.text.tertiary,
+      marginTop: 2,
+    },
+    divider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: theme.colors.utility.divider,
+      marginLeft: spacing.md + 20 + spacing.md,
+    },
 
-  // Privacy Note
-  privacyNote: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: spacing.xl,
-    paddingHorizontal: spacing.lg,
-  },
-  privacyText: {
-    fontSize: typography.size.sm,
-    color: colors.text.tertiary,
-    marginLeft: spacing.sm,
-    flex: 1,
-    textAlign: 'center',
-  },
-});
+    // Privacy Note
+    privacyNote: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: spacing.xl,
+      paddingHorizontal: spacing.lg,
+    },
+    privacyText: {
+      fontSize: typography.size.sm,
+      color: theme.colors.text.tertiary,
+      marginLeft: spacing.sm,
+      flex: 1,
+      textAlign: 'center',
+    },
+  });
