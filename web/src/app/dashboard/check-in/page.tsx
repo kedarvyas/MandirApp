@@ -74,11 +74,17 @@ export default function CheckInPage() {
 
   const handleCheckIn = async (member: Member) => {
     try {
+      // Record who performed the check-in. Without this the attendance log
+      // says a member arrived but never who admitted them, which is the whole
+      // point of the column.
+      const { data: { user } } = await supabase.auth.getUser()
+
       const { error } = await supabase
         .from('check_ins')
         .insert({
           member_id: member.id,
           organization_id: member.organization_id,
+          checked_in_by: user?.id ?? null,
         })
 
       if (error) throw error
