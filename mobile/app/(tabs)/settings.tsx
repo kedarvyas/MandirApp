@@ -219,9 +219,10 @@ export default function SettingsScreen() {
           radius={borderRadius.xl}
           contentStyle={styles.appearanceCard}
         >
-          <Text style={styles.appearanceHint}>
-            Sanctum follows your device by default.
-          </Text>
+          {/* Deliberately makes no promise about matching the device: the
+              native userInterfaceStyle flag is still pinned to light, so
+              "System" resolves to light until the next native build. */}
+          <Text style={styles.appearanceHint}>Choose how Sanctum looks.</Text>
           <View style={styles.segmented}>
             {APPEARANCE_OPTIONS.map((option) => {
               const isSelected = preference === option.value;
