@@ -18,14 +18,14 @@ import { darkTheme, lightTheme, Theme } from '../constants/theme';
  * `"userInterfaceStyle": "automatic"` -- pinning it to "light" makes the hook
  * return "light" forever, so the two must stay in sync.
  *
- * app.json is deliberately still pinned to "light" today. It is native config,
- * and `runtimeVersion.policy` is "fingerprint", so flipping it to "automatic"
- * changes the runtime version and cuts every installed build off from OTA
- * updates. Flip it in the same change as the next native build and the
- * "System" option starts following the device with no code change here.
+ * Beware when changing that flag: it is native config, and
+ * `runtimeVersion.policy` is "fingerprint", so editing it moves the runtime
+ * version and cuts every already-installed build off from OTA updates. Only
+ * change it in a release that also ships a new native build -- which is why it
+ * stayed "light" through the 1.0.1 OTA and flipped to "automatic" for 1.0.2.
  *
- * Until then "System" resolves to light, and a member reaches the dark theme by
- * choosing it explicitly. The choice is persisted so it survives a relaunch.
+ * A member can still override the system with an explicit choice, which is
+ * persisted so it survives a relaunch.
  */
 
 export type ThemePreference = 'system' | 'light' | 'dark';

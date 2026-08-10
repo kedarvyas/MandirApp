@@ -2,10 +2,10 @@
   "expo": {
     "name": "Sanctum",
     "slug": "sanctum",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "scheme": "sanctum",
     "newArchEnabled": false,
     "updates": {
