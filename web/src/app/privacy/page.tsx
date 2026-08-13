@@ -41,6 +41,9 @@ export default function PrivacyPolicyPage() {
 
             <div className="bg-card rounded-xl p-6 border border-border mb-8">
               <h2 className="text-xl font-semibold text-foreground mb-3">Overview</h2>
+              <p className="text-muted-foreground mb-4">
+                Sanctum is a service operated by <strong>Kedar Vyas</strong>, doing business as Sanctum.
+              </p>
               <p className="text-muted-foreground">
                 Sanctum (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our mobile application and web platform.
               </p>

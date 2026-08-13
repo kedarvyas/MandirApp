@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Linking,
 } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import {
   borderRadius,
@@ -37,6 +38,7 @@ export default function PhoneScreen() {
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [smsConsent, setSmsConsent] = useState(false);
   const [organization, setOrganization] = useState<StoredOrganization | null>(null);
 
   useEffect(() => {
@@ -177,33 +179,57 @@ export default function PhoneScreen() {
           </Text>
         </GlassSurface>
 
-        <Text style={styles.smsConsent}>
-          By tapping Continue, you agree to receive a one-time verification code
-          by text message. Message frequency varies based on how often you sign
-          in. Message and data rates may apply. Reply STOP to opt out or HELP for
-          help. See our{' '}
+        {/*
+          Twilio toll-free verification requires that consent to receive SMS be
+          an explicit, affirmative act, and that it stand on its own rather than
+          being bundled with acceptance of the Terms or Privacy Policy. Hence a
+          real checkbox, unchecked by default, with the policy links kept in a
+          visually separate row below.
+        */}
+        <TouchableOpacity
+          style={styles.consentRow}
+          onPress={() => setSmsConsent((c) => !c)}
+          activeOpacity={0.7}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: smsConsent }}
+          accessibilityLabel="Agree to receive a one-time verification code by text message"
+        >
+          <View style={[styles.checkbox, smsConsent && styles.checkboxChecked]}>
+            {smsConsent && (
+              <Feather name="check" size={14} color={theme.colors.text.onImmersive} />
+            )}
+          </View>
+          <Text style={styles.consentText}>
+            I agree to receive a one-time verification code by text message from
+            Sanctum at the number provided. This is the only text message we
+            send — no marketing or promotional messages. Message frequency
+            varies by sign-in. Message and data rates may apply. Reply STOP to
+            opt out or HELP for help.
+          </Text>
+        </TouchableOpacity>
+
+        <View style={styles.policyRow}>
           <Text
-            style={styles.smsConsentLink}
+            style={styles.policyLink}
             onPress={() => Linking.openURL('https://sanctumcommunity.com/privacy')}
           >
             Privacy Policy
-          </Text>{' '}
-          and{' '}
+          </Text>
+          <Text style={styles.policySeparator}> · </Text>
           <Text
-            style={styles.smsConsentLink}
+            style={styles.policyLink}
             onPress={() => Linking.openURL('https://sanctumcommunity.com/terms')}
           >
             Terms of Service
           </Text>
-          .
-        </Text>
+        </View>
 
         <View style={styles.footer}>
           <Button
             title="Continue"
             onPress={handleContinue}
             loading={loading}
-            disabled={phone.replace(/\D/g, '').length !== 10}
+            disabled={phone.replace(/\D/g, '').length !== 10 || !smsConsent}
             size="lg"
             fullWidth
           />
@@ -273,15 +299,49 @@ const createStyles = (theme: Theme) =>
       color: theme.colors.text.tertiary,
       marginTop: spacing.xs,
     },
-    smsConsent: {
-      fontSize: typography.size.xs,
-      color: theme.colors.text.tertiary,
-      lineHeight: typography.size.xs * 1.5,
-      marginBottom: spacing.lg,
+    consentRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      marginBottom: spacing.md,
     },
-    smsConsentLink: {
+    checkbox: {
+      width: 22,
+      height: 22,
+      borderRadius: borderRadius.sm,
+      borderWidth: 2,
+      borderColor: theme.colors.accent.rose,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: spacing.sm,
+      // Nudge the box onto the first line of text rather than the row's top.
+      marginTop: 2,
+    },
+    checkboxChecked: {
+      backgroundColor: theme.colors.primary.maroon,
+      borderColor: theme.colors.primary.maroon,
+    },
+    consentText: {
+      flex: 1,
+      fontSize: typography.size.xs,
+      color: theme.colors.text.secondary,
+      lineHeight: typography.size.xs * 1.5,
+    },
+    // Deliberately a separate row: consent to messaging must not read as
+    // bundled with accepting these policies.
+    policyRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: spacing.lg,
+      paddingLeft: 22 + spacing.sm,
+    },
+    policyLink: {
+      fontSize: typography.size.xs,
       color: theme.colors.primary.maroon,
       textDecorationLine: 'underline',
+    },
+    policySeparator: {
+      fontSize: typography.size.xs,
+      color: theme.colors.text.tertiary,
     },
     footer: {
       marginTop: 'auto',

@@ -41,6 +41,9 @@ export default function TermsOfServicePage() {
 
             <div className="bg-card rounded-xl p-6 border border-border mb-8">
               <h2 className="text-xl font-semibold text-foreground mb-3">Agreement to Terms</h2>
+              <p className="text-muted-foreground mb-4">
+                Sanctum is a service operated by <strong>Kedar Vyas</strong>, doing business as Sanctum.
+              </p>
               <p className="text-muted-foreground">
                 By accessing or using Sanctum&apos;s mobile application and web platform, you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access our services.
               </p>
