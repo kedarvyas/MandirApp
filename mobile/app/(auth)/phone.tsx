@@ -125,9 +125,12 @@ export default function PhoneScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Logo */}
+        {/* Logo. The wordmark matters beyond decoration: this screen otherwise
+            shows only the member's own organization name, leaving the sender of
+            the text message unidentified for anyone reviewing the opt-in. */}
         <View style={styles.logoContainer}>
           <Logo size={56} color={theme.colors.primary.maroon} />
+          <Text style={styles.wordmark}>Sanctum</Text>
         </View>
 
         {/* Organization Badge */}
@@ -252,6 +255,13 @@ const createStyles = (theme: Theme) =>
     logoContainer: {
       alignItems: 'center',
       marginBottom: spacing.md,
+    },
+    wordmark: {
+      fontSize: typography.size.lg,
+      fontWeight: typography.weight.bold,
+      color: theme.colors.primary.maroon,
+      letterSpacing: 0.5,
+      marginTop: spacing.xs,
     },
     orgBadgeWrapper: {
       marginBottom: spacing.lg,
