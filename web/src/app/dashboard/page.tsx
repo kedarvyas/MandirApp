@@ -26,6 +26,7 @@ export default async function DashboardPage() {
     { count: totalMembers },
     { count: todayCheckIns },
     { data: recentPayments },
+    { count: activeFamilies },
   ] = await Promise.all([
     supabase.from('members').select('*', { count: 'exact', head: true })
       .eq('organization_id', organization.id),
@@ -35,6 +36,8 @@ export default async function DashboardPage() {
     supabase.from('payments').select('amount')
       .eq('organization_id', organization.id)
       .gte('payment_date', thirtyDaysAgo),
+    supabase.from('family_groups').select('*', { count: 'exact', head: true })
+      .eq('organization_id', organization.id),
   ])
 
   const monthlyPayments = recentPayments?.reduce((sum, p) => sum + Number(p.amount), 0) || 0
@@ -75,7 +78,7 @@ export default async function DashboardPage() {
     },
     {
       title: 'Active Families',
-      value: '-',
+      value: activeFamilies || 0,
       icon: TrendingUp,
       color: 'text-[#6B3050]',
       bgColor: 'bg-[#F5E6DC]',

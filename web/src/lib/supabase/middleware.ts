@@ -43,7 +43,9 @@ export async function updateSession(request: NextRequest) {
   // The password reset pages must be here: /forgot-password is only ever
   // reached while signed out, and /reset-password has to render its
   // expired-link state when the recovery token no longer yields a session.
-  const publicRoutes = ['/', '/login', '/signup', '/pricing', '/auth', '/faq', '/privacy', '/terms', '/help', '/forgot-password', '/reset-password', '/sms-consent']
+  // /kiosk belongs here: it is a lobby tablet running signed out, so gating it
+  // behind auth redirected the one case it exists for straight to /login.
+  const publicRoutes = ['/', '/login', '/signup', '/pricing', '/auth', '/faq', '/privacy', '/terms', '/help', '/forgot-password', '/reset-password', '/sms-consent', '/kiosk']
   const isPublicRoute = publicRoutes.some(route =>
     route === '/'
       ? request.nextUrl.pathname === '/'

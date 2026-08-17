@@ -19,6 +19,15 @@ import { Organization, KioskSettings, DEFAULT_KIOSK_SETTINGS, KioskPaymentMethod
 
 type Step = 'loading' | 'disabled' | 'not_found' | 'amount' | 'payment' | 'processing' | 'success'
 
+// Shape returned by the get_kiosk_config RPC.
+type KioskConfigRow = {
+  id: string
+  name: string
+  logo_url: string | null
+  primary_color: string | null
+  kiosk: KioskSettings | null
+}
+
 export default function DonationKioskPage() {
   const params = useParams()
   const orgCode = params.org_code as string
@@ -38,21 +47,26 @@ export default function DonationKioskPage() {
   useEffect(() => {
     async function fetchOrganization() {
       const supabase = createClient()
+      // The kiosk runs signed out, and `organizations` is only readable by
+      // authenticated users (migration 007). This RPC is the anon-safe lookup:
+      // it returns display fields plus the kiosk block for one exact org_code.
       const { data, error } = await supabase
-        .from('organizations')
-        .select('*')
-        .ilike('org_code', orgCode)
-        .eq('is_active', true)
-        .single()
+        .rpc('get_kiosk_config', { code: orgCode })
+        .maybeSingle<KioskConfigRow>()
 
       if (error || !data) {
         setStep('not_found')
         return
       }
 
-      setOrganization(data)
+      setOrganization({
+        id: data.id,
+        name: data.name,
+        logo_url: data.logo_url,
+        primary_color: data.primary_color,
+      } as Organization)
 
-      const settings = (data.settings?.kiosk as KioskSettings) || DEFAULT_KIOSK_SETTINGS
+      const settings = data.kiosk || DEFAULT_KIOSK_SETTINGS
 
       if (!settings.enabled) {
         setStep('disabled')
