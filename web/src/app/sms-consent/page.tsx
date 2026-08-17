@@ -111,6 +111,97 @@ export default function SmsConsentPage() {
             </ol>
           </div>
 
+          {/*
+            The screenshot series. Twilio's reviewer asked to see the actual
+            consent-collection step rather than a description of it, and allows
+            a screenshot series where the form only exists in-app. Screenshot 2
+            is the one that matters: it proves the box is unchecked by default,
+            so consent is an affirmative act rather than a pre-checked opt-out.
+          */}
+          <div className="bg-card rounded-xl p-6 border border-border">
+            <h2 className="text-xl font-semibold text-foreground mb-3">
+              The opt-in form, as the member sees it
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              The opt-in is collected inside the Sanctum mobile app, on the same
+              screen where the member enters their phone number. These
+              screenshots are taken from that screen, in order.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {[
+                {
+                  src: '/opt-in/1-org-code.png',
+                  step: 'Step 1',
+                  title: 'Entering the organization code',
+                  caption:
+                    'The member enters the code given to them by their organization.',
+                  emphasis: false,
+                },
+                {
+                  src: '/opt-in/2-consent-unchecked.png',
+                  step: 'Steps 2–3',
+                  title: 'Consent checkbox unchecked',
+                  caption:
+                    'The phone number is entered and the consent checkbox is empty. It is never pre-checked. Continue is disabled and cannot be tapped until the member ticks it. The Privacy Policy and Terms of Service links sit in a separate row below.',
+                  emphasis: true,
+                },
+                {
+                  src: '/opt-in/3-consent-checked.png',
+                  step: 'Step 3',
+                  title: 'Consent given',
+                  caption:
+                    'The member ticks the box themselves. Only now does Continue become enabled.',
+                  emphasis: false,
+                },
+                {
+                  src: '/opt-in/4-verify-code.png',
+                  step: 'Steps 4–5',
+                  title: 'Verification code entry',
+                  caption:
+                    'Only after consent is given do we send a single one-time code, which the member enters here.',
+                  emphasis: false,
+                },
+              ].map((shot) => (
+                <figure key={shot.src} className="flex flex-col">
+                  {/* Links to the raw PNG so a reviewer can open the
+                      full-resolution screenshot and read the consent text. */}
+                  <a href={shot.src} target="_blank" rel="noopener noreferrer">
+                    <Image
+                      src={shot.src}
+                      alt={`${shot.title} — Sanctum mobile app`}
+                      width={800}
+                      height={1739}
+                      className={`w-full h-auto rounded-lg border ${
+                        shot.emphasis
+                          ? 'border-2 border-primary'
+                          : 'border-border'
+                      }`}
+                    />
+                  </a>
+                  <figcaption className="mt-3">
+                    <span className="text-xs font-semibold uppercase tracking-wide text-primary">
+                      {shot.step}
+                    </span>
+                    <span className="block font-semibold text-foreground">
+                      {shot.title}
+                    </span>
+                    <span className="block text-sm text-muted-foreground mt-1">
+                      {shot.caption}
+                    </span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+
+            <p className="text-sm text-muted-foreground mt-6">
+              The organization shown is a test account used for demonstration.
+              The consent checkbox is part of a build pending release on the App
+              Store; it cannot be delivered as an over-the-air update because it
+              changes the app&apos;s native runtime fingerprint.
+            </p>
+          </div>
+
           {/* Verbatim consent language. */}
           <div className="bg-card rounded-xl p-6 border border-border">
             <h2 className="text-xl font-semibold text-foreground mb-3">Exact consent language shown to the member</h2>
